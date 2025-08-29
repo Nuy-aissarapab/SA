@@ -58,7 +58,7 @@ function SignInPages() {
                 style={{ width: 80 }}
               />
               <h2 style={{ margin: "8px 0 0 0", lineHeight: 1 }}>เข้าสู่ระบบ</h2>
-              <p style={{ margin: "2px 0 0 0" }}>ระบบบริหารจัดการหอพักนักศึกษา</p>
+              <p style={{ margin: "2px 0 0 0" }}>ระบบบริหารจัดการหอพักนักศึกษา</p><br></br>
             </Col>
             <Col span={24}>
               <Form
