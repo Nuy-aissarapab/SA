@@ -1,0 +1,546 @@
+import React, { useState } from "react";
+
+import { Routes, Route, Link ,useNavigate} from "react-router-dom";
+
+import "../../App.css";
+
+import { UserOutlined, DashboardOutlined, FileSearchOutlined, SolutionOutlined, HomeOutlined, ToolOutlined, ExceptionOutlined, KeyOutlined ,DownOutlined } from "@ant-design/icons";
+
+import { Breadcrumb, Layout, Menu, theme, Button, message } from "antd";
+
+import logo from "../../assets/logo.png";
+
+import Dashboard from "../../pages/dashboard";
+
+import Customer from "../../pages/customer";
+
+// import CustomerCreate from "../../pages/customer/create";
+
+// import CustomerEdit from "../../pages/customer/edit";
+
+import Contract from "../../pages/Contract";
+
+import Billing from "../../pages/Billing";
+
+import Payment from "../../pages/Payment";
+
+import Evidence from "../../../src/pages/Payment/Evidence"
+
+import EvidenceFail from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess"
+
+import EvidenceSuccess from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess"
+
+import Student from "../../pages/Student";
+
+import Assets from "../../pages/Assets";
+
+import Room from "../../pages/Room";
+
+import Maintenance from "../../pages/Maintenance";
+
+import MaintenanceCreate from "../../pages/Maintenance/Create";
+
+import MaintenanceEdit from "../../pages/Maintenance/Edit";
+
+import Review from "../../pages/Review"
+
+import ReviewEdit from "../../pages/Review/Edit"
+
+import ReviewCreate from "../../pages/Review/Create"
+
+import Bank from "../../../src/pages/Payment/Bank"
+
+import QRCode from "../../../src/pages/Payment/QRCode"
+
+import Managecontracts from "../../pages/Contract/Managecontracts"
+
+import Extendcontract from "../../pages/Contract/Extendcontract"
+
+import History from "../../pages/Contract/History"
+
+import Report from "../../pages/Contract/Report"
+
+import Main from "../../pages/Main"
+
+import Login from "../../pages/authentication/Login"
+
+
+
+const { Header, Content, Footer, Sider } = Layout;
+
+
+const FullLayout: React.FC = () => {
+
+  const page = localStorage.getItem("page");
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+
+  const [collapsed, setCollapsed] = useState(false);
+
+
+  const {
+
+    token: { colorBgContainer },
+
+  } = theme.useToken();
+
+
+  const setCurrentPage = (val: string) => {
+
+    localStorage.setItem("page", val);
+
+  };
+
+
+  const Logout = () => {
+
+    localStorage.clear();
+
+    messageApi.success("Logout successful");
+
+    setTimeout(() => {
+
+      location.href = "/";
+
+    }, 2000);
+
+  };
+
+
+  return (
+
+    <Layout style={{ minHeight: "100vh" }}>
+
+      {contextHolder}
+
+
+      <Sider
+
+        collapsible
+
+        collapsed={collapsed}
+
+        onCollapse={(value) => setCollapsed(value)}
+
+      >
+
+        <div
+
+          style={{
+
+            display: "flex",
+
+            flexDirection: "column",
+
+            justifyContent: "space-between",
+
+            height: "100%",
+
+            backgroundColor: '#253543'
+
+          }}
+
+        >
+
+          <div >
+
+            <div
+
+              style={{
+
+
+                justifyContent: "center",
+
+                alignItems: "center"
+                
+              }}
+
+            >
+
+            <h1 style={{ color: 'white', textAlign: 'center' }}>
+
+                SUT<br />
+                DORMITIRY
+                <hr style={{ border: 'none', borderTop: '1px solid white', width: '80%', margin: '10px auto' }} />
+            </h1>
+
+            </div>
+
+            <Menu
+              style = {{backgroundColor: '#253543'}}
+
+              theme="dark"
+
+              defaultSelectedKeys={[page ? page : "dashboard"]}
+
+              mode="inline"
+
+              
+
+            >  
+
+              <Menu.Item
+
+                key="Contract"
+
+                onClick={() => setCurrentPage("Contract")}
+
+              >
+
+                <Link to="/Contract">
+
+                  <FileSearchOutlined />
+
+                  <span>ตรวจสอบสัญญาเช่า</span>
+
+                </Link>
+
+              </Menu.Item>
+
+
+              <Menu.Item
+
+                key="Student"
+
+                onClick={() => setCurrentPage("Student")}
+
+              >
+
+                <Link to="/Student">
+
+                  <UserOutlined />
+
+                  <span>ข้อมูลนักศึกษา</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="Room"
+
+                onClick={() => setCurrentPage("Room")}
+
+              >
+
+                <Link to="/Room">
+
+                  <HomeOutlined />
+
+                  <span>ห้องพัก</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="Assets"
+
+                onClick={() => setCurrentPage("Assets")}
+
+              >
+
+                <Link to="/Assets">
+
+                  <HomeOutlined />
+
+                  <span>ทรัพย์สินหอพัก</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="Maintenance"
+
+                onClick={() => setCurrentPage("Maintenance")}
+
+              >
+
+                <Link to="/Maintenance">
+
+                  <ToolOutlined />
+
+                  <span>แจ้งซ่อม</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="Billing"
+
+                onClick={() => setCurrentPage("Billing")}
+
+              >
+
+                <Link to="/Billing">
+
+                  <ExceptionOutlined />
+
+                  <span>บิลและใบแจ้งหนี้</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="customer"
+
+                onClick={() => setCurrentPage("customer")}
+
+              >
+
+                <Link to="/">
+
+                  <KeyOutlined />
+
+                  <span>เปลี่ยนรหัสผ่าน</span>
+
+                </Link>
+
+              </Menu.Item>
+
+            </Menu>
+
+          </div>
+
+        </div>
+
+      </Sider>
+
+
+      <Layout >
+
+        {/* Add Header */}
+        <Header style={{ 
+          padding: '0 24px', 
+          background: '#ffffff', 
+          borderBottom: '1px solid #f0f0f0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor:'#C4C2C2',
+          maxWidth: 'none' // ยกเลิกการจำกัดความกว้าง
+        }}>
+
+          <Menu
+              mode="horizontal" 
+
+              style={{ 
+                backgroundColor: '#253543',
+                fontSize: '14px',
+                flex: 1,
+                justifyContent: 'flex-end',
+                width: '100%', // ใช้ 100% แทน 120%
+                maxWidth: 'none' // ยกเลิกการจำกัดความกว้าง
+              }}
+
+              theme="dark"
+
+              defaultSelectedKeys={[page ? page : "dashboard"]}
+
+              
+
+            >  
+
+              <Menu.Item
+
+                key="Main"
+
+                onClick={() => setCurrentPage("Main")}
+
+              >
+
+                <Link to="/Main">
+
+                  <span>หน้าหลัก</span>
+
+                </Link>
+
+              </Menu.Item>
+
+
+              <Menu.Item
+
+                key="Review"
+
+                onClick={() => setCurrentPage("Review")}
+
+              >
+
+                <Link to="/Review">
+
+                  <span>รีวิวและประเมินหอพัก</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="customer"
+
+                onClick={() => setCurrentPage("customer")}
+
+              >
+
+                <Link to="/">
+
+                  <span>ติดต่อเจ้าหน้าที่</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                  key="Logout"
+
+                  onClick={() => {
+
+                    localStorage.removeItem("isLogin"); // ลบค่าออกจาก localStorage
+
+                  }}
+
+                >
+                  <Link to="/">
+
+                    <span>ออกจากระบบ</span>
+
+                  </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="customer"
+
+                onClick={() => setCurrentPage("customer")}
+
+              >
+
+                <Link to="/">
+
+                  <span>เปลี่ยนภาษา </span>
+
+                  <DownOutlined />
+
+                </Link>
+
+              </Menu.Item>
+
+            </Menu>
+
+          
+        </Header>
+
+        <Content style={{ margin: "0 16px" }}>
+
+          <Breadcrumb style={{ margin: "16px 0" }} />
+
+          <div
+
+            style={{
+
+              padding: 24,
+
+              minHeight: "100%",
+
+              background: colorBgContainer,
+              
+
+            }}
+
+          >
+
+            <Routes>
+
+              <Route path="/" element={<Dashboard />} />
+
+              <Route path="/customer" element={<Customer />} />
+
+              {/* <Route path="/customer/create" element={<CustomerCreate />} />
+
+              <Route path="/customer/edit/:id" element={<CustomerEdit />} /> */}
+
+              <Route path="/Contract" element={<Contract />} />
+
+              <Route path="/Billing" element={<Billing />} />
+
+              <Route path="/Billing/Payment" element={<Payment />} />
+
+              <Route path="/Student" element={<Student />} />
+
+              <Route path="/Assets" element={<Assets />} />
+
+              <Route path="/Room" element={<Room />} />
+
+              <Route path="/Maintenance" element={<Maintenance />} />
+
+              <Route path="/Maintenance/Create" element={<MaintenanceCreate />} />
+
+              <Route path="/Maintenance/Edit" element={<MaintenanceEdit />} />
+
+              <Route path="/Review" element={<Review />} />
+
+              <Route path="/Review/Create" element={<ReviewCreate />} />
+
+              <Route path="/Review/Edit/:id" element={<ReviewEdit />} /> {/* ✅ ต้องมี :id */}
+
+              <Route path="/Bank" element={<Bank />} />
+
+              <Route path="/Payment/Bank" element={<Bank />} />
+
+              <Route path="/Payment/QRCode" element={<QRCode />} />
+
+              <Route path="/Payment/Evidence" element={<Evidence />} />
+
+              <Route path="/Payment/Evidence/EvidenceSuccess" element={<EvidenceSuccess />} />
+
+              <Route path="/Payment/Evidence/EvidenceFail" element={<EvidenceFail />} />
+
+              <Route path="/Bank" element={<Bank />} />
+
+              <Route path="/Contract" element={<Contract />} />
+
+              <Route path="/Contract/Managecontracts" element={<Managecontracts />} />
+
+              <Route path="/Contract/Extendcontract" element={<Extendcontract />} />
+
+              <Route path="/Contract/History" element={<History />} />
+
+              <Route path="/Contract/Report" element={<Report />} />
+
+              <Route path="/Main" element={<Main />} />
+
+              <Route path="/Login" element={<Login />} />
+
+
+
+            </Routes>
+
+          </div>
+
+        </Content>
+
+      </Layout>
+
+
+    </Layout>
+
+
+  );
+
+  
+
+};
+
+
+export default FullLayout;
