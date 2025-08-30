@@ -44,14 +44,21 @@ function SignInPages() {
   
   
 
-  return (
+ return (
     <>
       {contextHolder}
       <Flex justify="center" align="center" className="login">
         <Card className="card-login" style={{ width: 500 }}>
           <Row align={"middle"} justify={"center"} style={{ height: "450px" }}>
-            <Col span={24}>
-              <img alt="logo" style={{ width: "80%" }} src={logo} className="images-logo" />
+            <Col span={24} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+              <img
+                alt="logo"
+                src={logo}
+                className="images-logo"
+                style={{ width: 80 }}
+              />
+              <h2 style={{ margin: "8px 0 0 0", lineHeight: 1 }}>เข้าสู่ระบบ</h2>
+              <p style={{ margin: "2px 0 0 0" }}>ระบบบริหารจัดการหอพักนักศึกษา</p><br></br>
             </Col>
             <Col span={24}>
               <Form
@@ -86,12 +93,11 @@ function SignInPages() {
                 >
                   <Input.Password />
                 </Form.Item>
-
                 <Form.Item>
-                  <Button type="primary" htmlType="submit" style={{ marginBottom: 20 }}>
-                    Log in
+                  <Button type="primary" htmlType="submit" style={{ marginBottom: 10, width: "100%" }}>
+                    เข้าสู่ระบบ
                   </Button>
-                  Or <a onClick={() => navigate("/signup")}>signup now !</a>
+                    หรือ <a onClick={() => navigate("/signup")}> สมัครสมาชิก!</a>
                 </Form.Item>
               </Form>
             </Col>

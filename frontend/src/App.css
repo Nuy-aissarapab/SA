@@ -4,39 +4,32 @@ body {
 
 }
 
-
-.login {
-
-  margin: 0;
-
-  height: 100vh;
-
-  width: 100%;
-
-  /* overflow: scroll; */
-
-  background-color: #F5F5F5;
-
-}
-
-
 .header {
 
   text-align: center;
 
 }
 
+.login {
+  margin: 0;
+  height: 100vh;
+  width: 100%;
+  background-image: url('assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 
 .card-login {
-
   overflow-y: scroll;
-
   width: 70%;
-
   height: auto;
-
-  max-height: 550px;
-
+  max-height: 600px;
+  background-color: rgba(255, 255, 255, 0.8); 
+  backdrop-filter: blur(5px);
+  border-radius: 8px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 
