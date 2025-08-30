@@ -5,6 +5,7 @@ import (
 
 	"github.com/SA/config"
 	"github.com/SA/controller/admin"
+	"github.com/SA/controller/announcement"
 	"github.com/SA/controller/contract"
 	"github.com/SA/controller/evidence"
 	"github.com/SA/controller/payment"
@@ -46,6 +47,7 @@ func main() {
 		router.GET("/students", student.GetAll)
 		router.GET("/student/:id", student.Get)
 		router.DELETE("/student/:id", student.Delete)
+		router.PUT("/student/:id", student.UpdateUser)
 
 		// Admin
 		router.GET("/admins", admin.GetAll)
@@ -76,7 +78,15 @@ func main() {
 
 		// ReviewTopic
 		router.GET("/reviewtopics", reviewTopic.GetReviewTopics)
+
+		// Announcement
+		router.POST("/announcements", announcement.CreateAnnouncement) // admin only
+		router.GET("/announcements", announcement.ListAnnouncements)
+		router.GET("/announcements/:id", announcement.ListByIDAnnouncements)
+		router.DELETE("/announcements/:id", announcement.DeleteAnnouncement)
+		router.PATCH("/announcements/:id", announcement.UpdateAnnouncement) // admin only
 	}
+	
 
 	// test route
 	r.GET("/", func(c *gin.Context) {

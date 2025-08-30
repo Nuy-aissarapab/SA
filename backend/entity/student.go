@@ -7,6 +7,7 @@ import (
 )
 
 type Student struct {
+	//ข้อมูลพื้นฐานเลย เช่น รหัสนักศึกษา ชื่อ-นามสกุล คณะ เบอร์โทร อีเมล และเลขห้องที่พักอยู่ตอนนี้
 	gorm.Model
 	Username 	 string 	`json:"username"`
 	Password 	 string		`json:"password"`
@@ -17,6 +18,7 @@ type Student struct {
 	Phone		 string		`json:"phone"`
 	Parent_Phone string		`json:"parent_phone"`
 	Parent_Name  string		`json:"parent_name"`
+	Major		 string		`json:"major"`
 
 	// หลาย student มีได้หลาย Billing
 	Billings []Billing `gorm:"foreignKey:StudentID"`

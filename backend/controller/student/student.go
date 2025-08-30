@@ -53,3 +53,30 @@ func Delete(c *gin.Context) {
    c.JSON(http.StatusOK, gin.H{"message": "Deleted successful"})
 }
 
+func UpdateUser(c *gin.Context) {
+   var user entity.Student
+   UserID := c.Param("id")
+
+   db := config.DB()
+
+   result := db.First(&user, UserID)
+
+   if result.Error != nil {
+       c.JSON(http.StatusNotFound, gin.H{"error": "id not found"})
+       return
+   }
+
+   if err := c.ShouldBindJSON(&user); err != nil {
+       c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request, unable to map payload"})
+       return
+   }
+
+   result = db.Save(&user)
+
+   if result.Error != nil {
+       c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
+       return
+   }
+
+   c.JSON(http.StatusOK, gin.H{"message": "Updated successful"})
+}
