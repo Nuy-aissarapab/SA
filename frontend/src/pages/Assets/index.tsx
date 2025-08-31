@@ -173,7 +173,7 @@ function Assets() {
 
   const deleteUserById = async (id: string) => {
 
-    let res = await DeleteUsersById(id);
+    const res = await DeleteUsersById(id);
 
 
     if (res.status == 200) {
@@ -205,7 +205,7 @@ function Assets() {
 
   const getUsers = async () => {
 
-    let res = await GetUsers();
+    const res = await GetUsers();
 
    
 

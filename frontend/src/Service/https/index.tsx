@@ -265,21 +265,21 @@ async function DeleteContractById(id: string) {
 
 async function GetUsersById(id: string) {
   return await axios
-    .get(`${apiUrl}/user/${id}`, requestOptions)
+    .get(`${apiUrl}/student/${id}`, requestOptions) // 🔥 แก้ user → student
     .then((res) => res)
     .catch((e) => e.response);
 }
 
 async function UpdateUsersById(id: string, data: UsersInterface) {
   return await axios
-    .put(`${apiUrl}/user/${id}`, data, requestOptions)
+    .put(`${apiUrl}/student/${id}`, data, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
 
 async function DeleteUsersById(id: string) {
   return await axios
-    .delete(`${apiUrl}/user/${id}`, requestOptions)
+    .delete(`${apiUrl}/student/${id}`, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -294,7 +294,7 @@ async function CreateUser(data: UsersInterface) {
 
 
 
-async function GetStudentById(id: string) {
+async function GetStudentById(id: number) {
   return await axios
     .get(`${apiUrl}/student/${id}`, requestOptions)
     .then((res) => res)
@@ -308,14 +308,14 @@ async function CreateStudent(data: StudentInterface) {
     .catch((e) => e.response);
 }
 
-async function UpdateStudentById(id: string, data: StudentInterface) {
+async function UpdateStudentById(id: number, data: StudentInterface) {
   return await axios
     .put(`${apiUrl}/student/${id}`, data, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function DeleteStudentById(id: string) {
+async function DeleteStudentById(id: number) {
   return await axios
     .delete(`${apiUrl}/student/${id}`, requestOptions)
     .then((res) => res)

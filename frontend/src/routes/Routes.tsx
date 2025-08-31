@@ -25,6 +25,8 @@ const Payment = Loadable(lazy(() => import("../pages/Payment")));
 
 const Student = Loadable(lazy(() => import("../pages/Student")));
 
+const UpdateInfo = Loadable(lazy(() => import("../pages/Student/UpdateInfo/UpdateInfo")));
+
 const Assets = Loadable(lazy(() => import("../pages/Assets")));
 
 const Room = Loadable(lazy(() => import("../pages/Room")));
@@ -58,9 +60,6 @@ const Extendcontract = Loadable(lazy(() => import("../pages/Contract/Extendcontr
 const History = Loadable(lazy(() => import("../pages/Contract/History")));
 
 const Report = Loadable(lazy(() => import("../pages/Contract/Report")));
-
-
-
 
 const AdminRoutes = (isLoggedIn : boolean): RouteObject => {
 
@@ -198,7 +197,25 @@ const AdminRoutes = (isLoggedIn : boolean): RouteObject => {
 
         path: "/Student",
 
-        element: <Student />,
+        children: [
+
+          {
+
+            path: "/Student",
+
+            element: <Student />,
+
+          },
+
+          {
+
+            path: "/Student/UpdateInfo/UpdateInfo",
+
+             element: <UpdateInfo />,
+
+          }
+
+        ],
 
       },
 

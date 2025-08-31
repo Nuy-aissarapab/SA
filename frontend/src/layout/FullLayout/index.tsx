@@ -32,6 +32,8 @@ import EvidenceSuccess from "../../pages/Payment/Evidence/EvidenceSuccess/Eviden
 
 import Student from "../../pages/Student";
 
+import UpdateInfo from "../../pages/Student/UpdateInfo/UpdateInfo";
+
 import Assets from "../../pages/Assets";
 
 import Room from "../../pages/Room";
@@ -521,6 +523,8 @@ const FullLayout: React.FC = () => {
               <Route path="/Main" element={<Main />} />
 
               <Route path="/Login" element={<Login />} />
+
+              <Route path="/Student/UpdateInfo/UpdateInfo" element={<UpdateInfo />} />
 
 
 

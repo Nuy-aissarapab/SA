@@ -49,7 +49,7 @@ function SignUpPages() {
 
   const onFinish = async (values: StudentInterface) => {
 
-    let res = await CreateUser(values);
+    const res = await CreateUser(values);
 
 
     if (res.status == 201) {
@@ -83,7 +83,7 @@ function SignUpPages() {
   };
   
   const getStudents = async () => {
-    let res = await GetStudents();
+    const res = await GetStudents();
       // console.log("sss",res)
     if (res.status == 200) {
       setStudent(res.data);

@@ -82,7 +82,7 @@ function Room() {
   ];
 
   const deleteUserById = async (id: string) => {
-    let res = await DeleteUsersById(id);
+    const res = await DeleteUsersById(id);
     
     if (res.status == 200) {
       messageApi.open({
@@ -99,7 +99,7 @@ function Room() {
   };
 
   const getUsers = async () => {
-    let res = await GetUsers();
+    const res = await GetUsers();
 
     if (res.status == 200) {
       setUsers(res.data);

@@ -8,7 +8,7 @@ function History() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const getPayments = async () => {
-    let res = await GetPayment();
+    const res = await GetPayment();
     if (res.status === 200) {
       setPayments(res.data);
     } else {

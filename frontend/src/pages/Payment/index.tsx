@@ -20,7 +20,7 @@ function Payment() {
 
   const getPaymentStudent = async () => {
     const id = localStorage.getItem("id"); // ✅ ใช้ id จาก login response
-    let res = await GetPayment(id ?? undefined);
+    const res = await GetPayment(id ?? undefined);
   
     if (res.status == 200) {
       setPayment(res.data);
@@ -34,7 +34,7 @@ function Payment() {
   };
 
   const getPaymentAdmin = async () => {
-    let res = await GetPayment();
+    const res = await GetPayment();
   
     if (res.status == 200) {
       setPayment(res.data);
@@ -50,7 +50,7 @@ function Payment() {
   
 
   const getStudents = async () => {
-    let res = await GetStudents();
+    const res = await GetStudents();
       console.log("AAA",res)
     if (res.status == 200) {
       setStudent(res.data);

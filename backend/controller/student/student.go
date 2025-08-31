@@ -54,29 +54,20 @@ func Delete(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-   var user entity.Student
-   UserID := c.Param("id")
-
+   var student entity.Student
+   id := c.Param("id")
+   if err := c.ShouldBindJSON(&student); err != nil {
+	   c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	   return
+   }
    db := config.DB()
-
-   result := db.First(&user, UserID)
-
-   if result.Error != nil {
-       c.JSON(http.StatusNotFound, gin.H{"error": "id not found"})
-       return
+   if tx := db.Where("id = ?", id).First(&entity.Student{}); tx.RowsAffected == 0 {
+	   c.JSON(http.StatusBadRequest, gin.H{"error": "student not found"})
+	   return
    }
-
-   if err := c.ShouldBindJSON(&user); err != nil {
-       c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request, unable to map payload"})
-       return
+   if err := db.Model(&student).Where("id = ?", id).Updates(student).Error; err != nil {
+	   c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	   return
    }
-
-   result = db.Save(&user)
-
-   if result.Error != nil {
-       c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
-       return
-   }
-
-   c.JSON(http.StatusOK, gin.H{"message": "Updated successful"})
+   c.JSON(http.StatusOK, gin.H{"data": student})
 }

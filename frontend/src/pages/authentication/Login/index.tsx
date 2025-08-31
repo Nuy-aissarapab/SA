@@ -23,7 +23,7 @@ function SignInPages() {
         // เก็บข้อมูลลง localStorage
         localStorage.setItem("isLogin", "true");
         localStorage.setItem("role", role);
-        localStorage.setItem("id", res.data.id.toString());
+        localStorage.setItem("id", res.data.id);
         localStorage.setItem("email", res.data.email);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("token_type", res.data.token_type ?? "Bearer");
