@@ -119,4 +119,3 @@ func SignIn(c *gin.Context) {
         "email":      user.Email, //มี email ด้วย
     })
 }
-}
