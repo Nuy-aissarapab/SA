@@ -51,29 +51,23 @@ const QRCode = Loadable(lazy(() => import("../pages/Payment/QRCode")));
 
 const Evidence = Loadable(lazy(() => import("../pages/Payment/Evidence")));
 
-const EvidenceSuccess = Loadable(
-  lazy(
-    () => import("../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess")
-  )
-);
+const EvidenceSuccess = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess")));
 
-const EvidenceFail = Loadable(
-  lazy(() => import("../pages/Payment/Evidence/EvidenceFail/EvidenceFail"))
-);
+const EvidenceFail = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceFail/EvidenceFail")));
 
-const Managecontracts = Loadable(
-  lazy(() => import("../pages/Contract/Managecontracts"))
-);
+const Managecontracts = Loadable(lazy(() => import("../pages/Contract/Managecontracts")));
 
-const Extendcontract = Loadable(
-  lazy(() => import("../pages/Contract/Extendcontract"))
-);
+const Extendcontract = Loadable(lazy(() => import("../pages/Contract/Extendcontract")));
+
+const ExtendSuccess = Loadable(lazy(() => import("../pages/Contract/Extendcontract/ExtendSuccess")));
+
+const EvidenceGallery = Loadable(lazy(() => import("../pages/Contract/Extendcontract/EvidenceGallery")));
 
 const History = Loadable(lazy(() => import("../pages/Contract/History")));
 
-const Report = Loadable(lazy(() => import("../pages/Contract/Report")));
-
 const Announcement = Loadable(lazy(() => import("../pages/Announcement")));
+
+
 
 const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
   return {
@@ -129,39 +123,65 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       // },
 
       {
+
         path: "/Contract",
 
         children: [
+
           {
             path: "/Contract",
 
             element: <Contract />,
+
           },
 
           {
             path: "/Contract/Managecontracts",
 
             element: <Managecontracts />,
+
           },
 
           {
             path: "/Contract/Extendcontract",
 
             element: <Extendcontract />,
+
           },
 
           {
+
             path: "/Contract/History",
 
             element: <History />,
+
+          },
+          {
+
+            path: "/Contract/History",
+
+            element: <ExtendSuccess />,
+
           },
 
           {
-            path: "/Contract/Report",
 
-            element: <Report />,
+            path: "/Contract/Extendcontract/ExtendSuccess",
+
+            element: <ExtendSuccess />,
+
           },
+          
+          {
+
+            path: "/Contract/Extendcontract/EvidenceGallery",
+
+            element: <EvidenceGallery />,
+
+          },
+
         ],
+
       },
 
       {
@@ -272,6 +292,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
             path: "/Payment/Evidence/EvidenceFail",
             element: <EvidenceFail />,
           },
+
         ],
       },
     ],
