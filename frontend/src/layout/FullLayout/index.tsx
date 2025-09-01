@@ -544,7 +544,6 @@ const FullLayout: React.FC = () => {
 
               <Route path="/Login" element={<Login />} />
 
-              <Route path="/Student/UpdateInfo/UpdateInfo" element={<UpdateInfo />} />
 
               <Route path="/Announcement" element={<Announcement/>} />
 

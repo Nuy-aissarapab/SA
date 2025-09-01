@@ -24,7 +24,6 @@ const Payment = Loadable(lazy(() => import("../pages/Payment")));
 
 const Student = Loadable(lazy(() => import("../pages/Student")));
 
-const UpdateInfo = Loadable(lazy(() => import("../pages/Student/UpdateInfo/UpdateInfo")));
 
 const Assets = Loadable(lazy(() => import("../pages/Assets")));
 
@@ -193,11 +192,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
             element: <Student />,
           },
 
-          {
-            path: "/Student/UpdateInfo/UpdateInfo",
-
-            element: <UpdateInfo />,
-          },
+          
         ],
       },
 
