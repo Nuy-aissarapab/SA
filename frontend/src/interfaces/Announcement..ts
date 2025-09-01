@@ -7,5 +7,5 @@ export interface AnnouncementInterface {
   UpdatedAt?: string; // ควรเป็นวันที่ในรูปแบบ ISO 8601 (เช่น "2023-10-01T12:00:00Z")
   AdminID?: number; // ผู้ดูแลระบบที่โพสต์ประกาศ
   AnnouncementTargetID?: number; // ประเภทเป้าหมายของประกาศ
-  AnnouncementTypeID?: number; // ประเภทของประกาศ
+  AnnouncementTypeID?: number; 
 }
