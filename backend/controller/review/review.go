@@ -1,13 +1,12 @@
 package review
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/SA/config"
 	"github.com/SA/entity"
-	"github.com/gin-gonic/gin"
 )
 
 // GET /reviews?studentId=&topicId=
@@ -47,13 +46,11 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	in.StudentID = &userID // สำคัญ: bind owner จาก token
+	in.StudentID = &userID        // สำคัญ: bind owner จาก token
 	in.ReviewDate = time.Now()
 
-	//``getreview where userid``
 	var userReviewCount int64
 	config.DB().Where("student_id = ?", userID).Find(&[]entity.Review{}).Count(&userReviewCount)
-	fmt.Println("User Review Count:", userReviewCount)
 	if userReviewCount >= 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "you have already created a review"})
 		return
@@ -65,7 +62,6 @@ func Create(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, in)
 }
-
 
 // GET /review/:id
 func GetByID(c *gin.Context) {
@@ -115,18 +111,10 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if in.Title != nil {
-		review.Title = *in.Title
-	}
-	if in.Comment != nil {
-		review.Comment = *in.Comment
-	}
-	if in.Rating != nil {
-		review.Rating = *in.Rating
-	}
-	if in.ReviewTopicID != nil {
-		review.ReviewTopicID = in.ReviewTopicID
-	}
+	if in.Title != nil { review.Title = *in.Title }
+	if in.Comment != nil { review.Comment = *in.Comment }
+	if in.Rating != nil { review.Rating = *in.Rating }
+	if in.ReviewTopicID != nil { review.ReviewTopicID = in.ReviewTopicID }
 
 	if err := config.DB().Save(&review).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})
@@ -138,10 +126,7 @@ func Update(c *gin.Context) {
 // DELETE /review/:id
 func Delete(c *gin.Context) {
 	userID, role, ok := getAuth(c)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
+	if !ok { c.JSON(http.StatusUnauthorized, gin.H{"error":"unauthorized"}); return }
 
 	id := c.Param("id")
 	var review entity.Review
