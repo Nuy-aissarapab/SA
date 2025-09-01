@@ -111,6 +111,27 @@ const FullLayout: React.FC = () => {
 
   };
 
+  const headerStyle: React.CSSProperties = {
+    padding: 0,                 // ตัด padding ออกให้ “ชิดขอบ”
+    background: "#253543",      // สีเดียวกับเมนู
+    borderBottom: "0",
+    display: "flex",
+    alignItems: "center",
+  };
+
+  const menuStyle: React.CSSProperties = {
+    background: "transparent",
+    borderBottom: 0,
+    width: "100%",              // ให้เมนูยืดเต็มความกว้าง
+    display: "flex",
+    justifyContent: "flex-end", // ถ้าอยากกระจายเต็มเปลี่ยนเป็น 'space-between'
+    alignItems: "center",
+  };
+
+  const itemStyle: React.CSSProperties = {
+    margin: 0,                 // ตัด margin เริ่มต้นของ item
+    padding: "0 20px",         // ระยะห่างระหว่างแท็บ (ปรับตามชอบ)
+  };
 
   return (
 
@@ -341,126 +362,41 @@ const FullLayout: React.FC = () => {
       <Layout >
 
         {/* Add Header */}
-        <Header style={{ 
-          padding: '0 24px', 
-          background: '#ffffff', 
-          borderBottom: '1px solid #f0f0f0',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor:'#C4C2C2',
-          maxWidth: 'none' // ยกเลิกการจำกัดความกว้าง
-        }}>
-
+        <Header style={headerStyle}>
           <Menu
-              mode="horizontal" 
+            mode="horizontal"
+            theme="dark"
+            defaultSelectedKeys={[page ? page : "dashboard"]}
+            style={menuStyle}
+          >
+            <Menu.Item key="Main" style={itemStyle} onClick={() => setCurrentPage("Main")}>
+              <Link to="/Main">หน้าหลัก</Link>
+            </Menu.Item>
 
-              style={{ 
-                backgroundColor: '#253543',
-                fontSize: '14px',
-                flex: 1,
-                justifyContent: 'flex-end',
-                width: '100%', // ใช้ 100% แทน 120%
-                maxWidth: 'none' // ยกเลิกการจำกัดความกว้าง
+            <Menu.Item key="Review" style={itemStyle} onClick={() => setCurrentPage("Review")}>
+              <Link to="/Review">รีวิวและประเมินหอพัก</Link>
+            </Menu.Item>
+
+            <Menu.Item key="customer" style={itemStyle} onClick={() => setCurrentPage("customer")}>
+              <Link to="/">ติดต่อเจ้าหน้าที่</Link>
+            </Menu.Item>
+
+            <Menu.Item
+              key="Logout"
+              style={itemStyle}
+              onClick={() => {
+                localStorage.removeItem("isLogin");
               }}
+            >
+              <Link to="/">ออกจากระบบ</Link>
+            </Menu.Item>
 
-              theme="dark"
-
-              defaultSelectedKeys={[page ? page : "dashboard"]}
-
-              
-
-            >  
-
-              <Menu.Item
-
-                key="Main"
-
-                onClick={() => setCurrentPage("Main")}
-
-              >
-
-                <Link to="/Main">
-
-                  <span>หน้าหลัก</span>
-
-                </Link>
-
-              </Menu.Item>
-
-
-              <Menu.Item
-
-                key="Review"
-
-                onClick={() => setCurrentPage("Review")}
-
-              >
-
-                <Link to="/Review">
-
-                  <span>รีวิวและประเมินหอพัก</span>
-
-                </Link>
-
-              </Menu.Item>
-
-              <Menu.Item
-
-                key="customer"
-
-                onClick={() => setCurrentPage("customer")}
-
-              >
-
-                <Link to="/">
-
-                  <span>ติดต่อเจ้าหน้าที่</span>
-
-                </Link>
-
-              </Menu.Item>
-
-              <Menu.Item
-
-                  key="Logout"
-
-                  onClick={() => {
-
-                    localStorage.removeItem("isLogin"); // ลบค่าออกจาก localStorage
-
-                  }}
-
-                >
-                  <Link to="/">
-
-                    <span>ออกจากระบบ</span>
-
-                  </Link>
-
-              </Menu.Item>
-
-              <Menu.Item
-
-                key="customer"
-
-                onClick={() => setCurrentPage("customer")}
-
-              >
-
-                <Link to="/">
-
-                  <span>เปลี่ยนภาษา </span>
-
-                  <DownOutlined />
-
-                </Link>
-
-              </Menu.Item>
-
-            </Menu>
-
-          
+            <Menu.Item key="lang" style={itemStyle} onClick={() => setCurrentPage("customer")}>
+              <Link to="/">
+                เปลี่ยนภาษา <DownOutlined />
+              </Link>
+            </Menu.Item>
+          </Menu>
         </Header>
 
         <Content style={{ margin: "0 16px" }}>
