@@ -1,12 +1,13 @@
 package review
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/SA/config"
 	"github.com/SA/entity"
+	"github.com/gin-gonic/gin"
 )
 
 // GET /reviews?studentId=&topicId=
