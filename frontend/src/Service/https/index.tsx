@@ -199,17 +199,33 @@ async function GetPayment(studentId?: string) {
     .catch((e) => e.response);
 }
 // Evidence (Upload transfer slip)
+// Service/https/index.ts
 async function UploadEvidence(data: any) {
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type") || "Bearer";
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `${tokenType} ${token}`;
+
   return await axios
-    .post(`${apiUrl}/upload`, data, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${Bearer} ${Authorization}`,
-      },
-    })
-    .then((res) => res)              // 👈 ต้อง return res
-    .catch((e) => e.response);       // 👈 return error.response ด้วย
+    .post(`${apiUrl}/upload`, data, { headers })
+    .then((res) => res)
+    .catch((e) => e.response);
 }
+export async function GetLatestEvidencesByStudents(studentIds: number[]) {
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type") || "Bearer";
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `${tokenType} ${token}`;
+
+  const qs = studentIds.join(",");
+  return await axios
+    .get(`${apiUrl}/evidences/latest-by-students?student_ids=${qs}`, { headers })
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+
 
 
 // Contract API
@@ -239,23 +255,47 @@ export async function RenewContract(
     .catch((e) => e.response);
 }
 
-async function CreateContract(data: ContractInterface) {
+export async function RequestRenewContract(
+  id: number,
+  body: { months?: number; start_date?: string; end_date?: string; rate?: number }
+) {
   return await axios
-    .post(`${apiUrl}/contract`, data, requestOptions)
+    .put(`${apiUrl}/contracts/${id}/renew-request`, body, requestOptions)
+    .then(res => res).catch(e => e.response);
+}
+
+export async function ApproveRenewContract(id: number) {
+  return await axios
+    .put(`${apiUrl}/contracts/${id}/renew-approve`, {}, requestOptions)
+    .then(res => res).catch(e => e.response);
+}
+
+export async function RejectRenewContract(id: number) {
+  return await axios
+    .put(`${apiUrl}/contracts/${id}/renew-reject`, {}, requestOptions)
+    .then(res => res).catch(e => e.response);
+}
+
+export async function CreateContract(data: ContractInterface) {
+  return await axios
+    .post(`${apiUrl}/contracts`, data, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function UpdateContractById(id: string, data: ContractInterface) {
+export async function UpdateContractById(
+  id: string,
+  data: Partial<ContractInterface> & any
+) {
   return await axios
-    .put(`${apiUrl}/contract/${id}`, data, requestOptions)
+    .put(`${apiUrl}/contracts/${id}`, data, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function DeleteContractById(id: string) {
+export async function DeleteContractById(id: string) {
   return await axios
-    .delete(`${apiUrl}/contract/${id}`, requestOptions)
+    .delete(`${apiUrl}/contracts/${id}`, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
