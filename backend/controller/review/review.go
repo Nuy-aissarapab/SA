@@ -46,8 +46,17 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	in.StudentID = &userID        // สำคัญ: bind owner จาก token
+	in.StudentID = &userID // สำคัญ: bind owner จาก token
 	in.ReviewDate = time.Now()
+
+	//``getreview where userid``
+	var userReviewCount int64
+	config.DB().Where("student_id = ?", userID).Find(&[]entity.Review{}).Count(&userReviewCount)
+	fmt.Println("User Review Count:", userReviewCount)
+	if userReviewCount >= 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "you have already created a review"})
+		return
+	}
 
 	if err := config.DB().Create(&in).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -55,6 +64,7 @@ func Create(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, in)
 }
+
 
 // GET /review/:id
 func GetByID(c *gin.Context) {
