@@ -84,7 +84,7 @@ func UpdateAnnouncement(c *gin.Context) {
 	a.Picture = payload.Picture
 	a.AdminID = payload.AdminID
 	a.AnnouncementTypeID = payload.AnnouncementTypeID
-	a.AnnouncementsTargetID = payload.AnnouncementsTargetID
+	a.AnnouncementTargetID = payload.AnnouncementTargetID
 	
 
     if err := config.DB().Save(&a).Error; err != nil {

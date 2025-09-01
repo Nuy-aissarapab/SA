@@ -13,8 +13,8 @@ type Announcement struct {
 	AdminID     uint
 	Admin       Admin `gorm:"foreignKey:AdminID"`
 
-	AnnouncementsTargetID uint
-	AnnouncementsTarget   AnnouncementTarget `gorm:"foreignKey:AnnouncementsTargetID"`
+	AnnouncementTargetID uint
+	AnnouncementsTarget   AnnouncementTarget `gorm:"foreignKey:AnnouncementTargetID"`
 	
  
 	AnnouncementTypeID uint

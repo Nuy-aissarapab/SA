@@ -322,6 +322,46 @@ async function DeleteStudentById(id: number) {
     .catch((e) => e.response);
 }
 
+//Announcement
+async function GetAnnouncements(params?: any) {
+  return await axios
+    .get(`${apiUrl}/announcements`, {
+      ...requestOptions,
+      params, // ⬅️ เอา params มาติด query string
+    })
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+
+async function CreateAnnouncement(data: any) {
+  return await axios
+    .post(`${apiUrl}/announcements`, data, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function UpdateAnnouncementById(id: string, data: any) {
+  return await axios
+    .put(`${apiUrl}/announcements/${id}`, data, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function DeleteAnnouncementById(id: string) {
+  return await axios
+    .delete(`${apiUrl}/announcements/${id}`, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function GetAnnouncementById(id: string) {
+  return await axios
+    .get(`${apiUrl}/announcements/${id}`, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
 // Review
 export async function GetReviews() {
   return await axios
@@ -379,4 +419,10 @@ export {
   UpdateContractById,
   DeleteContractById,
   UploadEvidence,
+  GetAnnouncements,
+  CreateAnnouncement,
+  UpdateAnnouncementById,
+  DeleteAnnouncementById,
+  GetAnnouncementById,
+
 };

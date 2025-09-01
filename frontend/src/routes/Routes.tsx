@@ -6,7 +6,6 @@ import Loadable from "../components/third-patry/Loadable";
 
 import FullLayout from "../layout/FullLayout";
 
-
 const MainPages = Loadable(lazy(() => import("../pages/authentication/Login")));
 
 const Main = Loadable(lazy(() => import("../pages/Main")));
@@ -33,9 +32,13 @@ const Room = Loadable(lazy(() => import("../pages/Room")));
 
 const Maintenance = Loadable(lazy(() => import("../pages/Maintenance")));
 
-const MaintenanceCreate = Loadable(lazy(() => import("../pages/Maintenance/Create")));
+const MaintenanceCreate = Loadable(
+  lazy(() => import("../pages/Maintenance/Create"))
+);
 
-const MaintenanceEdit = Loadable(lazy(() => import("../pages/Maintenance/Edit")));
+const MaintenanceEdit = Loadable(
+  lazy(() => import("../pages/Maintenance/Edit"))
+);
 
 const Review = Loadable(lazy(() => import("../pages/Review")));
 
@@ -49,41 +52,47 @@ const QRCode = Loadable(lazy(() => import("../pages/Payment/QRCode")));
 
 const Evidence = Loadable(lazy(() => import("../pages/Payment/Evidence")));
 
-const EvidenceSuccess = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess")));
+const EvidenceSuccess = Loadable(
+  lazy(
+    () => import("../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess")
+  )
+);
 
-const EvidenceFail = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceFail/EvidenceFail")));
+const EvidenceFail = Loadable(
+  lazy(() => import("../pages/Payment/Evidence/EvidenceFail/EvidenceFail"))
+);
 
-const Managecontracts = Loadable(lazy(() => import("../pages/Contract/Managecontracts")));
+const Managecontracts = Loadable(
+  lazy(() => import("../pages/Contract/Managecontracts"))
+);
 
-const Extendcontract = Loadable(lazy(() => import("../pages/Contract/Extendcontract")));
+const Extendcontract = Loadable(
+  lazy(() => import("../pages/Contract/Extendcontract"))
+);
 
 const History = Loadable(lazy(() => import("../pages/Contract/History")));
 
 const Report = Loadable(lazy(() => import("../pages/Contract/Report")));
 
-const AdminRoutes = (isLoggedIn : boolean): RouteObject => {
+const Announcement = Loadable(lazy(() => import("../pages/Announcement")));
 
+const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
   return {
-
     path: "/",
 
     element: isLoggedIn ? <FullLayout /> : <MainPages />,
 
     children: [
       {
-
         path: "/MainPages",
 
         element: <MainPages />,
-
       },
 
       {
-
         path: "/Main",
 
         element: <Main />,
-
       },
 
       // {
@@ -121,160 +130,124 @@ const AdminRoutes = (isLoggedIn : boolean): RouteObject => {
       // },
 
       {
-
         path: "/Contract",
 
         children: [
-
           {
             path: "/Contract",
 
             element: <Contract />,
-
           },
 
           {
             path: "/Contract/Managecontracts",
 
             element: <Managecontracts />,
-
           },
 
           {
             path: "/Contract/Extendcontract",
 
             element: <Extendcontract />,
-
           },
 
           {
-
             path: "/Contract/History",
 
             element: <History />,
-
           },
 
           {
-
             path: "/Contract/Report",
 
             element: <Report />,
-
           },
-          
         ],
-
       },
 
       {
-
         path: "/Billing",
 
         children: [
-
           {
-
             path: "/Billing",
 
             element: <Billing />,
-
           },
 
           {
-
             path: "/Billing/Payment",
 
-             element: <Payment />,
-
-          }
-
+            element: <Payment />,
+          },
         ],
-
       },
 
       {
-
         path: "/Student",
 
         children: [
-
           {
-
             path: "/Student",
 
             element: <Student />,
-
           },
 
           {
-
             path: "/Student/UpdateInfo/UpdateInfo",
 
-             element: <UpdateInfo />,
-
-          }
-
+            element: <UpdateInfo />,
+          },
         ],
-
       },
 
       {
-
         path: "/Assets",
 
         element: <Assets />,
-
       },
 
       {
-
         path: "/Room",
 
         element: <Room />,
-
       },
 
-       {
+      {
         path: "/Maintenance",
 
         children: [
-
           {
-
             path: "/Maintenance",
 
-            element: <Maintenance/>,
-
+            element: <Maintenance />,
           },
 
           {
-
             path: "/Maintenance/Create",
 
-             element: <MaintenanceCreate/>,
-
+            element: <MaintenanceCreate />,
           },
 
           {
-
             path: "/Maintenance/Edit",
 
-            element: <MaintenanceEdit/>,
-
-          }
-
+            element: <MaintenanceEdit />,
+          },
         ],
-
       },
 
       {
         path: "/Review",
         children: [
-          { path: "/Review", element: <Review/> },
-          { path: "/Review/Create", element: <ReviewCreate/> },
-          { path: "/Review/Edit/:id", element: <ReviewEdit/> }, // ✅ ต้องมี :id
+          { path: "/Review", element: <Review /> },
+          { path: "/Review/Create", element: <ReviewCreate /> },
+          { path: "/Review/Edit/:id", element: <ReviewEdit /> }, // ✅ ต้องมี :id
         ],
+      },
+      {
+        path: "/Announcement",
+        children: [{ path: "/Announcement", element: <Announcement /> }],
       },
 
       {
@@ -304,16 +277,10 @@ const AdminRoutes = (isLoggedIn : boolean): RouteObject => {
             path: "/Payment/Evidence/EvidenceFail",
             element: <EvidenceFail />,
           },
-
         ],
       },
-
-
-
     ],
-
   };
-
 };
 
 export default AdminRoutes;

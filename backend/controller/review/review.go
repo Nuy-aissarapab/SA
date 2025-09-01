@@ -115,10 +115,18 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if in.Title != nil { review.Title = *in.Title }
-	if in.Comment != nil { review.Comment = *in.Comment }
-	if in.Rating != nil { review.Rating = *in.Rating }
-	if in.ReviewTopicID != nil { review.ReviewTopicID = in.ReviewTopicID }
+	if in.Title != nil {
+		review.Title = *in.Title
+	}
+	if in.Comment != nil {
+		review.Comment = *in.Comment
+	}
+	if in.Rating != nil {
+		review.Rating = *in.Rating
+	}
+	if in.ReviewTopicID != nil {
+		review.ReviewTopicID = in.ReviewTopicID
+	}
 
 	if err := config.DB().Save(&review).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})
@@ -130,7 +138,10 @@ func Update(c *gin.Context) {
 // DELETE /review/:id
 func Delete(c *gin.Context) {
 	userID, role, ok := getAuth(c)
-	if !ok { c.JSON(http.StatusUnauthorized, gin.H{"error":"unauthorized"}); return }
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	id := c.Param("id")
 	var review entity.Review

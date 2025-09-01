@@ -7,5 +7,5 @@ import (
 type AnnouncementTarget struct {
 	gorm.Model
 	Name        string
-	Announcements []Announcement `gorm:"foreignKey:AnnouncementsTargetID"`
+	Announcements []Announcement `gorm:"foreignKey:AnnouncementTargetID"`
 }

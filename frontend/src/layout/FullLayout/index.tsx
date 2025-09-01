@@ -66,6 +66,8 @@ import Main from "../../pages/Main"
 
 import Login from "../../pages/authentication/Login"
 
+import Announcement from "../../pages/Announcement"
+
 
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -286,6 +288,24 @@ const FullLayout: React.FC = () => {
                   <ExceptionOutlined />
 
                   <span>บิลและใบแจ้งหนี้</span>
+
+                </Link>
+
+              </Menu.Item>
+
+              <Menu.Item
+
+                key="Announcement"
+
+                onClick={() => setCurrentPage("Announcement")}
+
+              >
+
+                <Link to="/Announcement">
+
+                  <UserOutlined />
+
+                  <span>Announcement</span>
 
                 </Link>
 
@@ -525,6 +545,8 @@ const FullLayout: React.FC = () => {
               <Route path="/Login" element={<Login />} />
 
               <Route path="/Student/UpdateInfo/UpdateInfo" element={<UpdateInfo />} />
+
+              <Route path="/Announcement" element={<Announcement/>} />
 
 
 
