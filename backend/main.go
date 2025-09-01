@@ -32,6 +32,10 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
+	// ✅ เสิร์ฟไฟล์อัปโหลด
+	r.Static("/uploads", "./uploads")
+	// ดึงสลิปล่าสุดเป็นชุดตาม student_ids
+	r.GET("/evidences/latest-by-students", evidence.GetLatestByStudents)
 	// ===== Public routes (ไม่ต้องใช้ token) =====
 	r.POST("/student/auth", student.SignIn)
 	r.POST("/student/signup", student.SignUp)
@@ -59,15 +63,21 @@ func main() {
 		router.GET("/payment/:id", payment.GetPaymentById)
 
 		// Evidence
-		router.POST("/upload", evidence.UploadEvidence) // ✅ ใช้ controller/evidence
+		router.POST("/upload", evidence.UploadEvidence) // JSON base64
+		router.GET("/evidences", evidence.ListEvidences) // ✅ เพิ่มอันนี้
 
 		// auth.POST("/payment", payment.Create)
 		// auth.PUT("/payment/:id", payment.Update)
 		// auth.DELETE("/payment/:id", payment.Delete)
 
-		// Crontract
-		router.GET("/contracts", contract.ListContracts) // ✅ รองรับทั้ง admin และ user
-		router.PUT("/contracts/:id/renew", contract.Renew)
+		// Contract
+		router.GET("/contracts", contract.ListContracts)
+		router.PUT("/contracts/:id/renew-request", contract.RenewRequest)
+		router.PUT("/contracts/:id/renew-approve", contract.RenewApprove)
+		router.PUT("/contracts/:id/renew-reject", contract.RenewReject)
+		router.POST("/contracts", contract.Create)
+		router.PUT("/contracts/:id", contract.Update)
+		router.DELETE("/contracts/:id", contract.Delete)
 
 		// Review
 		router.GET("/reviews", review.List)
