@@ -33,9 +33,11 @@ func main() {
 	r.Use(CORSMiddleware())
 
 	// ✅ เสิร์ฟไฟล์อัปโหลด
-	r.Static("/uploads", "./uploads")
+	r.Static("/uploads/EvidentPayment", "./uploads/EvidentPayment")
 	// ดึงสลิปล่าสุดเป็นชุดตาม student_ids
 	r.GET("/evidences/latest-by-students", evidence.GetLatestByStudents)
+	r.POST("/upload", evidence.UploadEvidence)
+	
 	// ===== Public routes (ไม่ต้องใช้ token) =====
 	r.POST("/student/auth", student.SignIn)
 	r.POST("/student/signup", student.SignUp)
@@ -58,13 +60,18 @@ func main() {
 		router.GET("/admin/:id", admin.Get)
 		router.DELETE("/admin/:id", admin.Delete)
 
-		// Payment
-		router.GET("/payments", payment.GetPayments)
-		router.GET("/payment/:id", payment.GetPaymentById)
+		// payments
+		router.GET("/payments",                 payment.GetPayments)
+		router.GET("/payment/:id",             payment.GetPaymentById)
+		router.POST("/payments",               payment.CreatePayment)
+		router.PATCH("/payments/:id/status",   payment.UpdatePaymentStatus)
+		router.PUT("/payments/:id/confirm",    payment.ConfirmPayment)
+		router.PUT("/payments/:id/reject",     payment.RejectPayment)
+		router.PATCH("/payments/:id/receiver", payment.UpdatePaymentReceiver)
+		router.PATCH("/payments/:id/method", payment.UpdatePaymentMethod)
 
 		// Evidence
-		router.POST("/upload", evidence.UploadEvidence) // JSON base64
-		router.GET("/evidences", evidence.ListEvidences) // ✅ เพิ่มอันนี้
+		router.GET("/evidences", evidence.ListEvidences)
 
 		// auth.POST("/payment", payment.Create)
 		// auth.PUT("/payment/:id", payment.Update)
