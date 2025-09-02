@@ -6,26 +6,24 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
+
 	"github.com/SA/config"
 	"github.com/SA/entity"
 	"github.com/gin-gonic/gin"
 )
 
-// struct รับ JSON จาก frontend
 type EvidenceRequest struct {
-    File      string  `json:"file"`
-    Note      string  `json:"note"`
-    Date      string  `json:"date"`
-    StudentID uint    `json:"student_id"`
-    PaymentID uint    `json:"payment_id"`
-
-    // ⭐ เพิ่ม 3 ฟิลด์นี้
-    Method    string  `json:"method"`      // "bank" | "qr" | "cash"
-    PayerName string  `json:"payer_name"`  // ชื่อผู้ชำระ
-    Amount    float64 `json:"amount"`      // จำนวนเงิน
+	File      string  `json:"file" binding:"required"` // data:<mime>;base64,<...>
+	Note      string  `json:"note"`
+	Date      string  `json:"date" binding:"required"` // "2006-01-02 15:04:05"
+	StudentID uint    `json:"student_id" binding:"required"`
+	PaymentID uint    `json:"payment_id" binding:"required"`
+	Method    string  `json:"method"`     // "bank" | "qr" | "cash" (optional)
+	PayerName string  `json:"payer_name"` // optional
+	Amount    float64 `json:"amount"`     // optional
 }
 
 func UploadEvidence(c *gin.Context) {
@@ -35,7 +33,7 @@ func UploadEvidence(c *gin.Context) {
 		return
 	}
 
-	// --- decode base64 data URL ---
+	// ---- decode data URL ----
 	parts := strings.SplitN(req.File, ",", 2)
 	if len(parts) != 2 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบ base64 ไม่ถูกต้อง"})
@@ -50,7 +48,7 @@ func UploadEvidence(c *gin.Context) {
 		return
 	}
 
-	// --- เดาไฟล์จาก mime ของ data URL ---
+	// ---- detect extension ----
 	ext := ".png"
 	if strings.Contains(header, "jpeg") {
 		ext = ".jpg"
@@ -60,69 +58,70 @@ func UploadEvidence(c *gin.Context) {
 		ext = ".pdf"
 	}
 
-	// --- สร้างโฟลเดอร์และบันทึกไฟล์ ---
+	// ---- save file ----
 	dir := filepath.Join("uploads", "EvidentPayment")
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "สร้างโฟลเดอร์ไม่สำเร็จ"})
 		return
 	}
 	filename := fmt.Sprintf("evidence_%d%s", time.Now().UnixNano(), ext)
 	savePath := filepath.Join(dir, filename)
-
-	if err := os.WriteFile(savePath, data, 0644); err != nil {
+	if err := os.WriteFile(savePath, data, 0o644); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "บันทึกไฟล์ไม่สำเร็จ"})
 		return
 	}
 
-	// --- แปลงวันที่โอน ---
+	// ---- parse date ----
 	date, err := time.Parse("2006-01-02 15:04:05", req.Date)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบวันที่ไม่ถูกต้อง"})
 		return
 	}
 
-	// --- บันทึก Evidence ลง DB ---
-	evidence := entity.Evidence{
+	// ---- create Evidence ----
+	ev := entity.Evidence{
 		File:      savePath,
 		Note:      req.Note,
 		Date:      date,
 		PaymentID: req.PaymentID,
 		StudentID: req.StudentID,
 	}
-	if err := config.DB().Create(&evidence).Error; err != nil {
+	if err := config.DB().Create(&ev).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถบันทึกข้อมูลลง DB"})
 		return
 	}
 
-	// --- อัปเดต Payment ด้วย method/payer_name/amount (ถ้าส่งมา) ---
+	// ---- optional: update Payment ----
 	db := config.DB()
 	var pay entity.Payment
 	if err := db.First(&pay, req.PaymentID).Error; err == nil {
-		// อนุญาตเฉพาะ method ที่รองรับ
 		if m := strings.ToLower(strings.TrimSpace(req.Method)); m == "bank" || m == "qr" || m == "cash" {
 			pay.Method = m
 		}
-		if strings.TrimSpace(req.PayerName) != "" {
-			pay.PayerName = strings.TrimSpace(req.PayerName)
+		if s := strings.TrimSpace(req.PayerName); s != "" {
+			pay.PayerName = s
 		}
 		if req.Amount > 0 {
 			pay.Amount = req.Amount
 		}
-		// เติมวันที่โอนถ้ายังว่าง
 		if pay.Payment_Date.IsZero() {
 			pay.Payment_Date = date
 		}
 		_ = db.Save(&pay).Error
 	}
 
-	// --- สร้าง URL สำหรับเปิดไฟล์จาก client ---
-	baseURL := "http://localhost:8000"
+	// ---- build file_url from request host (no hard-coded localhost) ----
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	host := c.Request.Host
 	webPath := strings.ReplaceAll(savePath, "\\", "/")
-	fileURL := fmt.Sprintf("%s/%s", baseURL, webPath)
+	fileURL := fmt.Sprintf("%s://%s/%s", scheme, host, webPath)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "อัปโหลดสำเร็จ",
-		"evidence": evidence,
+		"evidence": ev,
 		"file_url": fileURL,
 	})
 }
@@ -155,11 +154,17 @@ func GetLatestByStudents(c *gin.Context) {
 		StudentID uint   `json:"student_id"`
 		FileURL   string `json:"file_url"`
 		Mime      string `json:"mime"`
-		// DataURL string `json:"data_url"` // ถ้าจะส่ง base64 ด้วย ค่อยเปิดบรรทัดนี้
 	}
 
 	results := make([]out, 0, len(ids))
-	baseURL := "http://localhost:8000"
+
+	// base URL จากคำขอจริง
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	host := c.Request.Host
+	baseURL := fmt.Sprintf("%s://%s", scheme, host)
 
 	for _, sid := range ids {
 		var ev entity.Evidence
@@ -170,17 +175,10 @@ func GetLatestByStudents(c *gin.Context) {
 			continue
 		}
 
-		fileURL := fmt.Sprintf("%s/%s", baseURL, ev.File)
+		webPath := strings.ReplaceAll(ev.File, "\\", "/")
+		fileURL := fmt.Sprintf("%s/%s", baseURL, webPath)
 
-		mime := "image/png"
-		switch strings.ToLower(filepath.Ext(ev.File)) {
-		case ".jpg", ".jpeg":
-			mime = "image/jpeg"
-		case ".png":
-			mime = "image/png"
-		case ".pdf":
-			mime = "application/pdf"
-		}
+		mime := mimeFromExt(filepath.Ext(ev.File))
 
 		results = append(results, out{
 			StudentID: sid,
@@ -192,54 +190,59 @@ func GetLatestByStudents(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"items": results})
 }
 
-// GET /evidences
+// GET /evidences  (optional studentId filter)
 func ListEvidences(c *gin.Context) {
-    var evidences []entity.Evidence
+	var evidences []entity.Evidence
 
-    // optional filter studentId
-    studentId := c.Query("studentId")
-    db := config.DB()
-    if studentId != "" {
-        db = db.Where("student_id = ?", studentId)
-    }
+	studentId := c.Query("studentId")
+	db := config.DB()
+	if studentId != "" {
+		db = db.Where("student_id = ?", studentId)
+	}
 
-    if err := db.Order("date DESC").Find(&evidences).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "โหลดข้อมูลไม่สำเร็จ"})
-        return
-    }
+	if err := db.Order("date DESC").Find(&evidences).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "โหลดข้อมูลไม่สำเร็จ"})
+		return
+	}
 
-    baseURL := "http://localhost:8000"
+	// base URL จากคำขอจริง
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	host := c.Request.Host
+	baseURL := fmt.Sprintf("%s://%s", scheme, host)
 
-    // map ออกมาเป็น JSON พร้อม file_url
-    var out []gin.H
-    for _, ev := range evidences {
-        webPath := strings.ReplaceAll(ev.File, "\\", "/")
-        fileURL := fmt.Sprintf("%s/%s", baseURL, webPath)
+	// map JSON พร้อม file_url
+	var out []gin.H
+	for _, ev := range evidences {
+		webPath := strings.ReplaceAll(ev.File, "\\", "/")
+		fileURL := fmt.Sprintf("%s/%s", baseURL, webPath)
 
-        out = append(out, gin.H{
-            "ID":          ev.ID,
-            "address":     "/" + webPath, // frontend จะต่อ API เอง
-            "file_url":    fileURL,
-            "mime_type":   mimeFromExt(filepath.Ext(ev.File)),
-            "note":        ev.Note,
-            "date":        ev.Date.Format("2006-01-02 15:04:05"),
-            "student_id":  ev.StudentID,
-            "payment_id":  ev.PaymentID,
-            "file_name":   filepath.Base(ev.File),
-        })
-    }
+		out = append(out, gin.H{
+			"ID":         ev.ID,
+			"address":    "/" + webPath, // ถ้า FE จะต่อเอง
+			"file_url":   fileURL,
+			"mime_type":  mimeFromExt(filepath.Ext(ev.File)),
+			"note":       ev.Note,
+			"date":       ev.Date.Format("2006-01-02 15:04:05"),
+			"student_id": ev.StudentID,
+			"payment_id": ev.PaymentID,
+			"file_name":  filepath.Base(ev.File),
+		})
+	}
 
-    c.JSON(http.StatusOK, out)
+	c.JSON(http.StatusOK, out)
 }
 
 func mimeFromExt(ext string) string {
-    switch strings.ToLower(ext) {
-    case ".jpg", ".jpeg":
-        return "image/jpeg"
-    case ".png":
-        return "image/png"
-    case ".pdf":
-        return "application/pdf"
-    }
-    return "application/octet-stream"
+	switch strings.ToLower(ext) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".pdf":
+		return "application/pdf"
+	}
+	return "application/octet-stream"
 }
