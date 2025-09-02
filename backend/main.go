@@ -22,23 +22,32 @@ import (
 const PORT = "8000"
 
 func main() {
+	// เปิด DB (เพื่อความเข้ากันได้กับโค้ดเดิมของโปรเจกต์)
 	db, err := gorm.Open(sqlite.Open("sa.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
+	_ = db
+
+	// เชื่อมต่อผ่าน config (ใช้ที่อื่น ๆ ในโปรเจกต์)
 	config.ConnectionDB()
 	config.SetupDatabase()
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	// ✅ เสิร์ฟไฟล์อัปโหลด
+	// ✅ เสิร์ฟไฟล์อัปโหลด (static)
 	r.Static("/uploads/EvidentPayment", "./uploads/EvidentPayment")
-	// ดึงสลิปล่าสุดเป็นชุดตาม student_ids
-	r.GET("/evidences/latest-by-students", evidence.GetLatestByStudents)
-	r.POST("/upload", evidence.UploadEvidence)
-	
+
 	// ===== Public routes (ไม่ต้องใช้ token) =====
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "API RUNNING... PORT: %s", PORT)
+	})
+
+	// อัปโหลดสลิป และดึงสลิปล่าสุดตาม student_ids
+	r.POST("/upload", evidence.UploadEvidence)
+	r.GET("/evidences/latest-by-students", evidence.GetLatestByStudents)
+
 	r.POST("/student/auth", student.SignIn)
 	r.POST("/student/signup", student.SignUp)
 
@@ -60,24 +69,20 @@ func main() {
 		router.GET("/admin/:id", admin.Get)
 		router.DELETE("/admin/:id", admin.Delete)
 
-		// payments
-		router.GET("/payments",                 payment.GetPayments)
-		router.GET("/payment/:id",             payment.GetPaymentById)
-		router.POST("/payments",               payment.CreatePayment)
-		router.PATCH("/payments/:id/status",   payment.UpdatePaymentStatus)
-		router.PUT("/payments/:id/confirm",    payment.ConfirmPayment)
-		router.PUT("/payments/:id/reject",     payment.RejectPayment)
+		// Payments
+		router.GET("/payments", payment.GetPayments)
+		router.GET("/payment/:id", payment.GetPaymentById)
+		router.POST("/payments", payment.CreatePayment)
+		router.PATCH("/payments/:id/status", payment.UpdatePaymentStatus)
+		router.PUT("/payments/:id/confirm", payment.ConfirmPayment)
+		router.PUT("/payments/:id/reject", payment.RejectPayment)
 		router.PATCH("/payments/:id/receiver", payment.UpdatePaymentReceiver)
 		router.PATCH("/payments/:id/method", payment.UpdatePaymentMethod)
 
 		// Evidence
 		router.GET("/evidences", evidence.ListEvidences)
 
-		// auth.POST("/payment", payment.Create)
-		// auth.PUT("/payment/:id", payment.Update)
-		// auth.DELETE("/payment/:id", payment.Delete)
-
-		// Contract
+		// Contracts
 		router.GET("/contracts", contract.ListContracts)
 		router.PUT("/contracts/:id/renew-request", contract.RenewRequest)
 		router.PUT("/contracts/:id/renew-approve", contract.RenewApprove)
@@ -86,34 +91,37 @@ func main() {
 		router.PUT("/contracts/:id", contract.Update)
 		router.DELETE("/contracts/:id", contract.Delete)
 
-		// Review
+		// Reviews
 		router.GET("/reviews", review.List)
 		router.POST("/reviews", review.Create) // student only
 		router.GET("/reviews/:id", review.GetByID)
 		router.PUT("/reviews/:id", review.Update)    // student: owner only
 		router.DELETE("/reviews/:id", review.Delete) // admin:any, student:owner
 
-		// ReviewTopic
+		// Review Topics
 		router.GET("/reviewtopics", reviewTopic.GetReviewTopics)
 
-		// Announcement
+		// Announcements
 		router.POST("/announcements", announcement.CreateAnnouncement) // admin only
 		router.GET("/announcements", announcement.ListAnnouncements)
 		router.GET("/announcements/:id", announcement.ListByIDAnnouncements)
 		router.DELETE("/announcements/:id", announcement.DeleteAnnouncement)
 		router.PATCH("/announcements/:id", announcement.UpdateAnnouncement) // admin only
 	}
-	
 
-	// test route
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "API RUNNING... PORT: %s", PORT)
-	})
+	// ✅ AutoMigrate (รวม Evidence)
+	config.DB().AutoMigrate(
+		&entity.Billing{},
+		&entity.Payment{},
+		&entity.Contract{},
+		&entity.Room{},
+		&entity.Student{},
+		&entity.Evidence{},
+		&entity.Admin{},
+	)
 
-	// Migrate DB
-	db.AutoMigrate(&entity.Billing{}, &entity.Payment{}, &entity.Contract{}, &entity.Room{}, &entity.Student{})
-
-	r.Run("localhost:" + PORT)
+	// ✅ เปิดรับทุกอินเตอร์เฟส (ย้ายเครื่องได้)
+	r.Run("0.0.0.0:" + PORT)
 }
 
 // ===== CORS Middleware =====
