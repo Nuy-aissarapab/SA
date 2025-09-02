@@ -199,18 +199,16 @@ async function GetPayment(studentId?: string) {
     .catch((e) => e.response);
 }
 // Evidence (Upload transfer slip)
-// Service/https/index.ts
-async function UploadEvidence(data: any) {
+export async function UploadEvidence(data: any) {
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
-
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `${tokenType} ${token}`;
+  if (token) headers.Authorization = `${tokenType} ${token}`;
 
-  return await axios
-    .post(`${apiUrl}/upload`, data, { headers })
-    .then((res) => res)
-    .catch((e) => e.response);
+  return axios
+    .post(`${import.meta.env.VITE_API_KEY || "http://localhost:8000"}/upload`, data, { headers })
+    .then((res) => res)                                  // ⬅️ สำคัญ: คืนทั้ง response
+    .catch((e) => e.response ?? { status: 0, data: e }); // กัน network error
 }
 export async function GetLatestEvidencesByStudents(studentIds: number[]) {
   const token = localStorage.getItem("token");
@@ -221,6 +219,68 @@ export async function GetLatestEvidencesByStudents(studentIds: number[]) {
   const qs = studentIds.join(",");
   return await axios
     .get(`${apiUrl}/evidences/latest-by-students?student_ids=${qs}`, { headers })
+    .then(res => res)              // ⬅️ ให้ได้ AxiosResponse
+    .catch(e => e.response);
+}
+export async function ConfirmPayment(id: number) {
+  return await axios
+    .put(`${apiUrl}/payments/${id}/confirm`, {}, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export async function RejectPayment(id: number) {
+  return await axios
+    .put(`${apiUrl}/payments/${id}/reject`, {}, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+// รองรับ null + 3 state
+export async function UpdatePaymentStatus(id: number, status: "paid" | "pending" | "remaining" | null) {
+  return await axios
+    .patch(`${apiUrl}/payments/${id}/status`, { status }, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+// ✅ ตั้งผู้รับเงิน
+export async function UpdatePaymentReceiver(id: number, receiver_id: number | null) {
+  return await axios
+    .patch(`${apiUrl}/payments/${id}/receiver`, { receiver_id }, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export async function AssignReceiverSelf(id: number) {
+  return await axios
+    .patch(`${apiUrl}/payments/${id}/receiver/self`, {}, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+// Create payment (รับชำระงวด/บางส่วนได้)
+export async function CreatePayment(body: {
+  student_id: number;
+  billing_id: number;
+  amount: number;
+  method: string;
+  payment_date?: string;
+  payer_name?: string;
+  receipt_number?: string;
+  evidence_url?: string;
+  status?: "paid" | "pending" | "remaining" | null;  // 👈 add "remaining"
+  receiver_id?: number | null;
+}) {
+  return await axios
+    .post(`${apiUrl}/payments`, body, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export async function UpdatePaymentMethod(id: number, method: string) {
+  return await axios
+    .patch(`${apiUrl}/payments/${id}/method`, { method }, requestOptions)
     .then(res => res)
     .catch(e => e.response);
 }
@@ -455,7 +515,6 @@ export {
   DeleteStudentById,
   GetPayment,
   GetContracts,
-  UploadEvidence,
   GetAnnouncements,
   CreateAnnouncement,
   UpdateAnnouncementById,
