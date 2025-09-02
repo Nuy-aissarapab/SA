@@ -41,13 +41,13 @@ const getCookie = (name: string): string | null => {
 //   },
 // });
 
-const token = localStorage.getItem("token");
-const tokenType = localStorage.getItem("token_type");
+// const token = localStorage.getItem("token");
+// const tokenType = localStorage.getItem("token_type");
 
-if (!token || !tokenType) {
-  console.warn("No token found, redirect to login");
-  window.location.href = "/login"; // หรือจัดการให้เหมาะสม
-}
+// if (!token || !tokenType) {
+//   console.warn("No token found, redirect to login");
+//   window.location.href = "/login"; // หรือจัดการให้เหมาะสม
+// }
 
 const getConfig = () => {
   // ✅ อ่านสดทุกครั้ง
