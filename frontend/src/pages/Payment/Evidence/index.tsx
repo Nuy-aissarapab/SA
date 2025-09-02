@@ -25,7 +25,9 @@ export default function Evidence() {
   const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation();   
+
+  // localStorage.setItem("current_payment_id","123")
 
   const getPaymentId = () => {
     const qs = new URLSearchParams(location.search);
