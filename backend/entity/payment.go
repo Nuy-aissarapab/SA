@@ -7,15 +7,21 @@ import (
 
 type Payment struct {
     gorm.Model
-    Payment_Date   time.Time `json:"start_date"`
+    Payment_Date   time.Time `json:"payment_date"`
     Amount         float64   `json:"amount" gorm:"type:decimal(10,2)"`
-    Payment_Status string    `json:"payment_status"`
+    Payment_Status *string   `json:"payment_status"`
+    Method         string    `json:"method"`
 
-    // Foreign key → Student
-    StudentID uint
+    PayerName     string `json:"payer_name"`
+    ReceiptNumber string `json:"receipt_number"` // ← ยังมีได้ แต่จะถูกเซ็ตจาก BillingID
+    EvidenceURL   string `json:"evidence_url"`
+
+    ReceiverID *uint `json:"receiver_id"`
+    Receiver   Admin `gorm:"foreignKey:ReceiverID" json:"receiver"`
+
+    StudentID uint    `json:"student_id"`
     Student   Student `gorm:"foreignKey:StudentID" json:"student"`
 
-    // FK ไปที่ Billing
-	BillingID uint
-	Billing   Billing `gorm:"foreignKey:BillingID"`
+    BillingID uint    `json:"billing_id"`
+    Billing   Billing `gorm:"foreignKey:BillingID" json:"billing"`
 }
