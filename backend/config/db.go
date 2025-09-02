@@ -31,11 +31,12 @@ func ConnectionDB() {
 
 func SetupDatabase() {
 	// Migrate the schema
-	db.AutoMigrate(&entity.Billing{},
+	db.AutoMigrate(
+		&entity.Admin{},
+		&entity.Billing{},
 		&entity.Payment{},
 		&entity.Contract{},
 		&entity.Room{},
-		&entity.Admin{},
 		&entity.Student{},
 		&entity.Evidence{},
 		&entity.ReviewTopic{},
@@ -49,6 +50,8 @@ func SetupDatabase() {
 
 	// Admin Base
 	Admin := entity.Admin{
+		First_Name: "แอดมิน",
+		Last_Name: "เองนะ",
 		Username: "admin",
 		Password: string(password),
 		Email:    "admin@gmail.com",
@@ -81,23 +84,37 @@ func SetupDatabase() {
 	})
 
 	//Payment
-	db.Model(&entity.Payment{}).Create(&entity.Payment{
+	db.Create(&entity.Payment{
 		StudentID:      1,
+		BillingID:      1,
+		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		Amount:         2900,
 		Payment_Date:   time.Now(),
-		Amount:         2900.00,
-		Payment_Status: "ยังไม่ได้ชำระ",
+		Payment_Status: StrPtr("paid"),     // หรือ pending
+		Method:         "-",
+		PayerName:      "ผู้ปกครอง A",
 	})
-	db.Model(&entity.Payment{}).Create(&entity.Payment{
+	
+	db.Create(&entity.Payment{
 		StudentID:      2,
+		BillingID:      2,
+		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		Amount:         2900,
 		Payment_Date:   time.Now(),
-		Amount:         2900.00,
-		Payment_Status: "ยังไม่ได้ชำระ",
+		Payment_Status: StrPtr("paid"),     // หรือ pending
+		Method:         "-",
+		PayerName:      "ผู้ปกครอง A",
 	})
-	db.Model(&entity.Payment{}).Create(&entity.Payment{
+	
+	db.Create(&entity.Payment{
 		StudentID:      3,
+		BillingID:      3,
+		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		Amount:         2900,
 		Payment_Date:   time.Now(),
-		Amount:         2900.00,
-		Payment_Status: "ยังไม่ได้ชำระ",
+		Payment_Status: StrPtr("paid"),     // หรือ pending
+		Method:         "-",
+		PayerName:      "ผู้ปกครอง A",
 	})
 
 	// สร้าง Contract ใหม่
