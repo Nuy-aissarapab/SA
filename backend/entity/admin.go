@@ -21,4 +21,7 @@ type Admin struct {
 
 	// หลาย admin อยู่ได้หลาย Contract
 	Contract []Contract `gorm:"foreignKey:Admin_ID"`
+
+	// ✅ payments ที่ admin คนนี้เป็นผู้รับ
+	PaymentsReceived []Payment `gorm:"foreignKey:ReceiverID" json:"payments_received,omitempty"`
 }
