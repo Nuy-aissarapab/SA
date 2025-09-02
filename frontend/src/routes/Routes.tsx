@@ -51,6 +51,8 @@ const QRCode = Loadable(lazy(() => import("../pages/Payment/QRCode")));
 
 const Evidence = Loadable(lazy(() => import("../pages/Payment/Evidence")));
 
+const Managepayment = Loadable(lazy(() => import("../pages/Payment/Managepayment")));
+
 const EvidenceSuccess = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess")));
 
 const EvidenceFail = Loadable(lazy(() => import("../pages/Payment/Evidence/EvidenceFail/EvidenceFail")));
@@ -283,6 +285,10 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           {
             path: "/Payment/Evidence",
             element: <Evidence />,
+          },
+          {
+            path: "/Payment/Managepayment",
+            element: <Managepayment />,
           },
           {
             path: "/Payment/Evidence/EvidenceSuccess",
