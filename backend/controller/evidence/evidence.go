@@ -16,87 +16,114 @@ import (
 
 // struct รับ JSON จาก frontend
 type EvidenceRequest struct {
-	File      string `json:"file"`
-	Note      string `json:"note"`
-	Date      string `json:"date"`
-	StudentID uint   `json:"student_id"`
-	PaymentID uint   `json:"payment_id"`
+    File      string  `json:"file"`
+    Note      string  `json:"note"`
+    Date      string  `json:"date"`
+    StudentID uint    `json:"student_id"`
+    PaymentID uint    `json:"payment_id"`
+
+    // ⭐ เพิ่ม 3 ฟิลด์นี้
+    Method    string  `json:"method"`      // "bank" | "qr" | "cash"
+    PayerName string  `json:"payer_name"`  // ชื่อผู้ชำระ
+    Amount    float64 `json:"amount"`      // จำนวนเงิน
 }
 
 func UploadEvidence(c *gin.Context) {
-    var req EvidenceRequest
-    if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "ข้อมูลไม่ถูกต้อง"})
-        return
-    }
+	var req EvidenceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ข้อมูลไม่ถูกต้อง"})
+		return
+	}
 
-    // แยก data URL
-    parts := strings.Split(req.File, ",")
-    if len(parts) != 2 {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบ base64 ไม่ถูกต้อง"})
-        return
-    }
+	// --- decode base64 data URL ---
+	parts := strings.SplitN(req.File, ",", 2)
+	if len(parts) != 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบ base64 ไม่ถูกต้อง"})
+		return
+	}
+	header := parts[0]
+	b64 := strings.TrimSpace(parts[1])
 
-    data, err := base64.StdEncoding.DecodeString(parts[1])
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "decode base64 ล้มเหลว"})
-        return
-    }
+	data, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "decode base64 ล้มเหลว"})
+		return
+	}
 
-    // เดา ext จาก mime
-    ext := ".png"
-    if strings.Contains(parts[0], "jpeg") {
-        ext = ".jpg"
-    } else if strings.Contains(parts[0], "pdf") {
-        ext = ".pdf"
-    }
+	// --- เดาไฟล์จาก mime ของ data URL ---
+	ext := ".png"
+	if strings.Contains(header, "jpeg") {
+		ext = ".jpg"
+	} else if strings.Contains(header, "png") {
+		ext = ".png"
+	} else if strings.Contains(header, "pdf") {
+		ext = ".pdf"
+	}
 
-    // เซฟไฟล์
-    newFileName := fmt.Sprintf("evidence_%d%s", time.Now().UnixNano(), ext)
-    savePath := filepath.Join("uploads", newFileName)
-    if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "สร้างโฟลเดอร์ไม่สำเร็จ"})
-        return
-    }
-    if err := os.WriteFile(savePath, data, 0644); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "บันทึกไฟล์ไม่สำเร็จ"})
-        return
-    }
+	// --- สร้างโฟลเดอร์และบันทึกไฟล์ ---
+	dir := filepath.Join("uploads", "EvidentPayment")
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "สร้างโฟลเดอร์ไม่สำเร็จ"})
+		return
+	}
+	filename := fmt.Sprintf("evidence_%d%s", time.Now().UnixNano(), ext)
+	savePath := filepath.Join(dir, filename)
 
-    // parse date
-    date, err := time.Parse("2006-01-02 15:04:05", req.Date)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบวันที่ไม่ถูกต้อง"})
-        return
-    }
+	if err := os.WriteFile(savePath, data, 0644); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "บันทึกไฟล์ไม่สำเร็จ"})
+		return
+	}
 
-    // save DB
-    evidence := entity.Evidence{
-        File:      savePath,
-        Note:      req.Note,
-        Date:      date,
-        PaymentID: req.PaymentID,
-        StudentID: req.StudentID,
-    }
-    if err := config.DB().Create(&evidence).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถบันทึกข้อมูลลง DB"})
-        return
-    }
+	// --- แปลงวันที่โอน ---
+	date, err := time.Parse("2006-01-02 15:04:05", req.Date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบวันที่ไม่ถูกต้อง"})
+		return
+	}
 
-	// ก่อนส่งกลับ
+	// --- บันทึก Evidence ลง DB ---
+	evidence := entity.Evidence{
+		File:      savePath,
+		Note:      req.Note,
+		Date:      date,
+		PaymentID: req.PaymentID,
+		StudentID: req.StudentID,
+	}
+	if err := config.DB().Create(&evidence).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถบันทึกข้อมูลลง DB"})
+		return
+	}
+
+	// --- อัปเดต Payment ด้วย method/payer_name/amount (ถ้าส่งมา) ---
+	db := config.DB()
+	var pay entity.Payment
+	if err := db.First(&pay, req.PaymentID).Error; err == nil {
+		// อนุญาตเฉพาะ method ที่รองรับ
+		if m := strings.ToLower(strings.TrimSpace(req.Method)); m == "bank" || m == "qr" || m == "cash" {
+			pay.Method = m
+		}
+		if strings.TrimSpace(req.PayerName) != "" {
+			pay.PayerName = strings.TrimSpace(req.PayerName)
+		}
+		if req.Amount > 0 {
+			pay.Amount = req.Amount
+		}
+		// เติมวันที่โอนถ้ายังว่าง
+		if pay.Payment_Date.IsZero() {
+			pay.Payment_Date = date
+		}
+		_ = db.Save(&pay).Error
+	}
+
+	// --- สร้าง URL สำหรับเปิดไฟล์จาก client ---
 	baseURL := "http://localhost:8000"
-
-	// แปลง \ -> / ให้เป็น URL-friendly
 	webPath := strings.ReplaceAll(savePath, "\\", "/")
-
-	fileURL := fmt.Sprintf("%s/%s", baseURL, webPath) // http://localhost:8000/uploads/....
-	dataURL := req.File
+	fileURL := fmt.Sprintf("%s/%s", baseURL, webPath)
 
 	c.JSON(http.StatusOK, gin.H{
-	"message":  "อัปโหลดสำเร็จ",
-	"evidence": evidence,
-	"file_url": fileURL,  // ✅ เปิดได้จริง
-	"data_url": dataURL,  // ✅ data:<mime>;base64,...
+		"message":  "อัปโหลดสำเร็จ",
+		"evidence": evidence,
+		"file_url": fileURL,
 	})
 }
 
