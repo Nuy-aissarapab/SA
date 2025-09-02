@@ -30,6 +30,12 @@ import EvidenceFail from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceS
 
 import EvidenceSuccess from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess"
 
+import Bank from "../../../src/pages/Payment/Bank"
+
+import QRCode from "../../../src/pages/Payment/QRCode"
+
+import Managepayment from "../../../src/pages/Payment/Managepayment"
+
 import Student from "../../pages/Student";
 
 import UpdateInfo from "../../pages/Student/UpdateInfo/UpdateInfo";
@@ -49,10 +55,6 @@ import Review from "../../pages/Review"
 import ReviewEdit from "../../pages/Review/Edit"
 
 import ReviewCreate from "../../pages/Review/Create"
-
-import Bank from "../../../src/pages/Payment/Bank"
-
-import QRCode from "../../../src/pages/Payment/QRCode"
 
 import Managecontracts from "../../pages/Contract/Managecontracts"
 
@@ -459,6 +461,8 @@ const FullLayout: React.FC = () => {
               <Route path="/Payment/QRCode" element={<QRCode />} />
 
               <Route path="/Payment/Evidence" element={<Evidence />} />
+
+              <Route path="/Payment/Managepayment" element={<Managepayment />} />
 
               <Route path="/Payment/Evidence/EvidenceSuccess" element={<EvidenceSuccess />} />
 
