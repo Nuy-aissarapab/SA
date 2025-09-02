@@ -30,5 +30,6 @@ type Contract struct {
 	RenewalEndDate   *time.Time `json:"renewal_end_date"`
 	RenewalRate      *float64   `json:"renewal_rate"`
 	RenewalStatus    *string    `json:"renewal_status"` // "pending" | "approved" | "rejected"
+
   }
   
