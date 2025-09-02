@@ -9,7 +9,17 @@ import { requestOptions as authOptions } from "../../Service/https/requestOption
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
 
-const apiUrl = "http://localhost:8000";
+/** =========================
+ *  Base URL เดียวทั้งโปรเจกต์
+ *  ========================= */
+export const API_BASE =
+  (import.meta as any)?.env?.VITE_API_KEY?.trim()?.replace(/\/+$/g, "") ||
+  `${window.location.protocol}//${window.location.hostname}:8000`;
+
+// คงชื่อตัวแปรเดิมไว้เพื่อความเข้ากันได้กับโค้ดส่วนอื่น
+const apiUrl = API_BASE;                           // เดิมเคยเป็น "http://localhost:8000"
+const API_URL = API_BASE;                          // เดิมเคยอ่านจาก env แล้ว fallback localhost
+
 const Authorization = localStorage.getItem("token");
 const Bearer = localStorage.getItem("token_type");
 
@@ -19,8 +29,6 @@ const requestOptions = {
     Authorization: `${Bearer} ${Authorization}`,
   },
 };
-
-const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:8000";
 
 const getCookie = (name: string): string | null => {
   const cookies = document.cookie.split("; ");
@@ -43,14 +51,10 @@ const getCookie = (name: string): string | null => {
 
 // const token = localStorage.getItem("token");
 // const tokenType = localStorage.getItem("token_type");
-
-// if (!token || !tokenType) {
-//   console.warn("No token found, redirect to login");
-//   window.location.href = "/login"; // หรือจัดการให้เหมาะสม
-// }
+// if (!token || !tokenType) { ... }
 
 const getConfig = () => {
-  // ✅ อ่านสดทุกครั้ง
+  // ✅ อ่าน token สดทุกครั้ง
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
 
@@ -59,8 +63,6 @@ const getConfig = () => {
 
   return { headers };
 };
-
-
 
 const getConfigWithoutAuth = () => ({
   headers: { "Content-Type": "application/json" },
@@ -162,7 +164,6 @@ export const adminAPI = {
 };
 
 
-
 // Gender
 async function GetGender() {
   return await axios
@@ -198,7 +199,8 @@ async function GetPayment(studentId?: string) {
     .then((res) => res)
     .catch((e) => e.response);
 }
-// Evidence (Upload transfer slip)
+
+// Evidence (Upload transfer slip) —— ใช้ฐาน URL เดียว
 export async function UploadEvidence(data: any) {
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
@@ -206,10 +208,11 @@ export async function UploadEvidence(data: any) {
   if (token) headers.Authorization = `${tokenType} ${token}`;
 
   return axios
-    .post(`${import.meta.env.VITE_API_KEY || "http://localhost:8000"}/upload`, data, { headers })
-    .then((res) => res)                                  // ⬅️ สำคัญ: คืนทั้ง response
-    .catch((e) => e.response ?? { status: 0, data: e }); // กัน network error
+    .post(`${API_BASE}/upload`, data, { headers })   // ← เปลี่ยนมาใช้ API_BASE
+    .then((res) => res)
+    .catch((e) => e.response ?? { status: 0, data: e });
 }
+
 export async function GetLatestEvidencesByStudents(studentIds: number[]) {
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
@@ -219,9 +222,10 @@ export async function GetLatestEvidencesByStudents(studentIds: number[]) {
   const qs = studentIds.join(",");
   return await axios
     .get(`${apiUrl}/evidences/latest-by-students?student_ids=${qs}`, { headers })
-    .then(res => res)              // ⬅️ ให้ได้ AxiosResponse
+    .then(res => res)
     .catch(e => e.response);
 }
+
 export async function ConfirmPayment(id: number) {
   return await axios
     .put(`${apiUrl}/payments/${id}/confirm`, {}, requestOptions)
@@ -286,8 +290,6 @@ export async function UpdatePaymentMethod(id: number, method: string) {
 }
 
 
-
-
 // Contract API
 async function GetContracts(studentId?: string) {
   const url = studentId
@@ -327,7 +329,7 @@ export async function RequestRenewContract(
 export async function ApproveRenewContract(id: number) {
   return await axios
     .put(`${apiUrl}/contracts/${id}/renew-approve`, {}, requestOptions)
-    .then(res => res).catch(e => e.response);
+  .then(res => res).catch(e => e.response);
 }
 
 export async function RejectRenewContract(id: number) {
@@ -361,8 +363,6 @@ export async function DeleteContractById(id: string) {
 }
 
 
-
-
 async function GetUsersById(id: string) {
   return await axios
     .get(`${apiUrl}/student/${id}`, requestOptions) // 🔥 แก้ user → student
@@ -390,8 +390,6 @@ async function CreateUser(data: UsersInterface) {
     .then((res) => res)
     .catch((e) => e.response);
 }
-
-
 
 
 async function GetStudentById(id: number) {
@@ -427,12 +425,11 @@ async function GetAnnouncements(params?: any) {
   return await axios
     .get(`${apiUrl}/announcements`, {
       ...requestOptions,
-      params, // ⬅️ เอา params มาติด query string
+      params,
     })
     .then((res) => res)
     .catch((e) => e.response);
 }
-
 
 async function CreateAnnouncement(data: any) {
   return await axios
@@ -462,7 +459,7 @@ async function GetAnnouncementById(id: string) {
     .catch((e) => e.response);
 }
 
-// Review
+// Review (เปลี่ยนมาใช้ API_URL ที่อิง API_BASE)
 export async function GetReviews() {
   return await axios
     .get(`${API_URL}/reviews`, getConfig())
@@ -497,6 +494,7 @@ export async function DeleteReview(id: string) {
     .then((r) => r)
     .catch((e) => e.response);
 }
+
 export async function GetReviewTopics() {
   return await axios.get(`${apiUrl}/reviewtopics`, requestOptions).then((r) => r).catch((e) => e.response);
 }
@@ -520,5 +518,4 @@ export {
   UpdateAnnouncementById,
   DeleteAnnouncementById,
   GetAnnouncementById,
-
 };
