@@ -32,7 +32,7 @@ export default function Evidence() {
   const getPaymentId = () => {
     const qs = new URLSearchParams(location.search);
     const qid = qs.get("paymentId");
-    const sid = localStorage.getItem("current_payment_id");
+    const sid = localStorage.getItem("id");
     const n = Number(qid || sid || "");
     return Number.isNaN(n) ? undefined : n;
   };
@@ -258,3 +258,4 @@ export default function Evidence() {
     </Row>
   );
 }
+
