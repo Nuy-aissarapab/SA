@@ -13,14 +13,11 @@ import {
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 
-import { GetStudentById, UpdateStudentById } from "../../../Service/https";
+import { GetStudentById, UpdateStudentById, Update } from "../../../Service/https";
 import type { StudentInterface } from "../../../interfaces/Student";
 
 const roleFromStorage = () =>
-  (localStorage.getItem("role") || "").toLowerCase() as
-    | "admin"
-    | "student"
-    | "";
+  (localStorage.getItem("role") || "").toLowerCase() as "admin" | "student" | "";
 const myId = () => localStorage.getItem("id") || "";
 
 const { TextArea } = Input;
@@ -32,8 +29,10 @@ const UpdateInfo: React.FC = () => {
   const role = roleFromStorage();
 
   const [form] = Form.useForm();
+  const [formPwd] = Form.useForm();              // ✅ ฟอร์มสำหรับเปลี่ยนรหัสผ่าน
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pwSaving, setPwSaving] = useState(false); // ✅ สถานะโหลดปุ่มรหัสผ่าน
   const [user, setUser] = useState<StudentInterface | null>(null);
 
   // ห้าม student แก้ของคนอื่น
@@ -48,7 +47,7 @@ const UpdateInfo: React.FC = () => {
     const fetchUser = async () => {
       try {
         setLoading(true);
-        const res = await GetStudentById(numericId); // ✅ ใช้ service ใหม่
+        const res = await GetStudentById(numericId);
         if (res?.status === 200) {
           const data: StudentInterface = res.data;
           setUser(data);
@@ -82,7 +81,7 @@ const UpdateInfo: React.FC = () => {
   }, [numericId, form, navigate]);
 
   const onFinish = async (values: any) => {
-    // ✅ ตัดฟิลด์ต้องห้าม: ID / Room_ID / Room / password
+    // ✅ ห้ามส่ง ID / Room_ID / password
     const payload: Partial<StudentInterface> = {
       username: values.username?.trim(),
       email: values.email?.trim(),
@@ -91,20 +90,14 @@ const UpdateInfo: React.FC = () => {
       phone: values.phone?.trim(),
       parent_name: values.parent_name?.trim(),
       parent_phone: values.parent_phone?.trim(),
-      birthday: values.birthday
-        ? (values.birthday as Dayjs).toISOString()
-        : undefined,
+      birthday: values.birthday ? (values.birthday as Dayjs).toISOString() : undefined,
       major: values.major?.trim(),
       address: values.address ?? "",
-      // 🚫 อย่าแนบ ID, Room_ID, Room, password
     };
 
     setSaving(true);
     try {
-      const res = await UpdateStudentById(
-        numericId,
-        payload as StudentInterface
-      ); // ✅ ใช้ service ใหม่
+      const res = await UpdateStudentById(numericId, payload as StudentInterface);
       if (res?.status === 200) {
         message.success("บันทึกเรียบร้อย");
         navigate(-1);
@@ -116,6 +109,39 @@ const UpdateInfo: React.FC = () => {
       message.error("บันทึกไม่สำเร็จ");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ✅ เปลี่ยนรหัสผ่าน
+  const onChangePassword = async (vals: any) => {
+    // นักศึกษา: ต้องใส่ทั้ง old+new, แอดมิน: เอาเฉพาะ new
+    const body: any =
+      role === "student"
+        ? { old_password: vals.current_password, new_password: vals.new_password }
+        : { new_password: vals.new_password };
+
+    if (role !== "student" && myId() === String(id)) {
+      // ถ้าเป็น admin ที่บังเอิญแก้ของตัวเอง และระบบอยากให้บังคับรหัสเดิมด้วย ก็สลับตรรกะนี้ได้
+    }
+
+    setPwSaving(true);
+    try {
+      // ใช้ helper Update ที่อ่าน token สด ๆ
+      const res = await Update(`/student/${numericId}/password`, body, true);
+      // สมมติ backend ตอบ 200 เมื่อสำเร็จ
+      if (res?.status === 200) {
+        message.success("เปลี่ยนรหัสผ่านเรียบร้อย");
+        formPwd.resetFields();
+      } else if (res?.status === 400 || res?.status === 401 || res?.status === 403) {
+        message.error(res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง หรือคุณไม่มีสิทธิ์ทำรายการนี้");
+      } else {
+        message.error(res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ");
+      }
+    } catch (e) {
+      console.error(e);
+      message.error("เกิดข้อผิดพลาดระหว่างเปลี่ยนรหัสผ่าน");
+    } finally {
+      setPwSaving(false);
     }
   };
 
@@ -131,10 +157,7 @@ const UpdateInfo: React.FC = () => {
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
         {/* ข้อมูลระบบ (ห้ามแก้) */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ข้อมูลระบบ
         </Divider>
         <Form.Item label="ID" name="ID">
@@ -142,10 +165,7 @@ const UpdateInfo: React.FC = () => {
         </Form.Item>
 
         {/* บัญชี */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ข้อมูลบัญชี
         </Divider>
         <Form.Item
@@ -167,24 +187,13 @@ const UpdateInfo: React.FC = () => {
         </Form.Item>
 
         {/* ทั่วไป */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ข้อมูลทั่วไป
         </Divider>
-        <Form.Item
-          label="ชื่อจริง"
-          name="first_name"
-          rules={[{ required: true, message: "กรอกชื่อจริง" }]}
-        >
+        <Form.Item label="ชื่อจริง" name="first_name" rules={[{ required: true, message: "กรอกชื่อจริง" }]}>
           <Input />
         </Form.Item>
-        <Form.Item
-          label="นามสกุล"
-          name="last_name"
-          rules={[{ required: true, message: "กรอกนามสกุล" }]}
-        >
+        <Form.Item label="นามสกุล" name="last_name" rules={[{ required: true, message: "กรอกนามสกุล" }]}>
           <Input />
         </Form.Item>
         <Form.Item label="วัน/เดือน/ปีเกิด" name="birthday">
@@ -198,10 +207,7 @@ const UpdateInfo: React.FC = () => {
         </Form.Item>
 
         {/* ผู้ปกครอง */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ข้อมูลผู้ปกครอง
         </Divider>
         <Form.Item label="ชื่อผู้ปกครอง" name="parent_name">
@@ -212,35 +218,22 @@ const UpdateInfo: React.FC = () => {
         </Form.Item>
 
         {/* ที่อยู่ */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ที่อยู่
         </Divider>
         <Form.Item label="ที่อยู่" name="address">
-          <TextArea
-            rows={4}
-            placeholder="บ้านเลขที่, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์"
-          />
+          <TextArea rows={4} placeholder="บ้านเลขที่, ถนน, ตำบล/แขวง, อำเภอ/เขต, จังหวัด, รหัสไปรษณีย์" />
         </Form.Item>
 
         {/* ที่พัก/ห้อง (ห้ามแก้) */}
-        <Divider
-          orientation="left"
-          style={{ fontSize: "18px", fontWeight: "bold", color: "#000000ff" }}
-        >
+        <Divider orientation="left" style={{ fontSize: 18, fontWeight: "bold", color: "#000000ff" }}>
           ข้อมูลที่พัก/ห้อง (แก้ไขไม่ได้)
         </Divider>
         <Form.Item label="Room_ID" name="Room_ID">
           <Input disabled style={disabledStyle} />
         </Form.Item>
         <Form.Item label="รายละเอียดห้อง">
-          <Input
-            disabled
-            style={disabledStyle}
-            value={user?.room_id ? "มีข้อมูลห้อง" : "-"}
-          />
+          <Input disabled style={disabledStyle} value={user?.room_id ? "มีข้อมูลห้อง" : "-"} />
         </Form.Item>
 
         <Divider />
@@ -251,6 +244,85 @@ const UpdateInfo: React.FC = () => {
           </Button>
         </Space>
       </Form>
+
+      {/* ✅ ส่วนเปลี่ยนรหัสผ่าน */}
+      <Divider style={{ margin: "28px 0" }} />
+      <Card
+        type="inner"
+        title="เปลี่ยนรหัสผ่าน"
+        headStyle={{ fontWeight: 600 }}
+        style={{ maxWidth: 900, margin: "16px auto 0" }}
+      >
+        <Form
+          form={formPwd}
+          layout="vertical"
+          onFinish={onChangePassword}
+          initialValues={{ current_password: "", new_password: "", confirm_password: "" }}
+        >
+          {role === "student" ? (
+            <>
+              <Form.Item
+                label="รหัสผ่านปัจจุบัน"
+                name="current_password"
+                rules={[{ required: true, message: "กรอกรหัสผ่านปัจจุบัน" }]}
+              >
+                <Input.Password />
+              </Form.Item>
+              <Form.Item
+                label="รหัสผ่านใหม่"
+                name="new_password"
+                rules={[
+                  { required: true, message: "กรอกรหัสผ่านใหม่" },
+                  { min: 6, message: "อย่างน้อย 6 ตัวอักษร" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("current_password") !== value) return Promise.resolve();
+                      return Promise.reject(new Error("รหัสผ่านใหม่ต้องไม่เหมือนรหัสผ่านเดิม"));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </>
+          ) : (
+            <>
+              {/* admin ไม่ต้องใส่รหัสเดิม */}
+              <Form.Item
+                label="รหัสผ่านใหม่"
+                name="new_password"
+                rules={[{ required: true, message: "กรอกรหัสผ่านใหม่" }, { min: 6, message: "อย่างน้อย 6 ตัวอักษร" }]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </>
+          )}
+
+          <Form.Item
+            label="ยืนยันรหัสผ่านใหม่"
+            name="confirm_password"
+            dependencies={["new_password"]}
+            rules={[
+              { required: true, message: "กรุณายืนยันรหัสผ่านใหม่" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("new_password") === value) return Promise.resolve();
+                  return Promise.reject(new Error("รหัสผ่านไม่ตรงกัน"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+        <Space>
+          <Button onClick={() => formPwd.resetFields()}>ล้างฟอร์ม</Button>
+          <Button type="primary" htmlType="submit" loading={pwSaving}>
+            อัปเดตรหัสผ่าน
+          </Button>
+        </Space>
+        </Form>
+      </Card>
     </Card>
   );
 };

@@ -1,10 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Space, Table, Button, Col, Row, Divider, message } from "antd";
+import {
+  Space,
+  Table,
+  Button,
+  Col,
+  Row,
+  Divider,
+  message,
+  Popconfirm,
+  Tooltip,
+} from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Input } from "antd";
+
 const { Search } = Input;
 
 // ====== Service functions (ตามโปรเจ็กต์ของคุณ) ======
@@ -99,31 +110,45 @@ const AdminStudentTable: React.FC = () => {
       },
       {
         title: "ชื่อ",
-        key: "name",
+        key: "first_name",
         render: (record) => `${record?.first_name ?? ""}`.trim() || "-",
       },
       {
         title: "นามสกุล",
-        key: "name",
-        render: (record) => ` ${record?.last_name ?? ""}`.trim() || "-",
+        key: "last_name",
+        render: (record) => `${record?.last_name ?? ""}`.trim() || "-",
       },
       {
-        title: "",
-        key: "view",
-        width: 120,
+        title: "จัดการ",
+        key: "actions",
+        width: 200,
         render: (record) => (
-          <Button
-            type="primary"
-            onClick={() =>
-              navigate(`/student/UpdateInfo/UpdateInfo/${record.ID}`)
-            }
-          >
-            แก้ไข
-          </Button>
+          <Space>
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate(`/student/UpdateInfo/UpdateInfo/${record.ID}`)
+              }
+            >
+              แก้ไข
+            </Button>
+
+            <Popconfirm
+              title="ยืนยันการลบ"
+              description={`ต้องการลบนักศึกษา ID: ${record.ID} ใช่ไหม?`}
+              okText="ลบเลย"
+              cancelText="ยกเลิก"
+              onConfirm={() => deleteUserById(record.ID!)} // ✅ ลบได้แม้เป็นตัวเอง
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                ลบ
+              </Button>
+            </Popconfirm>
+          </Space>
         ),
       },
     ],
-    [navigate]
+    [navigate, myId]
   );
 
   return (

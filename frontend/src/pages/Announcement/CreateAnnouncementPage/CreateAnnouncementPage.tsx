@@ -118,7 +118,11 @@ const CreateAnnouncementPage: React.FC = () => {
       }
     },
   };
-  
+  const handleRemoveImage = () => {
+    setUploadedUrl(null); // เอาพรีวิวออก
+    form.setFieldValue("Picture", null); // ส่งเป็น null เพื่อเคลียร์รูปใน DB
+    message.success("ลบรูปออกจากประกาศแล้ว (ยังไม่บันทึก)");
+  };
 
   const onFinish = async (v: any) => {
     setSaving(true);
@@ -221,9 +225,20 @@ const CreateAnnouncementPage: React.FC = () => {
             label="อัปโหลดรูปภาพ"
             tooltip="รองรับ .jpg .png .webp .gif ไม่เกิน 5MB"
           >
-            <Upload {...uploadProps}>
-              <Button icon={<UploadOutlined />}>เลือกไฟล์</Button>
-            </Upload>
+            <Space align="start">
+              <Upload {...uploadProps}>
+                <Button icon={<UploadOutlined />}>เลือกไฟล์</Button>
+              </Upload>
+
+              {/* ปุ่มลบรูป */}
+              <Button
+                danger
+                onClick={handleRemoveImage}
+                disabled={!uploadedUrl}
+              >
+                ลบรูป
+              </Button>
+            </Space>
             {uploadedUrl && (
               <div style={{ marginTop: 12 }}>
                 <img
