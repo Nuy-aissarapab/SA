@@ -27,8 +27,9 @@ export default function Evidence() {
   const navigate = useNavigate();
   const location = useLocation();   
 
+  // const sid = localStorage.getItem("id");
   // localStorage.setItem("current_payment_id","123")
-
+  
   const getPaymentId = () => {
     const qs = new URLSearchParams(location.search);
     const qid = qs.get("paymentId");
@@ -258,4 +259,5 @@ export default function Evidence() {
     </Row>
   );
 }
+
 
