@@ -134,8 +134,8 @@ const RequestContractRenewal = () => {
             onChange={(val) => setSelectedStudentId(val)}
           >
             {students.map((s) => (
-              <Select.Option key={s.StudentID} value={String(s.StudentID)}>
-                {s.first_name} {s.last_name} (ID: {s.StudentID})
+              <Select.Option key={s.ID} value={String(s.ID)}>
+                {s.first_name} {s.last_name} (ID: {s.ID})
               </Select.Option>
             ))}
           </Select>

@@ -1,13 +1,22 @@
 import type { UsersInterface } from "../../interfaces/IUser";
 import type { SignInInterface } from "../../interfaces/SignIn";
-import type { StudentInterface ,CreateStudentRequest, LoginStudentRequest} from "../../interfaces/Student";
-import type { AdminInterface, CreateAdminRequest, LoginAdminRequest} from "../../interfaces/Admin";
+import type {
+  StudentInterface,
+  CreateStudentRequest,
+  LoginStudentRequest,
+} from "../../interfaces/Student";
+import type {
+  AdminInterface,
+  CreateAdminRequest,
+  LoginAdminRequest,
+} from "../../interfaces/Admin";
 import type { PaymentInterface } from "../../interfaces/Payment";
 import type { ContractInterface } from "../../interfaces/Contract";
 import type { ReviewInterface } from "../../interfaces/Review";
 import { requestOptions as authOptions } from "../../Service/https/requestOptions";
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
+import type { CreateAnnouncementRequest } from "../../interfaces/CreateAnnouncementRequest";
 
 const apiUrl = "http://localhost:8000";
 const Authorization = localStorage.getItem("token");
@@ -54,25 +63,31 @@ const getConfig = () => {
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   if (token) headers["Authorization"] = `${tokenType} ${token}`;
 
   return { headers };
 };
 
-
-
 const getConfigWithoutAuth = () => ({
   headers: { "Content-Type": "application/json" },
 });
 
-export const Post = async (url: string, data: any, requireAuth: boolean = true) => {
+export const Post = async (
+  url: string,
+  data: any,
+  requireAuth: boolean = true
+) => {
   const config = requireAuth ? getConfig() : getConfigWithoutAuth();
   try {
     const res = await axios.post(`${API_URL}${url}`, data, config);
     return res;
   } catch (error: any) {
-    return error.response ?? { status: 500, data: { error: "Unexpected error" } };
+    return (
+      error.response ?? { status: 500, data: { error: "Unexpected error" } }
+    );
   }
 };
 
@@ -131,20 +146,21 @@ export const Delete = async (
     });
 };
 
-
 // Authentication APIs
 export const authAPI = {
   // Student
   studentSignup: (data: CreateStudentRequest) =>
-    Post("/student/signup", data, false),
+    Post(
+      "/student/signup",
+      { email: data.Email, password: data.Password },
+      false
+    ),
   studentLogin: (data: LoginStudentRequest) =>
     Post("/student/auth", data, false),
 
   // Admin
-  adminSignup: (data: CreateAdminRequest) =>
-    Post("/admin/signup", data, false),
-  adminLogin: (data: LoginAdminRequest) =>
-    Post("/admin/auth", data, false),
+  adminSignup: (data: CreateAdminRequest) => Post("/admin/signup", data, false),
+  adminLogin: (data: LoginAdminRequest) => Post("/admin/auth", data, false),
 };
 
 // student APIs
@@ -160,8 +176,6 @@ export const adminAPI = {
   getById: (id: number) => Get(`/admin/${id}`),
   delete: (id: number) => Delete(`/admin/${id}`),
 };
-
-
 
 // Gender
 async function GetGender() {
@@ -207,10 +221,9 @@ async function UploadEvidence(data: any) {
         Authorization: `${Bearer} ${Authorization}`,
       },
     })
-    .then((res) => res)              // 👈 ต้อง return res
-    .catch((e) => e.response);       // 👈 return error.response ด้วย
+    .then((res) => res) // 👈 ต้อง return res
+    .catch((e) => e.response); // 👈 return error.response ด้วย
 }
-
 
 // Contract API
 async function GetContracts(studentId?: string) {
@@ -227,10 +240,10 @@ async function GetContracts(studentId?: string) {
 export async function RenewContract(
   id: number,
   body: {
-    months?: number;           // 6 | 12
-    start_date?: string;       // "YYYY-MM-DD"
-    end_date?: string;         // "YYYY-MM-DD" (ใช้ตอน custom)
-    rate?: number;             // ค่าเช่าใหม่ (optional)
+    months?: number; // 6 | 12
+    start_date?: string; // "YYYY-MM-DD"
+    end_date?: string; // "YYYY-MM-DD" (ใช้ตอน custom)
+    rate?: number; // ค่าเช่าใหม่ (optional)
   }
 ) {
   return await axios
@@ -260,9 +273,6 @@ async function DeleteContractById(id: string) {
     .catch((e) => e.response);
 }
 
-
-
-
 async function GetUsersById(id: string) {
   return await axios
     .get(`${apiUrl}/student/${id}`, requestOptions) // 🔥 แก้ user → student
@@ -291,9 +301,6 @@ async function CreateUser(data: UsersInterface) {
     .catch((e) => e.response);
 }
 
-
-
-
 async function GetStudentById(id: number) {
   return await axios
     .get(`${apiUrl}/student/${id}`, requestOptions)
@@ -301,9 +308,11 @@ async function GetStudentById(id: number) {
     .catch((e) => e.response);
 }
 
-async function CreateStudent(data: StudentInterface) {
+// Service/https/index.ts
+async function CreateStudent(data: any) {
+  // ← หรือสร้างชนิด CreateStudentPayload
   return await axios
-    .post(`${apiUrl}/signup`, data, requestOptions)
+    .post(`${apiUrl}/student/signup`, data, getConfigWithoutAuth())
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -323,41 +332,98 @@ async function DeleteStudentById(id: number) {
 }
 
 //Announcement
-async function GetAnnouncements(params?: any) {
+async function GetAnnouncements() {
   return await axios
-    .get(`${apiUrl}/announcements`, {
-      ...requestOptions,
-      params, // ⬅️ เอา params มาติด query string
-    })
+    .get(`${apiUrl}/announcements`, requestOptions)
     .then((res) => res)
-    .catch((e) => e.response);
+    .catch((e) => e?.response);
 }
 
-
-async function CreateAnnouncement(data: any) {
+async function CreateAnnouncement(data: CreateAnnouncementRequest) {
   return await axios
     .post(`${apiUrl}/announcements`, data, requestOptions)
     .then((res) => res)
-    .catch((e) => e.response);
+    .catch((e) => e?.response);
+}
+export interface UpdateAnnouncementRequest {
+  Title?: string;
+  Content?: string;
+  Picture?: string | null;
+  AnnouncementTargetID?: number;
+  AnnouncementTypeID?: number;
+  AdminID?: number;
 }
 
-async function UpdateAnnouncementById(id: string, data: any) {
+async function UpdateAnnouncementById(
+  id: string | number,
+  data: {
+    Title?: string;
+    Content?: string;
+    Picture?: string | null;
+    AnnouncementTargetID?: number;
+    AnnouncementTypeID?: number;
+    AdminID?: number;
+  }
+) {
   return await axios
-    .put(`${apiUrl}/announcements/${id}`, data, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
+    .patch(`${apiUrl}/announcements/${id}`, data, requestOptions)
+    .then(res => res)
+    .catch(e => e?.response);
 }
 
-async function DeleteAnnouncementById(id: string) {
+async function DeleteAnnouncementById(id: string | number) {
   return await axios
     .delete(`${apiUrl}/announcements/${id}`, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function GetAnnouncementById(id: string) {
+async function GetAnnouncementById(id: string | number) {
   return await axios
     .get(`${apiUrl}/announcements/${id}`, requestOptions)
+    .then((res) => res)
+    .catch((e) => e?.response);
+}
+
+// Announcement Target Service
+async function CreateAnnouncementTarget(data: any) {
+  return await axios
+    .post(`${apiUrl}/announcement-targets`, data, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function GetAnnouncementTarget(id: string) {
+  return await axios
+    .get(`${apiUrl}/announcement-targets/${id}`, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function ListAnnouncementTargets() {
+  return await axios
+    .get(`${apiUrl}/announcement-targets`, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+// Announcement Type Service
+async function CreateAnnouncementType(data: any) {
+  return await axios
+    .post(`${apiUrl}/announcement-types`, data, requestOptions)
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function GetAnnouncementType(id: string) {
+  return await axios
+    .get(`${apiUrl}/announcement-types/${id}`, requestOptions) // 🔥 แก้ตรงนี้
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+async function ListAnnouncementTypes() {
+  return await axios
+    .get(`${apiUrl}/announcement-types`, requestOptions)
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -398,7 +464,10 @@ export async function DeleteReview(id: string) {
     .catch((e) => e.response);
 }
 export async function GetReviewTopics() {
-  return await axios.get(`${apiUrl}/reviewtopics`, requestOptions).then((r) => r).catch((e) => e.response);
+  return await axios
+    .get(`${apiUrl}/reviewtopics`, requestOptions)
+    .then((r) => r)
+    .catch((e) => e.response);
 }
 
 export {
@@ -424,5 +493,10 @@ export {
   UpdateAnnouncementById,
   DeleteAnnouncementById,
   GetAnnouncementById,
-
+  CreateAnnouncementType,
+  ListAnnouncementTypes,
+  GetAnnouncementType,
+  CreateAnnouncementTarget,
+  ListAnnouncementTargets,
+  GetAnnouncementTarget,
 };
