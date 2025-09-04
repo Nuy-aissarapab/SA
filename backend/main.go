@@ -40,7 +40,7 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	r.Static("/uploads/maintenance", "./uploads/maintenance")
+	r.Static("/uploads", "./uploads")
 	
 	// ✅ เสิร์ฟไฟล์อัปโหลด (static)
 	r.Static("/uploads/EvidentPayment", "./uploads/EvidentPayment")
