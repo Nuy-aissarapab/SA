@@ -25,8 +25,8 @@ type Student struct {
 	Billings []Billing `gorm:"foreignKey:StudentID"`
 
 	// MemberID ทำหน้าที่เป็น FK
-	Room_ID *uint
-	Room    Room `gorm:"foreignKey:Room_ID"`
+	Room_ID *uint	`json:"room_id"`
+	Room    Room `gorm:"foreignKey:Room_ID" json:"room"`
 
 	Contract []Contract `gorm:"foreignKey:StudentID"`
 	// Contract_ID ทำหน้าที่เป็น FK
