@@ -155,24 +155,6 @@ func SetupDatabase() {
 		StudentID:  &s3,
 	})
 
-	db.Model(&entity.Room{}).Create(&entity.Room{
-		Rental_Price: 2900.00,
-		Room_Status:  "ว่าง",
-		Floor:        2,
-	})
-
-	db.Model(&entity.Room{}).Create(&entity.Room{
-		Rental_Price: 2900.00,
-		Room_Status:  "ว่าง",
-		Floor:        2,
-	})
-
-	db.Model(&entity.Room{}).Create(&entity.Room{
-		Rental_Price: 2900.00,
-		Room_Status:  "ว่าง",
-		Floor:        2,
-	})
-
 	// ✅ Seed Room
 	RoomNumber := []string{"101", "102", "103", "104", "105", "201", "202", "203", "204", "205"}
 	for _, name := range RoomNumber {
