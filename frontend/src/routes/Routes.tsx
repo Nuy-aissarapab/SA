@@ -31,13 +31,11 @@ const Room = Loadable(lazy(() => import("../pages/Room")));
 
 const Maintenance = Loadable(lazy(() => import("../pages/Maintenance")));
 
-const MaintenanceCreate = Loadable(
-  lazy(() => import("../pages/Maintenance/Create"))
-);
+const MaintenanceCreate = Loadable(lazy(() => import("../pages/Maintenance/Create")));
 
-const MaintenanceEdit = Loadable(
-  lazy(() => import("../pages/Maintenance/Edit"))
-);
+const MaintenanceEdit = Loadable(lazy(() => import("../pages/Maintenance/Edit")));
+
+const MaintenanceStatus = Loadable(lazy(() => import("../pages/Maintenance/Status")));
 
 const Review = Loadable(lazy(() => import("../pages/Review")));
 
@@ -232,25 +230,11 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
 
       {
         path: "/Maintenance",
-
         children: [
-          {
-            path: "/Maintenance",
-
-            element: <Maintenance />,
-          },
-
-          {
-            path: "/Maintenance/Create",
-
-            element: <MaintenanceCreate />,
-          },
-
-          {
-            path: "/Maintenance/Edit",
-
-            element: <MaintenanceEdit />,
-          },
+          { path: "/Maintenance", element: <Maintenance /> },
+          { path: "/Maintenance/Create", element: <MaintenanceCreate /> },
+          { path: "/Maintenance/Edit/:id", element: <MaintenanceEdit /> }, // ✅ มี :id
+          { path: "/Maintenance/Status/:id", element:<MaintenanceStatus /> }, 
         ],
       },
 
