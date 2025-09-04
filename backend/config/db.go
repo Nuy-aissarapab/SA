@@ -41,6 +41,9 @@ func SetupDatabase() {
 		&entity.Evidence{},
 		&entity.ReviewTopic{},
 		&entity.Review{},
+		&entity.MaintenanceStatus{},
+		&entity.ProblemType{},
+		&entity.Maintenance{},
 		&entity.AnnouncementTarget{},
 		&entity.AnnouncementType{},
 		&entity.Announcement{},
@@ -58,6 +61,10 @@ func SetupDatabase() {
 	}
 	db.Create(&Admin)
 
+	r1 := uint(1)
+	r2 := uint(2)
+	r3 := uint(3)
+	
 	// Student Base
 	student := entity.Student{
 		Username:   "SA",
@@ -65,6 +72,7 @@ func SetupDatabase() {
 		Email:      "sa@gmail.com",
 		First_Name: "เจษฎา",
 		Last_Name:  "เชือดขุนทด",
+		Room_ID:  &r1,
 	}
 	db.Create(&student)
 
@@ -74,13 +82,15 @@ func SetupDatabase() {
 		Email:      "sa1@gmail.com",
 		First_Name: "สมชาติ",
 		Last_Name:  "เชือดขุนทด",
+		Room_ID:  &r2,
 	})
 	db.Model(&entity.Student{}).Create(&entity.Student{
 		Username:   "SA2",
 		Password:   string(password),
 		Email:      "sa2@gmail.com",
-		First_Name: "รชต",
-		Last_Name:  "สวุขใจ",
+		First_Name: "อิสรภาพ",
+		Last_Name:  "วาตุรัมย์",
+		Room_ID:  &r3,
 	})
 
 	//Payment
@@ -163,49 +173,30 @@ func SetupDatabase() {
 		Floor:        2,
 	})
 
+	// ✅ Seed Room
+	RoomNumber := []string{"101", "102", "103", "104", "105", "201", "202", "203", "204", "205"}
+	for _, name := range RoomNumber {
+    db.FirstOrCreate(&entity.Room{}, entity.Room{RoomNumber: name})
+	}
+
+	// ✅ Seed ProblemType (ComboBox) and MaintenanceStatus (ComboBox)
+	problemTypes := []string{"ไฟฟ้า", "ประปา", "เฟอร์นิเจอร์", "อื่นๆ"}
+	for _, name := range problemTypes {
+    db.FirstOrCreate(&entity.ProblemType{}, entity.ProblemType{TypeName: name})
+	}
+
+	statuses := []string{"แจ้งซ่อม", "กำลังดำเนินการ", "เสร็จสิ้น"}
+	for _, name := range statuses {
+    db.FirstOrCreate(&entity.MaintenanceStatus{}, entity.MaintenanceStatus{StatusName: name})
+	}
+
 	// ✅ Seed ReviewTopic (ComboBox)
 	db.FirstOrCreate(&entity.ReviewTopic{}, entity.ReviewTopic{TopicName: "ความสะอาด"})
 	db.FirstOrCreate(&entity.ReviewTopic{}, entity.ReviewTopic{TopicName: "ความปลอดภัย"})
 	db.FirstOrCreate(&entity.ReviewTopic{}, entity.ReviewTopic{TopicName: "เสียงรบกวน"})
 	db.FirstOrCreate(&entity.ReviewTopic{}, entity.ReviewTopic{TopicName: "อื่นๆ"})
 
-	// // วันที่ตัวอย่าง
-	// date1, _ := time.Parse("2006-01-02", "2025-01-01")
-	// date2, _ := time.Parse("2006-01-02", "2025-02-01")
-	// date3, _ := time.Parse("2006-01-02", "2025-03-01")
-
-	// // สร้าง 3 รีวิว
-	// r1 := uint(1)
-	// r2 := uint(2)
-	// r3 := uint(3)
-
-	// db.Create(&entity.Review{
-	// 	StudentID:     &r1,
-	//    ReviewTopicID:     &r1,
-	// 	ReviewDate:    date1,
-	// 	Title:         "รีวิวความสะอาด 1",
-	// 	Comment:       "ดีมาก",
-	// 	Rating:        5,
-
-	// })
-
-	// db.Create(&entity.Review{
-	// 	StudentID:     &r2,
-	//    ReviewTopicID:     &r2,
-	// 	ReviewDate:    date2,
-	// 	Title:         "รีวิวความสะอาด 2",
-	// 	Comment:       "โอเค",
-	// 	Rating:        4,
-	// })
-
-	// db.Create(&entity.Review{
-	// 	StudentID:     &r3,
-	//    ReviewTopicID:     &r3,
-	// 	ReviewDate:    date3,
-	// 	Title:         "รีวิวความสะอาด 3",
-	// 	Comment:       "พอใช้ได้",
-	// 	Rating:        3,
-	// })
+	
 	// Target (เช่น ทั้งหอ, เฉพาะนักศึกษา, เฉพาะชั้น 2)
 	db.FirstOrCreate(&entity.AnnouncementTarget{}, entity.AnnouncementTarget{Name: "นักศึกษาทุกคน"})
 	db.FirstOrCreate(&entity.AnnouncementTarget{}, entity.AnnouncementTarget{Name: "นักศึกษาที่ยังไม่ชำระเงิน"})
