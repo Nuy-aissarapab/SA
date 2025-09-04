@@ -41,9 +41,6 @@ func main() {
 	r.Use(CORSMiddleware())
 
 	r.Static("/uploads", "./uploads")
-	
-	// ✅ เสิร์ฟไฟล์อัปโหลด (static)
-	r.Static("/uploads/EvidentPayment", "./uploads/EvidentPayment")
 
 	// ===== Public routes (ไม่ต้องใช้ token) =====
 	r.GET("/", func(c *gin.Context) {
