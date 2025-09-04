@@ -7,18 +7,13 @@ import (
 
 type Room struct {
 	gorm.Model
-	Rental_Price	float64 	`json:"rental_price"`
-	Room_Status		string 		`json:"room_status"`
-	Last_Update		time.Time	`json:"last_update"`
-	Floor			int 		`json:"floor"`
+	RoomNumber		string 		`json:"room_number"`
+	Status			string 		`json:"room_status"`
 	Image			string 		`json:"image"`
+	LastUpdated		time.Time 	`json:"last_updated"`
 
-	// 1 room อยู่ได้หลาย student
-	Student []Student `gorm:"foreignKey:Room_ID"`
+	AdminID *uint
+	Admin   Admin `gorm:"foreignKey:AdminID"`
 
-	// หลาย room อยู่ได้หลาย admin
-	Admin []Admin `gorm:"many2many:Room_ID"`
 
-	// 1 Room_ID มีได้หลาย Contract
-	Contract []Contract `gorm:"foreignKey:Room_ID"`
 }
