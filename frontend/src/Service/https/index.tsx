@@ -5,6 +5,7 @@ import type { AdminInterface, CreateAdminRequest, LoginAdminRequest} from "../..
 import type { PaymentInterface } from "../../interfaces/Payment";
 import type { ContractInterface } from "../../interfaces/Contract";
 import type { ReviewInterface } from "../../interfaces/Review";
+import type { MaintenanceInterface } from "../../interfaces/Maintenance";
 import { requestOptions as authOptions } from "../../Service/https/requestOptions";
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
@@ -491,6 +492,58 @@ export async function DeleteReview(id: string) {
 export async function GetReviewTopics() {
   return await axios.get(`${apiUrl}/reviewtopics`, requestOptions).then((r) => r).catch((e) => e.response);
 }
+
+// ---------- Maintenance ----------
+export async function GetProblemTypes() {
+  return axios.get(`${API_URL}/problem-types`, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+export async function GetMaintenanceStatuses() {
+  return axios.get(`${API_URL}/maintenance-statuses`, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+export async function GetMaintenances(params?: any) {
+  return axios.get(`${API_URL}/maintenances`, { ...getConfig(), params })
+    .then(r=>r).catch(e=>e.response);
+}
+export async function GetMyMaintenances() {
+  return axios.get(`${API_URL}/maintenances`, { ...getConfig(), params: { myOnly: 1 } })
+    .then(r=>r).catch(e=>e.response);
+}
+export async function GetMaintenanceById(id: number) {
+  return axios.get(`${API_URL}/maintenance/${id}`, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+export async function CreateMaintenance(body: any) {   // JSON
+  return axios.post(`${API_URL}/maintenances`, body, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+export async function UpdateMaintenance(id: number, body: any) { // JSON
+  return axios.put(`${API_URL}/maintenance/${id}`, body, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+
+export async function UpdateMaintenanceStatus(id: number, body: { maintenance_status_id: number }) {
+  return axios.patch(`${API_URL}/maintenance/${id}/status`, body, getConfig())
+    .then(r=>r).catch(e=>e.response);
+}
+
+// export async function UpdateMaintenanceStatus(
+//   id: number,
+//   body: { maintenance_status_id: number }
+// ) {
+//   return axios
+//     .patch(`${API_URL}/maintenance/${id}/status`, body, getConfig()) // ✅ JSON
+//     .then(r => r)
+//     .catch(e => e.response);
+// }
+export async function DeleteMaintenance(id: number) {
+  return axios
+    .delete(`${API_URL}/maintenance/${id}`, getConfig()) // << เอกพจน์
+    .then(r => r)
+    .catch(e => e.response);
+}
+
 
 export {
   GetGender,
