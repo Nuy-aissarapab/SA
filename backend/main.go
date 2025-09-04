@@ -9,6 +9,10 @@ import (
 	"github.com/SA/controller/contract"
 	"github.com/SA/controller/evidence"
 	"github.com/SA/controller/payment"
+	"github.com/SA/controller/room"
+	"github.com/SA/controller/maintenance"
+	"github.com/SA/controller/maintenancestatus"
+	"github.com/SA/controller/problemtype"
 	"github.com/SA/controller/review"
 	"github.com/SA/controller/reviewTopic"
 	"github.com/SA/controller/student"
@@ -91,6 +95,22 @@ func main() {
 		router.PUT("/contracts/:id", contract.Update)
 		router.DELETE("/contracts/:id", contract.Delete)
 
+		// Room
+		router.GET("/rooms", room.GetAll)
+
+		// Maintenance
+		// Combo
+		router.GET("/problem-types", problemtype.List)
+		router.GET("/maintenance-statuses", maintenancestatus.List)
+
+		// Maintenance (JSON)
+		router.GET("/maintenances", maintenance.List)
+		router.GET("/maintenance/:id", maintenance.Get)
+		router.POST("/maintenances", maintenance.Create)                 // JSON
+		router.PUT("/maintenance/:id", maintenance.Update)               // JSON
+		router.PATCH("/maintenance/:id/status", maintenance.UpdateStatus)// JSON
+		router.DELETE("/maintenance/:id", maintenance.Delete)
+		
 		// Reviews
 		router.GET("/reviews", review.List)
 		router.POST("/reviews", review.Create) // student only
