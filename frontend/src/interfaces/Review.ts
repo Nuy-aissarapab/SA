@@ -1,6 +1,6 @@
 import type { StudentInterface } from "./Student";
-import type { ContractInterface } from "./Contract";
 import type { ReviewTopicInterface } from "./ReviewTopic";
+import type { RoomInterface } from "./Room";
 
 export interface ReviewInterface {
   ID?: number;                 // gorm.Model
@@ -13,6 +13,6 @@ export interface ReviewInterface {
   ReviewTopicID?: number;
 
   Student?: StudentInterface;
-  Contract?: ContractInterface;
+  Room?: RoomInterface;
   ReviewTopic?: ReviewTopicInterface;
 }
