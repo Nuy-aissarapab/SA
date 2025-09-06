@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Table, Rate, message } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { GetReviews, DeleteReview } from "../../Service/https";
 import type { ReviewInterface } from "../../interfaces/Review";
@@ -16,18 +16,20 @@ export default function ReviewPage() {
 
   const getTitle = (r: any) => r?.Title ?? r?.title ?? "-";
   const getFirstName = (r:any) => r?.Student?.first_name ?? r?.student?.first_name ?? r?.Student?.First_Name ?? "-";
+  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.room_number ?? "-";
   const getTopic = (r:any) => r?.ReviewTopic?.TopicName ?? r?.review_topic?.topic_name ?? "-";
   const getRating = (r: any) => r?.Rating ?? r?.rating ?? 0;
   const getDate = (r: any) => r?.ReviewDate ?? r?.review_date;
   const getOwnerId = (r:any) => r?.StudentID ?? r?.student_id ?? r?.Student?.ID ?? r?.student?.id;
   const isOwner = (r:any) => myId && getOwnerId(r)?.toString() === myId.toString();
-  const getComment = (r: any) => r?.Comment ?? r?.comment;
+  const getComment = (r: any) => r?.Comment ?? r?.comment ?? "-";
 
   const columns: ColumnsType<any> = [
     { title: "รหัส", dataIndex: "ID" },
     { title: "หัวข้อ", render: (_: any, r: any) => getTitle(r) },
     { title: "ประเภท", render: (_: any, r: any) => getTopic(r) },
     { title: "ผู้รีวิว", render: (_: any, r: any) => getFirstName(r) },
+    { title: "ห้อง", render: (_: any, r: any) => getRoomNumber(r) },
     { title: "คะแนน", render: (_: any, r: any) => <Rate disabled defaultValue={getRating(r)} /> },
     { title: "ความคิดเห็น", render: (_: any, r: any) => getComment(r) },
     {
@@ -47,9 +49,9 @@ export default function ReviewPage() {
       return (
         <>
           <Link to={`/Review/Edit/${record.ID}`}>
-            <Button style={{ marginRight: 8 }}>แก้ไข</Button>
+            <Button icon={<EditOutlined />} style={{ marginRight: 8 }}>แก้ไข</Button>
           </Link>
-          <Button danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>
+          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>
         </>
       );
     }
