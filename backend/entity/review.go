@@ -18,6 +18,6 @@ type Review struct {
 	ReviewTopicID *uint       `json:"review_topic_id"`
 	ReviewTopic   ReviewTopic `gorm:"foreignKey:ReviewTopicID" json:"review_topic"`
 
-	ContractID    *uint       `json:"contract_id"`
-	Contract      Contract    `gorm:"foreignKey:ContractID" json:"contract"`
+	RoomID *uint `json:"room_id"`
+    Room   Room  `gorm:"foreignKey:RoomID" json:"room"`
 }
