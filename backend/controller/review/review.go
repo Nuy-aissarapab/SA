@@ -17,7 +17,7 @@ func List(c *gin.Context) {
 	studentID := c.Query("studentId")
 	topicID := c.Query("topicId")
 
-	q := db.Preload("Student").Preload("Contract").Preload("ReviewTopic")
+	q := db.Preload("Student").Preload("Room").Preload("Student.Room").Preload("ReviewTopic")
 	if studentID != "" {
 		q = q.Where("student_id = ?", studentID)
 	}
@@ -34,42 +34,54 @@ func List(c *gin.Context) {
 
 // POST /review
 func Create(c *gin.Context) {
-	userID, role, ok := getAuth(c) // เหมือน Contract
-	if !ok || role != "student" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "only student can create review"})
-		return
-	}
+    userID, role, ok := getAuth(c) // เหมือน Contract
+    if !ok || role != "student" {
+        c.JSON(http.StatusForbidden, gin.H{"error": "only student can create review"})
+        return
+    }
 
-	var in entity.Review
-	if err := c.ShouldBindJSON(&in); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    // ✅ ดึงห้องจาก Student.Room_ID
+    var stu entity.Student
+    if err := config.DB().Preload("Room").First(&stu, userID).Error; err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "student not found"})
+        return
+    }
+    if stu.Room_ID == nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "student has no current room"})
+        return
+    }
 
-	in.StudentID = &userID        // สำคัญ: bind owner จาก token
-	in.ReviewDate = time.Now()
+    var in entity.Review
+    if err := c.ShouldBindJSON(&in); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	var userReviewCount int64
-	config.DB().Where("student_id = ?", userID).Find(&[]entity.Review{}).Count(&userReviewCount)
-	if userReviewCount >= 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "you have already created a review"})
-		return
-	}
+    in.StudentID = &userID       // bind owner จาก token
+    in.ReviewDate = time.Now()
+    in.RoomID = stu.Room_ID      // ✅ snapshot ห้อง ณ เวลาที่รีวิว
 
-	if err := config.DB().Create(&in).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusCreated, in)
+    var userReviewCount int64
+    config.DB().Model(&entity.Review{}).Where("student_id = ?", userID).Count(&userReviewCount)
+    if userReviewCount >= 1 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "you have already created a review"})
+        return
+    }
+
+    if err := config.DB().Create(&in).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    c.JSON(http.StatusCreated, in)
 }
-
 // GET /review/:id
 func GetByID(c *gin.Context) {
 	id := c.Param("id")
 	var review entity.Review
 	if err := config.DB().
 		Preload("Student").
-		Preload("Contract").
+		Preload("Room").
+		Preload("Student.Room").
 		Preload("ReviewTopic").
 		First(&review, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
