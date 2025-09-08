@@ -11,7 +11,6 @@ type Payment struct {
     Amount         float64   `json:"amount" gorm:"type:decimal(10,2)"`
     Payment_Status *string   `json:"payment_status"`
     Method         string    `json:"method"`
-
     PayerName     string `json:"payer_name"`
     ReceiptNumber string `json:"receipt_number"` // ← ยังมีได้ แต่จะถูกเซ็ตจาก BillingID
     EvidenceURL   string `json:"evidence_url"`
@@ -24,4 +23,11 @@ type Payment struct {
 
     BillingID uint    `json:"billing_id"`
     Billing   Billing `gorm:"foreignKey:BillingID" json:"billing"`
+
+    EvidenceID uint    `json:"evidence_id"`
+    Evidence   Evidence `gorm:"foreignKey:BillingID" json:"evidence"`
+
+    ContractID uint `json:"contract_id"`
+    // Contract   Contract `gorm:"foreignKey:ContractID" json:"contract"`
+
 }
