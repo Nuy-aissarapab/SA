@@ -63,26 +63,51 @@ const AdminStudentTable: React.FC = () => {
   };
 
   const submitPwd = async (values: any) => {
-  if (!pwdTarget.id) return;
-  setPwdLoading(true);
-  try {
-    const res = await Update(`/student/${pwdTarget.id}/password`, {
-      new_password: values.newPassword, // ✅ admin ไม่ต้องส่ง old_password
-    });
-    if (res?.status === 200) {
-      message.success("อัปเดตรหัสผ่านสำเร็จ");
-      setPwdOpen(false);
-    } else {
-      message.error(res?.data?.error || "อัปเดตรหัสผ่านไม่สำเร็จ");
-    }
-  } catch (e) {
-    console.error(e);
-    message.error("เกิดข้อผิดพลาด");
-  } finally {
-    setPwdLoading(false);
-  }
-};
+    if (!pwdTarget.id) return;
+    setPwdLoading(true);
 
+    const key = `pwd-${pwdTarget.id}`;
+    messageApi.open({
+      key,
+      type: "loading",
+      content: "กำลังอัปเดตรหัสผ่าน...",
+    });
+
+    try {
+      const res = await Update(`/student/${pwdTarget.id}/password`, {
+        new_password: values.newPassword,
+      });
+
+      if (res?.status === 200) {
+        messageApi.open({
+          key,
+          type: "success",
+          content: "อัปเดตรหัสผ่านสำเร็จ",
+          duration: 2,
+        });
+        setPwdOpen(false);
+        pwdForm.resetFields();
+        await refresh(); // ✅ รีโหลดตารางให้ข้อมูลใหม่
+      } else {
+        messageApi.open({
+          key,
+          type: "error",
+          content: res?.data?.error || "อัปเดตรหัสผ่านไม่สำเร็จ",
+          duration: 3,
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      messageApi.open({
+        key,
+        type: "error",
+        content: "เกิดข้อผิดพลาด",
+        duration: 3,
+      });
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   const refresh = async () => {
     const res = await GetStudents();
@@ -287,33 +312,58 @@ const StudentSelfInfo: React.FC = () => {
   const [selfPwdOpen, setSelfPwdOpen] = useState(false);
   const [selfPwdLoading, setSelfPwdLoading] = useState(false);
   const [selfPwdForm] = Form.useForm();
+  const [messageApi, msgCtx] = message.useMessage();
 
   const submitSelfPwd = async (values: any) => {
   if (!user?.ID) return;
 
   if (values.currentPassword === values.newPassword) {
-    message.error("รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม");
+    messageApi.error("รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม");
     return;
   }
 
   setSelfPwdLoading(true);
+  const key = `self-pwd-${user.ID}`;
+  messageApi.open({ key, type: "loading", content: "กำลังเปลี่ยนรหัสผ่าน..." });
+
   try {
     const res = await Update(`/student/${user.ID}/password`, {
       old_password: values.currentPassword,
       new_password: values.newPassword,
     });
+
     if (res?.status === 200) {
-      message.success("เปลี่ยนรหัสผ่านสำเร็จ");
+      messageApi.open({
+        key,
+        type: "success",
+        content: "เปลี่ยนรหัสผ่านสำเร็จ",
+        duration: 2,
+      });
       setSelfPwdOpen(false);
       selfPwdForm.resetFields();
     } else if (res?.status === 401) {
-      message.error(res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง");
+      messageApi.open({
+        key,
+        type: "error",
+        content: res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง",
+        duration: 3,
+      });
     } else {
-      message.error(res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ");
+      messageApi.open({
+        key,
+        type: "error",
+        content: res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ",
+        duration: 3,
+      });
     }
   } catch (e) {
     console.error(e);
-    message.error("เกิดข้อผิดพลาด");
+    messageApi.open({
+      key,
+      type: "error",
+      content: "เกิดข้อผิดพลาด",
+      duration: 3,
+    });
   } finally {
     setSelfPwdLoading(false);
   }
@@ -350,7 +400,9 @@ const StudentSelfInfo: React.FC = () => {
   // const paymentsCount = Array.isArray(user.payments) ? user.payments.length : 0;
 
   return (
+    
     <div style={pageWrapper}>
+      {msgCtx}
       <div key={user.ID} style={containerStyle}>
         <div style={buttonGroupStyle}>
           <Link to={`/student/UpdateInfo/UpdateInfo/${user.ID}`}>
