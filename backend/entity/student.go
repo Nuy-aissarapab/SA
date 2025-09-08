@@ -21,15 +21,14 @@ type Student struct {
 	Major        string    `json:"major"`
 	Address      string    `json:"address"`
 
-	// หลาย student มีได้หลาย Billing
 	Billings []Billing `gorm:"foreignKey:StudentID"`
 
-	// MemberID ทำหน้าที่เป็น FK
-	Room_ID *uint	`json:"room_id"`
-	Room    Room `gorm:"foreignKey:Room_ID" json:"room"`
-
+	RoomID *uint `json:"Room_ID"`
+	Room    Room    // ความสัมพันธ์ย้อนกลับ
+	
+	ContractID *uint
 	Contract []Contract `gorm:"foreignKey:StudentID"`
-	// Contract_ID ทำหน้าที่เป็น FK
 
+	PaymentID  *uint
 	Payments []Payment `gorm:"foreignKey:StudentID"`
 }
