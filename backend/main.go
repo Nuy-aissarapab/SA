@@ -97,7 +97,6 @@ func main() {
 
 		// Room
 		router.GET("/rooms", room.GetAll)
-		router.GET("/rooms", room.List)
 
 		// Maintenance
 		// Combo
