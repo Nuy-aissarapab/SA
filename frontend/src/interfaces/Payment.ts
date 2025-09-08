@@ -1,25 +1,29 @@
-// interfaces/Payment.ts
 import type { StudentInterface } from "./Student";
 import type { AdminInterface } from "./Admin";
-import type { BillingInterface } from "./Billing";
+import type { EvidenceInterface } from "./Evidence";
 
 export interface PaymentInterface {
   ID?: number;
-  Payment_Date?: string;
-  Amount?: number;
-  Payment_Status?: "pending" | "remaining" | "paid" | null;
+  payment_date?: string;
+  amount?: number;
+  payment_status?: "pending" | "remaining" | "paid" | null;
 
-  Method?: string;
-  PayerName?: string;
-  ReceiptNumber?: string;
-  EvidenceURL?: string;
+  method?: string;
+  payer_name?: string;
+  receipt_number?: string;
+  evidence_url?: string;
 
-  ReceiverID?: number | null;
-  Receiver?: AdminInterface;
+  receiver_id?: number | null;
+  receiver?: AdminInterface;
 
-  StudentID?: number;
-  Student?: StudentInterface;
+  student_id?: number;
+  student?: StudentInterface;
 
-  BillingID?: number;
-  Billing?: BillingInterface;
+  evidence_id?: number;
+  evidence?: EvidenceInterface;
+
+  billing_id?: number;
+  billing?: any;
+
+  contract_id?: number;
 }
