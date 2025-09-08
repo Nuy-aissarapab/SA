@@ -24,7 +24,6 @@ const Payment = Loadable(lazy(() => import("../pages/Payment")));
 
 const Student = Loadable(lazy(() => import("../pages/Student")));
 
-
 const Assets = Loadable(lazy(() => import("../pages/Assets")));
 
 const Room = Loadable(lazy(() => import("../pages/Room")));
@@ -65,7 +64,25 @@ const EvidenceGallery = Loadable(lazy(() => import("../pages/Contract/Extendcont
 
 const Announcement = Loadable(lazy(() => import("../pages/Announcement")));
 
+const UpdateInfo = Loadable(
+  lazy(() => import("../pages/Student/UpdateInfo/UpdateInfo"))
+);
 
+const ViewEditStudent = Loadable(
+  lazy(() => import("../pages/Student/ViewEdit/ViewEdit"))
+);
+
+const CreateStudentPage = Loadable(
+  lazy(() => import("../pages/Student/CreateStudentPage/CreateStudentPage"))
+);
+
+const CreateAnnouncementPage = Loadable(
+  lazy(() => import("../pages/Announcement/CreateAnnouncementPage/CreateAnnouncementPage"))
+);
+
+const EditAnnouncementPage = Loadable(
+  lazy(() => import("../pages/Announcement/EditAnnouncementPage/EditAnnouncementPage"))
+);
 
 const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
   return {
@@ -202,9 +219,22 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
 
             element: <Student />,
           },
+          {
+            path: "/Student/UpdateInfo/UpdateInfo/:id",
 
-          
+            element: <UpdateInfo />, // ✅ ต้องมี :id
+          },
+          {
+            path: "/Student/ViewEdit/ViewEdit/:id",
+
+            element: <ViewEditStudent />, // ✅ ต้องมี :id
+          },
         ],
+      },
+      {
+        path: "/admin/students/create",
+
+        element: <CreateStudentPage />,
       },
 
       {
@@ -239,7 +269,20 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       },
       {
         path: "/Announcement",
-        children: [{ path: "/Announcement", element: <Announcement /> }],
+        children: [{ path: "/Announcement", element: <Announcement /> }
+
+
+        ],
+      },
+      {
+        path: "/announcements/create",
+
+        element: <CreateAnnouncementPage  />,
+      },
+      {
+        path: "/announcements/:id/edit",
+
+        element: <EditAnnouncementPage  />,
       },
 
       {

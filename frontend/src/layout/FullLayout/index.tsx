@@ -1,10 +1,20 @@
 import React, { useState } from "react";
 
-import { Routes, Route, Link ,useNavigate} from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 
 import "../../App.css";
 
-import { UserOutlined, DashboardOutlined, FileSearchOutlined, SolutionOutlined, HomeOutlined, ToolOutlined, ExceptionOutlined, KeyOutlined ,DownOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  DashboardOutlined,
+  FileSearchOutlined,
+  SolutionOutlined,
+  HomeOutlined,
+  ToolOutlined,
+  ExceptionOutlined,
+  KeyOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 
 import { Breadcrumb, Layout, Menu, theme, Button, message } from "antd";
 
@@ -24,11 +34,11 @@ import Billing from "../../pages/Billing";
 
 import Payment from "../../pages/Payment";
 
-import Evidence from "../../../src/pages/Payment/Evidence"
+import Evidence from "../../../src/pages/Payment/Evidence";
 
-import EvidenceFail from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess"
+import EvidenceFail from "../../pages/Payment/Evidence/EvidenceFail/EvidenceFail";
 
-import EvidenceSuccess from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess"
+import EvidenceSuccess from "../../pages/Payment/Evidence/EvidenceSuccess/EvidenceSuccess";
 
 import Bank from "../../../src/pages/Payment/Bank"
 
@@ -54,63 +64,54 @@ import MaintenanceStatus from "../../pages/Maintenance/Status"
 
 import Review from "../../pages/Review"
 
-import ReviewEdit from "../../pages/Review/Edit"
+import ReviewEdit from "../../pages/Review/Edit";
 
-import ReviewCreate from "../../pages/Review/Create"
+import ReviewCreate from "../../pages/Review/Create";
 
 import Managecontracts from "../../pages/Contract/Managecontracts"
 
-import Extendcontract from "../../pages/Contract/Extendcontract"
+import Extendcontract from "../../pages/Contract/Extendcontract";
 
 import EvidenceGallery from "../../pages/Contract/Extendcontract/EvidenceGallery"
 
-import Main from "../../pages/Main"
+import Main from "../../pages/Main";
 
-import Login from "../../pages/authentication/Login"
+import Login from "../../pages/authentication/Login";
 
-import Announcement from "../../pages/Announcement"
+import Announcement from "../../pages/Announcement";
 
+import ViewEditStudent from "../../pages/Student/ViewEdit/ViewEdit";
 
+import CreateStudentPage from "../../pages/Student/CreateStudentPage/CreateStudentPage";
+
+import CreateAnnouncementPage from "../../pages/Announcement/CreateAnnouncementPage/CreateAnnouncementPage";
+import EditAnnouncementPage from "../../pages/Announcement/EditAnnouncementPage/EditAnnouncementPage";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-
 const FullLayout: React.FC = () => {
-
   const page = localStorage.getItem("page");
 
   const [messageApi, contextHolder] = message.useMessage();
 
-
   const [collapsed, setCollapsed] = useState(false);
 
-
   const {
-
     token: { colorBgContainer },
-
   } = theme.useToken();
 
-
   const setCurrentPage = (val: string) => {
-
     localStorage.setItem("page", val);
-
   };
 
-
   const Logout = () => {
-
     localStorage.clear();
 
     messageApi.success("Logout successful");
 
     setTimeout(() => {
-
       location.href = "/";
-
     }, 2000);
-
   };
 
   const headerStyle: React.CSSProperties = {
@@ -136,26 +137,16 @@ const FullLayout: React.FC = () => {
   };
 
   return (
-
     <Layout style={{ minHeight: "100vh" }}>
-
       {contextHolder}
 
-
       <Sider
-
         collapsible
-
         collapsed={collapsed}
-
         onCollapse={(value) => setCollapsed(value)}
-
       >
-
         <div
-
           style={{
-
             display: "flex",
 
             flexDirection: "column",
@@ -164,205 +155,125 @@ const FullLayout: React.FC = () => {
 
             height: "100%",
 
-            backgroundColor: '#253543'
-
+            backgroundColor: "#253543",
           }}
-
         >
-
-          <div >
-
+          <div>
             <div
-
               style={{
-
-
                 justifyContent: "center",
 
-                alignItems: "center"
-                
+                alignItems: "center",
               }}
-
             >
-
-            <h1 style={{ color: 'white', textAlign: 'center' }}>
-
-                SUT<br />
+              <h1 style={{ color: "white", textAlign: "center" }}>
+                SUT
+                <br />
                 DORMITIRY
-                <hr style={{ border: 'none', borderTop: '1px solid white', width: '80%', margin: '10px auto' }} />
-            </h1>
-
+                <hr
+                  style={{
+                    border: "none",
+                    borderTop: "1px solid white",
+                    width: "80%",
+                    margin: "10px auto",
+                  }}
+                />
+              </h1>
             </div>
 
             <Menu
-              style = {{backgroundColor: '#253543'}}
-
+              style={{ backgroundColor: "#253543" }}
               theme="dark"
-
               defaultSelectedKeys={[page ? page : "dashboard"]}
-
               mode="inline"
-
-              
-
-            >  
-
+            >
               <Menu.Item
-
                 key="Contract"
-
                 onClick={() => setCurrentPage("Contract")}
-
               >
-
                 <Link to="/Contract">
-
                   <FileSearchOutlined />
 
                   <span>ตรวจสอบสัญญาเช่า</span>
-
                 </Link>
-
               </Menu.Item>
 
-
               <Menu.Item
-
                 key="Student"
-
                 onClick={() => setCurrentPage("Student")}
-
               >
-
                 <Link to="/Student">
-
                   <UserOutlined />
 
                   <span>ข้อมูลนักศึกษา</span>
-
                 </Link>
-
               </Menu.Item>
 
-              <Menu.Item
-
-                key="Room"
-
-                onClick={() => setCurrentPage("Room")}
-
-              >
-
+              <Menu.Item key="Room" onClick={() => setCurrentPage("Room")}>
                 <Link to="/Room">
-
                   <HomeOutlined />
 
                   <span>ห้องพัก</span>
-
                 </Link>
-
               </Menu.Item>
 
-              <Menu.Item
-
-                key="Assets"
-
-                onClick={() => setCurrentPage("Assets")}
-
-              >
-
+              <Menu.Item key="Assets" onClick={() => setCurrentPage("Assets")}>
                 <Link to="/Assets">
-
                   <HomeOutlined />
 
                   <span>ทรัพย์สินหอพัก</span>
-
                 </Link>
-
               </Menu.Item>
 
               <Menu.Item
-
                 key="Maintenance"
-
                 onClick={() => setCurrentPage("Maintenance")}
-
               >
-
                 <Link to="/Maintenance">
-
                   <ToolOutlined />
 
                   <span>แจ้งซ่อม</span>
-
                 </Link>
-
               </Menu.Item>
 
               <Menu.Item
-
                 key="Billing"
-
                 onClick={() => setCurrentPage("Billing")}
-
               >
-
                 <Link to="/Billing">
-
                   <ExceptionOutlined />
 
                   <span>บิลและใบแจ้งหนี้</span>
-
                 </Link>
-
               </Menu.Item>
 
               <Menu.Item
-
                 key="Announcement"
-
                 onClick={() => setCurrentPage("Announcement")}
-
               >
-
                 <Link to="/Announcement">
-
                   <UserOutlined />
 
                   <span>Announcement</span>
-
                 </Link>
-
               </Menu.Item>
 
               <Menu.Item
-
                 key="customer"
-
                 onClick={() => setCurrentPage("customer")}
-
               >
-
                 <Link to="/">
-
                   <KeyOutlined />
 
                   <span>เปลี่ยนรหัสผ่าน</span>
-
                 </Link>
-
               </Menu.Item>
-
             </Menu>
-
           </div>
-
         </div>
-
       </Sider>
 
-
-      <Layout >
-
+      <Layout>
         {/* Add Header */}
         <Header style={headerStyle}>
           <Menu
@@ -402,46 +313,29 @@ const FullLayout: React.FC = () => {
         </Header>
 
         <Content style={{ margin: "0 16px" }}>
-
           <Breadcrumb style={{ margin: "16px 0" }} />
 
           <div
-
             style={{
-
               padding: 24,
 
               minHeight: "100%",
 
               background: colorBgContainer,
-              
-
             }}
-
           >
-
             <Routes>
-
               <Route path="/" element={<Dashboard />} />
-
               <Route path="/customer" element={<Customer />} />
-
               {/* <Route path="/customer/create" element={<CustomerCreate />} />
 
               <Route path="/customer/edit/:id" element={<CustomerEdit />} /> */}
-
               <Route path="/Contract" element={<Contract />} />
-
               <Route path="/Billing" element={<Billing />} />
-
               <Route path="/Billing/Payment" element={<Payment />} />
-
               <Route path="/Student" element={<Student />} />
-
               <Route path="/Assets" element={<Assets />} />
-
               <Route path="/Room" element={<Room />} />
-
               <Route path="/Maintenance" element={<Maintenance />} />
 
               <Route path="/Maintenance/Create" element={<MaintenanceCreate />} />
@@ -451,17 +345,12 @@ const FullLayout: React.FC = () => {
               <Route path="/Maintenance/Status/:id" element={<MaintenanceStatus />} />
 
               <Route path="/Review" element={<Review />} />
-
               <Route path="/Review/Create" element={<ReviewCreate />} />
-
-              <Route path="/Review/Edit/:id" element={<ReviewEdit />} /> {/* ✅ ต้องมี :id */}
-
+              <Route path="/Review/Edit/:id" element={<ReviewEdit />} />{" "}
+              {/* ✅ ต้องมี :id */}
               <Route path="/Bank" element={<Bank />} />
-
               <Route path="/Payment/Bank" element={<Bank />} />
-
               <Route path="/Payment/QRCode" element={<QRCode />} />
-
               <Route path="/Payment/Evidence" element={<Evidence />} />
 
               <Route path="/Payment/Managepayment" element={<Managepayment />} />
@@ -482,31 +371,32 @@ const FullLayout: React.FC = () => {
               <Route path="/Contract/Extendcontract/EvidenceGallery" element={<EvidenceGallery />} />
 
               <Route path="/Main" element={<Main />} />
-
               <Route path="/Login" element={<Login />} />
-
-
-              <Route path="/Announcement" element={<Announcement/>} />
-
-
-
+              <Route
+                path="/Student/UpdateInfo/UpdateInfo/:id"
+                element={<UpdateInfo />}
+              />{" "}
+              {/* ✅ ต้องมี :id */}
+              <Route path="/Announcement" element={<Announcement />} />
+              <Route
+                path="/Student/ViewEdit/ViewEdit/:id"
+                element={<ViewEditStudent />}
+              />
+              <Route
+                path="/admin/students/create"
+                element={<CreateStudentPage />}
+              />
+              <Route
+                path="/announcements/create"
+                element={<CreateAnnouncementPage />}
+              />
+              <Route path="/announcements/:id/edit" element={<EditAnnouncementPage />} />
             </Routes>
-
           </div>
-
         </Content>
-
       </Layout>
-
-
     </Layout>
-
-
   );
-
-  
-
 };
-
 
 export default FullLayout;

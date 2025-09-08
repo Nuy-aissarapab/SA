@@ -1,46 +1,37 @@
 import type { UsersInterface } from "../../interfaces/IUser";
-import type { SignInInterface } from "../../interfaces/SignIn";
-import type { StudentInterface ,CreateStudentRequest, LoginStudentRequest} from "../../interfaces/Student";
-import type { AdminInterface, CreateAdminRequest, LoginAdminRequest} from "../../interfaces/Admin";
+import type { SignInInterface } from "../../interfaces/SignIn"; // (not used here but kept for parity)
+import type {
+  StudentInterface,
+  CreateStudentRequest,
+  LoginStudentRequest,
+} from "../../interfaces/Student";
+import type {
+  AdminInterface,
+  CreateAdminRequest,
+  LoginAdminRequest,
+} from "../../interfaces/Admin";
 import type { PaymentInterface } from "../../interfaces/Payment";
 import type { ContractInterface } from "../../interfaces/Contract";
 import type { ReviewInterface } from "../../interfaces/Review";
 import type { MaintenanceInterface } from "../../interfaces/Maintenance";
-import { requestOptions as authOptions } from "../../Service/https/requestOptions";
+import type { CreateAnnouncementRequest } from "../../interfaces/CreateAnnouncementRequest";
+
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
 
-const apiUrl = "http://localhost:8000";
-const Authorization = localStorage.getItem("token");
-const Bearer = localStorage.getItem("token_type");
-
-const requestOptions = {
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `${Bearer} ${Authorization}`,
-  },
-};
-
-const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:8000";
-
-const getCookie = (name: string): string | null => {
-  const cookies = document.cookie.split("; ");
-  const cookie = cookies.find((row) => row.startsWith(`${name}=`));
-
-  if (cookie) {
-    let AccessToken = decodeURIComponent(cookie.split("=")[1]);
-    AccessToken = AccessToken.replace(/\\/g, "").replace(/"/g, "");
-    return AccessToken ? AccessToken : null;
-  }
-  return null;
-};
+// =============================
+// Base URL & shared config
+// =============================
+export const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:8000";
 
 const getConfig = () => {
-  // ✅ อ่านสดทุกครั้ง
+  // อ่าน token สดทุกครั้ง
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   if (token) headers["Authorization"] = `${tokenType} ${token}`;
 
   return { headers };
@@ -50,7 +41,14 @@ const getConfigWithoutAuth = () => ({
   headers: { "Content-Type": "application/json" },
 });
 
-export const Post = async (url: string, data: any, requireAuth: boolean = true) => {
+// =============================
+// Low-level helpers (POST/GET/PUT/PATCH/DELETE)
+// =============================
+export const Post = async (
+  url: string,
+  data: any,
+  requireAuth: boolean = true
+) => {
   const config = requireAuth ? getConfig() : getConfigWithoutAuth();
   try {
     const res = await axios.post(`${API_URL}${url}`, data, config);
@@ -80,22 +78,14 @@ export const Get = async (
     });
 };
 
-export const Update = async (
-  url: string,
-  data: any,
-  requireAuth: boolean = true
-): Promise<AxiosResponse | any> => {
+export const Update = async (url: string, data: any, requireAuth = true) => {
   const config = requireAuth ? getConfig() : getConfigWithoutAuth();
-  return await axios
-    .put(`${API_URL}${url}`, data, config)
-    .then((res) => res.data)
-    .catch((error: AxiosError) => {
-      if (error?.response?.status === 401) {
-        localStorage.clear();
-        window.location.reload();
-      }
-      return error.response;
-    });
+  try {
+    const res = await axios.put(`${API_URL}${url}`, data, config);
+    return res; // สำคัญ: คืน AxiosResponse
+  } catch (error: any) {
+    return error.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
 };
 
 export const Delete = async (
@@ -115,76 +105,145 @@ export const Delete = async (
     });
 };
 
-
-// Authentication APIs
+// =============================
+// Auth APIs
+// =============================
 export const authAPI = {
   // Student
   studentSignup: (data: CreateStudentRequest) =>
-    Post("/student/signup", data, false),
-  studentLogin: (data: LoginStudentRequest) =>
-    Post("/student/auth", data, false),
+    Post("/student/signup", { email: data.Email, password: data.Password }, false),
+  studentLogin: (data: LoginStudentRequest) => Post("/student/auth", data, false),
 
   // Admin
-  adminSignup: (data: CreateAdminRequest) =>
-    Post("/admin/signup", data, false),
-  adminLogin: (data: LoginAdminRequest) =>
-    Post("/admin/auth", data, false),
+  adminSignup: (data: CreateAdminRequest) => Post("/admin/signup", data, false),
+  adminLogin: (data: LoginAdminRequest) => Post("/admin/auth", data, false),
 };
 
-// student APIs
+// =============================
+// Student APIs (object style)
+// =============================
 export const student = {
   getAll: () => Get("/students"),
   getById: (id: number) => Get(`/student/${id}`),
   delete: (id: number) => Delete(`/student/${id}`),
 };
 
-// admin APIs
+// =============================
+// Admin APIs (object style)
+// =============================
 export const adminAPI = {
   getAll: () => Get("/admins"),
   getById: (id: number) => Get(`/admin/${id}`),
   delete: (id: number) => Delete(`/admin/${id}`),
 };
 
-
-
+// =============================
 // Gender
-async function GetGender() {
+// =============================
+export async function GetGender() {
   return await axios
-    .get(`${apiUrl}/genders`, requestOptions)
+    .get(`${API_URL}/genders`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
+// =============================
 // Users
-async function GetUsers() {
+// =============================
+export async function GetUsers() {
   return await axios
-    .get(`${apiUrl}/users`, requestOptions)
+    .get(`${API_URL}/users`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-// Students
-async function GetStudents() {
+// =============================
+// Students (direct endpoints used elsewhere)
+// =============================
+export async function GetStudents() {
   return await axios
-    .get(`${apiUrl}/students`, requestOptions)
+    .get(`${API_URL}/students`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
+export async function GetUsersById(id: string) {
+  return await axios
+    .get(`${API_URL}/student/${id}`, getConfig()) // user → student
+    .then((res) => res)
+    .catch((e) => e.response);
+}
 
+export async function UpdateUsersById(id: string, data: UsersInterface) {
+  return await axios
+    .put(`${API_URL}/student/${id}`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
 
-// Payment API
-async function GetPayment(studentId?: string) {
+export async function DeleteUsersById(id: string) {
+  return await axios
+    .delete(`${API_URL}/student/${id}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function CreateUser(data: UsersInterface) {
+  return await axios
+    .post(`${API_URL}/signup`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetStudentById(id: number) {
+  return await axios
+    .get(`${API_URL}/student/${id}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function CreateStudent(data: any) {
+  return await axios
+    .post(`${API_URL}/student/signup`, data, getConfigWithoutAuth())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function UpdateStudentById(id: number, data: StudentInterface) {
+  return await axios
+    .put(`${API_URL}/student/${id}`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function DeleteStudentById(id: number) {
+  return await axios
+    .delete(`${API_URL}/student/${id}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function ChangeStudentPassword(id: number, password: string) {
+  return await axios
+    .put(`${API_URL}/student/${id}/password`, { password }, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+// =============================
+// Payments & Evidences
+// =============================
+export async function GetPayment(studentId?: string) {
   const url = studentId
-    ? `${apiUrl}/payments?studentId=${studentId}`
-    : `${apiUrl}/payments`;
+    ? `${API_URL}/payments?studentId=${studentId}`
+    : `${API_URL}/payments`;
 
   return await axios
-    .get(url, requestOptions)
+    .get(url, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
-// Evidence (Upload transfer slip)
+
 export async function UploadEvidence(data: any) {
   const token = localStorage.getItem("token");
   const tokenType = localStorage.getItem("token_type") || "Bearer";
@@ -192,52 +251,48 @@ export async function UploadEvidence(data: any) {
   if (token) headers.Authorization = `${tokenType} ${token}`;
 
   return axios
-    .post(`${import.meta.env.VITE_API_KEY || "http://localhost:8000"}/upload`, data, { headers })
-    .then((res) => res)                                  // ⬅️ สำคัญ: คืนทั้ง response
-    .catch((e) => e.response ?? { status: 0, data: e }); // กัน network error
+    .post(`${API_URL}/upload`, data, { headers })
+    .then((res) => res)
+    .catch((e) => e.response ?? { status: 0, data: e });
 }
-export async function GetLatestEvidencesByStudents(studentIds: number[]) {
-  const token = localStorage.getItem("token");
-  const tokenType = localStorage.getItem("token_type") || "Bearer";
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `${tokenType} ${token}`;
 
+export async function GetLatestEvidencesByStudents(studentIds: number[]) {
+  const headers = getConfig().headers;
   const qs = studentIds.join(",");
   return await axios
-    .get(`${apiUrl}/evidences/latest-by-students?student_ids=${qs}`, { headers })
-    .then(res => res)              // ⬅️ ให้ได้ AxiosResponse
-    .catch(e => e.response);
+    .get(`${API_URL}/evidences/latest-by-students?student_ids=${qs}`, { headers })
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
-export async function GetLatestEvidencesByStudent(studentId: number): Promise<AxiosResponse<any>> {
-  const token = localStorage.getItem("token");
-  const tokenType = localStorage.getItem("token_type") || "Bearer";
-
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `${tokenType} ${token}`;
-
-  const base = (apiUrl || "").replace(/\/+$/, "");
+export async function GetLatestEvidencesByStudent(
+  studentId: number
+): Promise<AxiosResponse<any>> {
+  const headers = getConfig().headers;
+  const base = (API_URL || "").replace(/\/+$/, "");
   const url = `${base}/evidences/latest?student_id=${encodeURIComponent(String(studentId))}`;
 
   try {
     const res = await axios.get(url, { headers });
     return res;
   } catch (e: any) {
-    return e?.response ?? {
-      status: 500,
-      statusText: "Network Error",
-      headers: {},
-      config: {},
-      data: { error: "Network error" },
-    };
+    return (
+      e?.response ?? {
+        status: 500,
+        statusText: "Network Error",
+        headers: {},
+        config: {},
+        data: { error: "Network error" },
+      }
+    );
   }
 }
 
 export function normalizeWebPath(p?: string): string | undefined {
   if (!p) return undefined;
-  const s = p.replace(/\\/g, "/").trim();    // backslash → slash
-  if (/^https?:\/\//i.test(s)) return s;     // absolute → ใช้เลย
-  return "/" + s.replace(/^\/+/, "");        // เติม "/" ต้นทาง
+  const s = p.replace(/\\/g, "/").trim();
+  if (/^https?:\/\//i.test(s)) return s; // absolute
+  return "/" + s.replace(/^\/+/, "");
 }
 
 export function evidenceToImgSrc(ev?: {
@@ -246,69 +301,69 @@ export function evidenceToImgSrc(ev?: {
   mime_type?: string;
 }): string | undefined {
   if (!ev) return undefined;
-  if (ev.url) return ev.url;                 // ถ้า API ให้ absolute แล้ว
-  return normalizeWebPath(ev.address);       // ไม่งั้น normalize path
+  if (ev.url) return ev.url;
+  return normalizeWebPath(ev.address);
 }
 
 export async function ConfirmPayment(id: number) {
   return await axios
-    .put(`${apiUrl}/payments/${id}/confirm`, {}, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .put(`${API_URL}/payments/${id}/confirm`, {}, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function RejectPayment(id: number) {
   return await axios
-    .put(`${apiUrl}/payments/${id}/reject`, {}, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .put(`${API_URL}/payments/${id}/reject`, {}, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function GetEvidenceByID(id: number) {
   return await axios
-    .get(`${apiUrl}/evidences/${id}`, requestOptions)   // 👈 ใช้ GET
-    .then(res => res)
-    .catch(e => e.response);
+    .get(`${API_URL}/evidences/${id}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function UpdateEvidence(id: number, data: any) {
   return await axios
-    .put(`${apiUrl}/evidences/${id}`, data, requestOptions)  // 👈 ใช้ PUT พร้อมส่ง body
-    .then(res => res)
-    .catch(e => e.response);
+    .put(`${API_URL}/evidences/${id}`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
-// Service/https/evidence.ts (หรือรวมใน index.ts ของคุณ)
+
 export async function GetEvidencesByPaymentId(pid: number) {
   return await axios
-    .get(`${apiUrl}/evidences?payment_id=${pid}`, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .get(`${API_URL}/evidences?payment_id=${pid}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
-// รองรับ null + 3 state
-export async function UpdatePaymentStatus(id: number, status: "paid" | "pending" | "remaining" | null) {
+export async function UpdatePaymentStatus(
+  id: number,
+  status: "paid" | "pending" | "remaining" | null
+) {
   return await axios
-    .patch(`${apiUrl}/payments/${id}/status`, { status }, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .patch(`${API_URL}/payments/${id}/status`, { status }, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
-// ✅ ตั้งผู้รับเงิน
 export async function UpdatePaymentReceiver(id: number, receiver_id: number | null) {
   return await axios
-    .patch(`${apiUrl}/payments/${id}/receiver`, { receiver_id }, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .patch(`${API_URL}/payments/${id}/receiver`, { receiver_id }, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function AssignReceiverSelf(id: number) {
   return await axios
-    .patch(`${apiUrl}/payments/${id}/receiver/self`, {}, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .patch(`${API_URL}/payments/${id}/receiver/self`, {}, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
-// Create payment (รับชำระงวด/บางส่วนได้)
 export async function CreatePayment(body: {
   student_id: number;
   billing_id: number;
@@ -318,34 +373,32 @@ export async function CreatePayment(body: {
   payer_name?: string;
   receipt_number?: string;
   evidence_url?: string;
-  status?: "paid" | "pending" | "remaining" | null;  // 👈 add "remaining"
+  status?: "paid" | "pending" | "remaining" | null;
   receiver_id?: number | null;
 }) {
   return await axios
-    .post(`${apiUrl}/payments`, body, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .post(`${API_URL}/payments`, body, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function UpdatePaymentMethod(id: number, method: string) {
   return await axios
-    .patch(`${apiUrl}/payments/${id}/method`, { method }, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+    .patch(`${API_URL}/payments/${id}/method`, { method }, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
-
-
-
-
-// Contract API
-async function GetContracts(studentId?: string) {
+// =============================
+// Contracts
+// =============================
+export async function GetContracts(studentId?: string) {
   const url = studentId
-    ? `${apiUrl}/contracts?studentId=${studentId}`
-    : `${apiUrl}/contracts`;
+    ? `${API_URL}/contracts?studentId=${studentId}`
+    : `${API_URL}/contracts`;
 
   return await axios
-    .get(url, requestOptions)
+    .get(url, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -353,14 +406,14 @@ async function GetContracts(studentId?: string) {
 export async function RenewContract(
   id: number,
   body: {
-    months?: number;           // 6 | 12
-    start_date?: string;       // "YYYY-MM-DD"
-    end_date?: string;         // "YYYY-MM-DD" (ใช้ตอน custom)
-    rate?: number;             // ค่าเช่าใหม่ (optional)
+    months?: number; // 6 | 12
+    start_date?: string; // YYYY-MM-DD
+    end_date?: string; // YYYY-MM-DD
+    rate?: number; // ค่าเช่าใหม่ (optional)
   }
 ) {
   return await axios
-    .put(`${apiUrl}/contracts/${id}/renew`, body, requestOptions)
+    .put(`${API_URL}/contracts/${id}/renew`, body, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -368,27 +421,30 @@ export async function RenewContract(
 export async function RequestRenewContract(
   id: number,
   body: { months?: number; start_date?: string; end_date?: string; rate?: number }
-) { 
+) {
   return await axios
-    .put(`${apiUrl}/contracts/${id}/renew-request`, body, requestOptions)
-    .then(res => res).catch(e => e.response);
+    .put(`${API_URL}/contracts/${id}/renew-request`, body, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function ApproveRenewContract(id: number) {
   return await axios
-    .put(`${apiUrl}/contracts/${id}/renew-approve`, {}, requestOptions)
-    .then(res => res).catch(e => e.response);
+    .put(`${API_URL}/contracts/${id}/renew-approve`, {}, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function RejectRenewContract(id: number) {
   return await axios
-    .put(`${apiUrl}/contracts/${id}/renew-reject`, {}, requestOptions)
-    .then(res => res).catch(e => e.response);
+    .put(`${API_URL}/contracts/${id}/renew-reject`, {}, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
 }
 
 export async function CreateContract(data: ContractInterface) {
   return await axios
-    .post(`${apiUrl}/contracts`, data, requestOptions)
+    .post(`${API_URL}/contracts`, data, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
@@ -398,21 +454,21 @@ export async function UpdateContractById(
   data: Partial<ContractInterface> & any
 ) {
   return await axios
-    .put(`${apiUrl}/contracts/${id}`, data, requestOptions)
+    .put(`${API_URL}/contracts/${id}`, data, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
 export async function DeleteContractById(id: string) {
   return await axios
-    .delete(`${apiUrl}/contracts/${id}`, requestOptions)
+    .delete(`${API_URL}/contracts/${id}`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
 export async function GetRooms() {
   try {
-    const res = await axios.get(`${apiUrl}/rooms`, requestOptions);
+    const res = await axios.get(`${API_URL}/rooms`, getConfig());
     const items = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
     return { status: res.status, data: items };
   } catch (e: any) {
@@ -420,114 +476,103 @@ export async function GetRooms() {
   }
 }
 
-
-
-
-
-
-
-
-
-async function GetUsersById(id: string) {
+// =============================
+// Announcements
+// =============================
+export async function GetAnnouncements() {
   return await axios
-    .get(`${apiUrl}/student/${id}`, requestOptions) // 🔥 แก้ user → student
+    .get(`${API_URL}/announcements`, getConfig())
+    .then((res) => res)
+    .catch((e) => e?.response);
+}
+
+export async function CreateAnnouncement(data: CreateAnnouncementRequest) {
+  return await axios
+    .post(`${API_URL}/announcements`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e?.response);
+}
+
+export interface UpdateAnnouncementRequest {
+  Title?: string;
+  Content?: string;
+  Picture?: string | null;
+  AnnouncementTargetID?: number;
+  AnnouncementTypeID?: number;
+  AdminID?: number;
+}
+
+export async function UpdateAnnouncementById(
+  id: string | number,
+  data: UpdateAnnouncementRequest
+) {
+  return await axios
+    .patch(`${API_URL}/announcements/${id}`, data, getConfig())
+    .then((res) => res)
+    .catch((e) => e?.response);
+}
+
+export async function DeleteAnnouncementById(id: string | number) {
+  return await axios
+    .delete(`${API_URL}/announcements/${id}`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function UpdateUsersById(id: string, data: UsersInterface) {
+export async function GetAnnouncementById(id: string | number) {
   return await axios
-    .put(`${apiUrl}/student/${id}`, data, requestOptions)
+    .get(`${API_URL}/announcements/${id}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e?.response);
+}
+
+// Announcement Target Service
+export async function CreateAnnouncementTarget(data: any) {
+  return await axios
+    .post(`${API_URL}/announcement-targets`, data, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function DeleteUsersById(id: string) {
+export async function GetAnnouncementTarget(id: string) {
   return await axios
-    .delete(`${apiUrl}/student/${id}`, requestOptions)
+    .get(`${API_URL}/announcement-targets/${id}`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function CreateUser(data: UsersInterface) {
+export async function ListAnnouncementTargets() {
   return await axios
-    .post(`${apiUrl}/signup`, data, requestOptions)
+    .get(`${API_URL}/announcement-targets`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-
-
-
-async function GetStudentById(id: number) {
+// Announcement Type Service
+export async function CreateAnnouncementType(data: any) {
   return await axios
-    .get(`${apiUrl}/student/${id}`, requestOptions)
+    .post(`${API_URL}/announcement-types`, data, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function CreateStudent(data: StudentInterface) {
+export async function GetAnnouncementType(id: string) {
   return await axios
-    .post(`${apiUrl}/signup`, data, requestOptions)
+    .get(`${API_URL}/announcement-types/${id}`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function UpdateStudentById(id: number, data: StudentInterface) {
+export async function ListAnnouncementTypes() {
   return await axios
-    .put(`${apiUrl}/student/${id}`, data, requestOptions)
+    .get(`${API_URL}/announcement-types`, getConfig())
     .then((res) => res)
     .catch((e) => e.response);
 }
 
-async function DeleteStudentById(id: number) {
-  return await axios
-    .delete(`${apiUrl}/student/${id}`, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-//Announcement
-async function GetAnnouncements(params?: any) {
-  return await axios
-    .get(`${apiUrl}/announcements`, {
-      ...requestOptions,
-      params, // ⬅️ เอา params มาติด query string
-    })
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-
-async function CreateAnnouncement(data: any) {
-  return await axios
-    .post(`${apiUrl}/announcements`, data, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-async function UpdateAnnouncementById(id: string, data: any) {
-  return await axios
-    .put(`${apiUrl}/announcements/${id}`, data, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-async function DeleteAnnouncementById(id: string) {
-  return await axios
-    .delete(`${apiUrl}/announcements/${id}`, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-async function GetAnnouncementById(id: string) {
-  return await axios
-    .get(`${apiUrl}/announcements/${id}`, requestOptions)
-    .then((res) => res)
-    .catch((e) => e.response);
-}
-
-// Review
+// =============================
+// Reviews
+// =============================
 export async function GetReviews() {
   return await axios
     .get(`${API_URL}/reviews`, getConfig())
@@ -562,79 +607,81 @@ export async function DeleteReview(id: string) {
     .then((r) => r)
     .catch((e) => e.response);
 }
+
 export async function GetReviewTopics() {
-  return await axios.get(`${apiUrl}/reviewtopics`, requestOptions).then((r) => r).catch((e) => e.response);
+  return await axios
+    .get(`${API_URL}/reviewtopics`, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
 }
 
-// ---------- Maintenance ----------
+// =============================
+// Maintenance
+// =============================
 export async function GetProblemTypes() {
-  return axios.get(`${API_URL}/problem-types`, getConfig())
-    .then(r=>r).catch(e=>e.response);
+  return axios
+    .get(`${API_URL}/problem-types`, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
 }
+
 export async function GetMaintenanceStatuses() {
-  return axios.get(`${API_URL}/maintenance-statuses`, getConfig())
-    .then(r=>r).catch(e=>e.response);
+  return axios
+    .get(`${API_URL}/maintenance-statuses`, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
 }
+
 export async function GetMaintenances(params?: any) {
-  return axios.get(`${API_URL}/maintenances`, { ...getConfig(), params })
-    .then(r=>r).catch(e=>e.response);
+  return axios
+    .get(`${API_URL}/maintenances`, { ...getConfig(), params })
+    .then((r) => r)
+    .catch((e) => e.response);
 }
+
 export async function GetMyMaintenances() {
-  return axios.get(`${API_URL}/maintenances`, { ...getConfig(), params: { myOnly: 1 } })
-    .then(r=>r).catch(e=>e.response);
+  return axios
+    .get(`${API_URL}/maintenances`, { ...getConfig(), params: { myOnly: 1 } })
+    .then((r) => r)
+    .catch((e) => e.response);
 }
+
 export async function GetMaintenanceById(id: number) {
-  return axios.get(`${API_URL}/maintenance/${id}`, getConfig())
-    .then(r=>r).catch(e=>e.response);
-}
-export async function CreateMaintenance(body: any) {   // JSON
-  return axios.post(`${API_URL}/maintenances`, body, getConfig())
-    .then(r=>r).catch(e=>e.response);
-}
-export async function UpdateMaintenance(id: number, body: any) { // JSON
-  return axios.put(`${API_URL}/maintenance/${id}`, body, getConfig())
-    .then(r=>r).catch(e=>e.response);
+  return axios
+    .get(`${API_URL}/maintenance/${id}`, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
 }
 
-export async function UpdateMaintenanceStatus(id: number, body: { maintenance_status_id: number }) {
-  return axios.patch(`${API_URL}/maintenance/${id}/status`, body, getConfig())
-    .then(r=>r).catch(e=>e.response);
+export async function CreateMaintenance(body: any) {
+  // JSON
+  return axios
+    .post(`${API_URL}/maintenances`, body, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
 }
 
-// export async function UpdateMaintenanceStatus(
-//   id: number,
-//   body: { maintenance_status_id: number }
-// ) {
-//   return axios
-//     .patch(`${API_URL}/maintenance/${id}/status`, body, getConfig()) // ✅ JSON
-//     .then(r => r)
-//     .catch(e => e.response);
-// }
+export async function UpdateMaintenance(id: number, body: any) {
+  // JSON
+  return axios
+    .put(`${API_URL}/maintenance/${id}`, body, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
+}
+
+export async function UpdateMaintenanceStatus(
+  id: number,
+  body: { maintenance_status_id: number }
+) {
+  return axios
+    .patch(`${API_URL}/maintenance/${id}/status`, body, getConfig())
+    .then((r) => r)
+    .catch((e) => e.response);
+}
+
 export async function DeleteMaintenance(id: number) {
   return axios
-    .delete(`${API_URL}/maintenance/${id}`, getConfig()) // << เอกพจน์
-    .then(r => r)
-    .catch(e => e.response);
+    .delete(`${API_URL}/maintenance/${id}`, getConfig()) // เอกพจน์
+    .then((r) => r)
+    .catch((e) => e.response);
 }
-
-
-export {
-  GetGender,
-  GetUsers,
-  GetUsersById,
-  UpdateUsersById,
-  DeleteUsersById,
-  CreateUser,
-  GetStudents,
-  GetStudentById,
-  CreateStudent,
-  UpdateStudentById,
-  DeleteStudentById,
-  GetPayment,
-  GetContracts,
-  GetAnnouncements,
-  CreateAnnouncement,
-  UpdateAnnouncementById,
-  DeleteAnnouncementById,
-  GetAnnouncementById,
-};

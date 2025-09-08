@@ -6,8 +6,11 @@ import (
 	"github.com/SA/config"
 	"github.com/SA/controller/admin"
 	"github.com/SA/controller/announcement"
+	"github.com/SA/controller/announcement_target"
+	"github.com/SA/controller/announcement_type"
 	"github.com/SA/controller/contract"
 	"github.com/SA/controller/evidence"
+	"github.com/SA/controller/media"
 	"github.com/SA/controller/payment"
 	"github.com/SA/controller/room"
 	"github.com/SA/controller/maintenance"
@@ -56,6 +59,13 @@ func main() {
 	r.POST("/admin/auth", admin.SignIn)
 	r.POST("/admin/signup", admin.SignUp)
 
+	r.Static("/uploads", "./uploads")
+	// main.go
+	r.MaxMultipartMemory = 16 << 20 // 16MB
+
+	// public หรือจะย้ายเข้า group auth ก็ได้ (ถ้าให้เฉพาะ admin อัปได้)
+	r.POST("/media/upload", media.UploadAnnouncementImage)
+
 	// ===== Protected routes (ต้องมี token) =====
 	router := r.Group("/")
 	router.Use(middlewares.Authorizes())
@@ -65,6 +75,8 @@ func main() {
 		router.GET("/student/:id", student.Get)
 		router.DELETE("/student/:id", student.Delete)
 		router.PUT("/student/:id", student.UpdateUser)
+
+		router.PUT("/student/:id/password", student.ChangePassword)
 
 		// Admin
 		router.GET("/admins", admin.GetAll)
@@ -126,7 +138,16 @@ func main() {
 		router.GET("/announcements", announcement.ListAnnouncements)
 		router.GET("/announcements/:id", announcement.ListByIDAnnouncements)
 		router.DELETE("/announcements/:id", announcement.DeleteAnnouncement)
-		router.PATCH("/announcements/:id", announcement.UpdateAnnouncement) // admin only
+		router.PATCH("/announcements/:id", announcement.UpdateAnnouncement)
+		// Announcement type
+		router.POST("/announcement-types", announcementtype.CreateAnnouncementType)
+		router.GET("/announcement-types", announcementtype.ListAnnouncementTypes)
+		router.GET("/announcement-types/:id", announcementtype.GetAnnouncementType)
+		// Announcement target
+		router.POST("/announcement-targets", announcementtarget.CreateAnnouncementTarget)
+		router.GET("/announcement-targets", announcementtarget.ListAnnouncementTargets)
+		router.GET("/announcement-targets/:id", announcementtarget.GetAnnouncementTarget)
+
 	}
 
 	// ✅ AutoMigrate (รวม Evidence)
@@ -152,6 +173,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
