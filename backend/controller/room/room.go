@@ -19,15 +19,6 @@ func GetAll(c *gin.Context) {
 
 }
 
-func List(c *gin.Context) {
-    var rooms []entity.Room
-    if err := config.DB().
-        Order("room_number ASC").
-        Find(&rooms).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, rooms)
-}
+
 
 
