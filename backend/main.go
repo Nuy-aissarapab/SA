@@ -84,18 +84,21 @@ func main() {
 
 		// Evidence
 		router.GET("/evidences", evidence.ListEvidences)
+		router.GET("/evidences/latest", evidence.GetLatestByStudent)          
+		router.GET("/students/:id/evidence/latest", evidence.GetLatestByStudent)
+		router.GET("/evidences/:id",evidence.GetEvidenceByID) 
+		router.PUT("/evidences/:id",evidence.UpdateEvidence)   
 
 		// Contracts
 		router.GET("/contracts", contract.ListContracts)
 		router.PUT("/contracts/:id/renew-request", contract.RenewRequest)
-		router.PUT("/contracts/:id/renew-approve", contract.RenewApprove)
-		router.PUT("/contracts/:id/renew-reject", contract.RenewReject)
 		router.POST("/contracts", contract.Create)
 		router.PUT("/contracts/:id", contract.Update)
 		router.DELETE("/contracts/:id", contract.Delete)
 
 		// Room
 		router.GET("/rooms", room.GetAll)
+		router.GET("/rooms", room.List)
 
 		// Maintenance
 		// Combo
