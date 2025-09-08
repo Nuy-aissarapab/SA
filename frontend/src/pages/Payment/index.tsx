@@ -198,18 +198,18 @@ function Payment() {
       title: "สถานะการชำระเงิน",
       key: "payment_status_view",
       render: (_: any, r: PaymentRow) => {
-        switch (r.renewal_status) {
-          case "approved":
+        switch (r.payment_status) {
+          case "remaining":
+            return "คงเหลือชำระ";
+          case "paid":
             return "ชำระเงินเรียบร้อย";
           case "pending":
-            return "รอการตรวจสอบ";
-          case "rejected":
             return "มียอดค้างชำระ";
           default: {
-            const v = (r as any).payment_status ?? r.payment_status;
+            const v = (r as any).renewal_status ?? r.renewal_status;
+            if (v === "remaining") return "คงเหลือชำระ";
             if (v === "paid") return "ชำระเงินเรียบร้อย";
-            if (v === "pending") return "รอการตรวจสอบ";
-            if (v === "remaining") return "มียอดค้างชำระ";
+            if (v === "pending") return "มียอดค้างชำระ";
             return "-";
           }
         }
