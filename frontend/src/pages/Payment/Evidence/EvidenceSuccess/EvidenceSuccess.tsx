@@ -21,7 +21,7 @@ export default function EvidenceSuccess() {
         title="ส่งหลักฐานสำเร็จ"
         subTitle="เราได้รับหลักฐานการโอนของคุณแล้ว อยู่ระหว่างตรวจสอบ"
         extra={[
-          <Button key="home" onClick={() => navigate("/")}>
+          <Button key="home" onClick={() => navigate("/Main")}>
             กลับหน้าแรก
           </Button>,
         ]}
@@ -29,3 +29,4 @@ export default function EvidenceSuccess() {
     </div>
   );
 }
+
