@@ -411,10 +411,13 @@ export async function DeleteContractById(id: string) {
 }
 
 export async function GetRooms() {
-  return await axios
-    .get(`${apiUrl}/rooms`, requestOptions)
-    .then(res => res)
-    .catch(e => e.response);
+  try {
+    const res = await axios.get(`${apiUrl}/rooms`, requestOptions);
+    const items = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+    return { status: res.status, data: items };
+  } catch (e: any) {
+    return e?.response ?? { status: 500, data: { error: "network error" } };
+  }
 }
 
 
