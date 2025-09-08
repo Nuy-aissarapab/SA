@@ -49,7 +49,6 @@ func main() {
 
 	// อัปโหลดสลิป และดึงสลิปล่าสุดตาม student_ids
 	r.POST("/upload", evidence.UploadEvidence)
-	r.GET("/evidences/latest-by-students", evidence.GetLatestByStudents)
 
 	r.POST("/student/auth", student.SignIn)
 	r.POST("/student/signup", student.SignUp)
