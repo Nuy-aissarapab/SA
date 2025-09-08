@@ -9,12 +9,15 @@ import {
   message,
   Popconfirm,
   Tooltip,
+  Modal,
+  Form,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Input } from "antd";
+import { Update } from "../../Service/https";
 
 const { Search } = Input;
 
@@ -42,6 +45,44 @@ const AdminStudentTable: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const myId = localStorage.getItem("id");
   const [filtered, setFiltered] = useState<StudentInterface[]>([]);
+  // ✅ NEW: state/logic เปลี่ยนรหัสผ่าน (แอดมิน)
+  const [pwdOpen, setPwdOpen] = useState(false);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdTarget, setPwdTarget] = useState<{ id?: number; name?: string }>(
+    {}
+  );
+  const [pwdForm] = Form.useForm();
+
+  const openPwdModal = (rec: StudentInterface) => {
+    setPwdTarget({
+      id: rec.ID,
+      name: `${rec.first_name ?? ""} ${rec.last_name ?? ""}`.trim(),
+    });
+    pwdForm.resetFields();
+    setPwdOpen(true);
+  };
+
+  const submitPwd = async (values: any) => {
+    if (!pwdTarget.id) return;
+    setPwdLoading(true);
+    try {
+      // ⚠️ ปรับ endpoint ตาม backend ของเธอ ถ้ามี route เฉพาะ เช่น /student/:id/password
+      const res = await Update(`/student/${pwdTarget.id}/password`, {
+        password: values.newPassword,
+      });
+      if (res?.status === 200) {
+        message.success("อัปเดตรหัสผ่านสำเร็จ");
+        setPwdOpen(false);
+      } else {
+        message.error(res?.data?.error || "อัปเดตรหัสผ่านไม่สำเร็จ");
+      }
+    } catch (e) {
+      console.error(e);
+      message.error("เกิดข้อผิดพลาด");
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   const refresh = async () => {
     const res = await GetStudents();
@@ -132,6 +173,7 @@ const AdminStudentTable: React.FC = () => {
             >
               แก้ไข
             </Button>
+            <Button onClick={() => openPwdModal(record)}>แก้ไขรหัสผ่าน</Button>
 
             <Popconfirm
               title="ยืนยันการลบ"
@@ -186,6 +228,49 @@ const AdminStudentTable: React.FC = () => {
         dataSource={filtered}
         style={{ width: "100%", overflow: "auto" }}
       />
+      {/* ✅ NEW: Modal เปลี่ยนรหัสผ่าน (แอดมิน) */}
+      <Modal
+        open={pwdOpen}
+        title={`เปลี่ยนรหัสผ่าน: ${pwdTarget.name ?? ""} (ID: ${
+          pwdTarget.id ?? "-"
+        })`}
+        onCancel={() => setPwdOpen(false)}
+        onOk={() => pwdForm.submit()}
+        confirmLoading={pwdLoading}
+        okText="บันทึก"
+        cancelText="ยกเลิก"
+        destroyOnClose
+      >
+        <Form form={pwdForm} layout="vertical" onFinish={submitPwd}>
+          <Form.Item
+            label="รหัสผ่านใหม่"
+            name="newPassword"
+            rules={[
+              { required: true, message: "กรอกรหัสผ่านใหม่" },
+              { min: 6, message: "อย่างน้อย 6 ตัวอักษร" },
+            ]}
+          >
+            <Input.Password placeholder="อย่างน้อย 6 ตัวอักษร" />
+          </Form.Item>
+          <Form.Item
+            label="ยืนยันรหัสผ่านใหม่"
+            name="confirmPassword"
+            dependencies={["newPassword"]}
+            rules={[
+              { required: true, message: "กรอกยืนยันรหัสผ่าน" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("newPassword") === value)
+                    return Promise.resolve();
+                  return Promise.reject(new Error("รหัสผ่านไม่ตรงกัน"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="พิมพ์ซ้ำให้ตรงกัน" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 };
@@ -198,6 +283,45 @@ const StudentSelfInfo: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const UserID = localStorage.getItem("id");
+  // ✅ NEW: เปลี่ยนรหัสผ่าน (นักศึกษา)
+  const [selfPwdOpen, setSelfPwdOpen] = useState(false);
+  const [selfPwdLoading, setSelfPwdLoading] = useState(false);
+  const [selfPwdForm] = Form.useForm();
+
+  const submitSelfPwd = async (values: any) => {
+    if (!user?.ID) return;
+
+    // ห้ามใช้รหัสเดิมซ้ำ
+    if (values.currentPassword === values.newPassword) {
+      message.error("รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม");
+      return;
+    }
+
+    setSelfPwdLoading(true);
+    try {
+      // ปรับชื่อคีย์ให้ตรงกับ backend ของคุณ (นิยม old_password/new_password)
+      const res = await Update(`/student/${user.ID}/password`, {
+        old_password: values.currentPassword,
+        new_password: values.newPassword,
+      });
+
+      if (res?.status === 200) {
+        message.success("เปลี่ยนรหัสผ่านสำเร็จ");
+        setSelfPwdOpen(false);
+        selfPwdForm.resetFields();
+      } else if (res?.status === 400 || res?.status === 401) {
+        // กรณีรหัสเดิมไม่ถูกต้อง/สิทธิ์ไม่ผ่าน
+        message.error(res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง");
+      } else {
+        message.error(res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ");
+      }
+    } catch (e) {
+      console.error(e);
+      message.error("เกิดข้อผิดพลาด");
+    } finally {
+      setSelfPwdLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!UserID) {
@@ -235,7 +359,69 @@ const StudentSelfInfo: React.FC = () => {
           <Link to={`/student/UpdateInfo/UpdateInfo/${user.ID}`}>
             <button style={btnStyleGreen}>เปลี่ยนแปลงข้อมูล</button>
           </Link>
+          <button
+            style={btnStyle}
+            onClick={() => {
+              selfPwdForm.resetFields();
+              setSelfPwdOpen(true);
+            }}
+          >
+            เปลี่ยนรหัสผ่าน
+          </button>
         </div>
+
+        <Modal
+          open={selfPwdOpen}
+          title="เปลี่ยนรหัสผ่านของฉัน"
+          onCancel={() => {
+            setSelfPwdOpen(false);
+            selfPwdForm.resetFields();
+          }}
+          onOk={() => selfPwdForm.submit()}
+          confirmLoading={selfPwdLoading}
+          okText="บันทึก"
+          cancelText="ยกเลิก"
+          destroyOnClose
+        >
+          <Form form={selfPwdForm} layout="vertical" onFinish={submitSelfPwd}>
+            <Form.Item
+              label="รหัสผ่านเดิม"
+              name="currentPassword"
+              rules={[{ required: true, message: "กรอกรหัสผ่านเดิม" }]}
+            >
+              <Input.Password placeholder="รหัสผ่านเดิม" />
+            </Form.Item>
+
+            <Form.Item
+              label="รหัสผ่านใหม่"
+              name="newPassword"
+              rules={[
+                { required: true, message: "กรอกรหัสผ่านใหม่" },
+                { min: 6, message: "อย่างน้อย 6 ตัวอักษร" },
+              ]}
+            >
+              <Input.Password placeholder="อย่างน้อย 6 ตัวอักษร" />
+            </Form.Item>
+
+            <Form.Item
+              label="ยืนยันรหัสผ่านใหม่"
+              name="confirmPassword"
+              dependencies={["newPassword"]}
+              rules={[
+                { required: true, message: "กรอกยืนยันรหัสผ่าน" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("newPassword") === value)
+                      return Promise.resolve();
+                    return Promise.reject(new Error("รหัสผ่านไม่ตรงกัน"));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password placeholder="พิมพ์ซ้ำให้ตรงกัน" />
+            </Form.Item>
+          </Form>
+        </Modal>
 
         {/* ข้อมูลบัญชี/ระบบ */}
         <h2 style={sectionTitle}>ข้อมูลบัญชี</h2>

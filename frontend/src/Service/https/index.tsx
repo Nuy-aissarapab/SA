@@ -470,6 +470,14 @@ export async function GetReviewTopics() {
     .catch((e) => e.response);
 }
 
+export async function ChangeStudentPassword(id: number, password: string) {
+  return await axios
+    .put(`${apiUrl}/student/${id}/password`, { password }, getConfig()) // ใช้ header สด
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+
 export {
   GetGender,
   GetUsers,
