@@ -16,7 +16,7 @@ type Evidence struct {
     Student   Student `gorm:"foreignKey:StudentID" json:"student"`
 
     // FK → Payment
-    PaymentID uint
-    Payment   Payment `gorm:"foreignKey:PaymentID" json:"payment"`
+    PaymentID uint `json:"payment_id"`
+    // Payment   Payment `gorm:"foreignKey:PaymentID" json:"payment"`
 }
 
