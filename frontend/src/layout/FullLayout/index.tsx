@@ -64,8 +64,6 @@ import Extendcontract from "../../pages/Contract/Extendcontract"
 
 import EvidenceGallery from "../../pages/Contract/Extendcontract/EvidenceGallery"
 
-import History from "../../pages/Contract/History"
-
 import Main from "../../pages/Main"
 
 import Login from "../../pages/authentication/Login"
@@ -480,7 +478,6 @@ const FullLayout: React.FC = () => {
 
               <Route path="/Contract/Extendcontract" element={<Extendcontract />} />
 
-              <Route path="/Contract/History" element={<History />} />
 
               <Route path="/Contract/Extendcontract/EvidenceGallery" element={<EvidenceGallery />} />
 
