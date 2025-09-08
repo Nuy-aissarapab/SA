@@ -43,7 +43,6 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	r.Static("/uploads", "./uploads")
 
 	// ===== Public routes (ไม่ต้องใช้ token) =====
 	r.GET("/", func(c *gin.Context) {
