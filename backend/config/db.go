@@ -92,15 +92,30 @@ func SetupDatabase() {
 		Last_Name:  "วาตุรัมย์",
 		Room_ID:  &r3,
 	})
+		db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:   "SA3",
+		Password:   string(password),
+		Email:      "sa3@gmail.com",
+		First_Name: "สุขสัฐญ์",
+		Last_Name:  "ใจดี",
+	})
+	db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:   "SA4",
+		Password:   string(password),
+		Email:      "sa4@gmail.com",
+		First_Name: "ดำรงค์",
+		Last_Name:  "ใจดี",
+	})
 
 	//Payment
 	db.Create(&entity.Payment{
 		StudentID:      1,
 		BillingID:      1,
-		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		ContractID:		1,
+		EvidenceID:		1,
+		ReceiverID:     UPtr(1),            
 		Amount:         2900,
-		Payment_Date:   time.Now(),
-		Payment_Status: StrPtr("paid"),     // หรือ pending
+		Payment_Date:   time.Now(), 
 		Method:         "-",
 		PayerName:      "ผู้ปกครอง A",
 	})
@@ -108,10 +123,11 @@ func SetupDatabase() {
 	db.Create(&entity.Payment{
 		StudentID:      2,
 		BillingID:      2,
-		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		ContractID:		2,
+		EvidenceID:		2,
+		ReceiverID:     UPtr(1),           
 		Amount:         2900,
-		Payment_Date:   time.Now(),
-		Payment_Status: StrPtr("paid"),     // หรือ pending
+		Payment_Date:   time.Now(), 
 		Method:         "-",
 		PayerName:      "ผู้ปกครอง A",
 	})
@@ -119,17 +135,18 @@ func SetupDatabase() {
 	db.Create(&entity.Payment{
 		StudentID:      3,
 		BillingID:      3,
-		ReceiverID:     UPtr(1),            // ✅ ผู้รับเงิน admin id = 1
+		ContractID:		3,
+		EvidenceID:		3,
+		ReceiverID:     UPtr(1),           
 		Amount:         2900,
 		Payment_Date:   time.Now(),
-		Payment_Status: StrPtr("paid"),     // หรือ pending
 		Method:         "-",
 		PayerName:      "ผู้ปกครอง A",
 	})
 
 	// สร้าง Contract ใหม่
-	startDate, _ := time.Parse("2006-01-02", "2025-08-01")
-	endDate, _ := time.Parse("2006-01-02", "2026-07-31")
+	startDate, _ := time.Parse("2006-01-02", "2025-01-01")
+	endDate, _ := time.Parse("2006-01-02", "2026-04-01")
 
 	s1 := uint(1)
 	s2 := uint(2)
@@ -139,6 +156,8 @@ func SetupDatabase() {
 		End_Date:   endDate,
 		Rate:       2900.00,
 		StudentID:  &s1,
+		RoomID:   &s1,
+		Admin_ID: &s1,
 	})
 
 	db.Model(&entity.Contract{}).Create(&entity.Contract{
@@ -146,6 +165,8 @@ func SetupDatabase() {
 		End_Date:   endDate,
 		Rate:       2900.00,
 		StudentID:  &s2,
+		RoomID:   &s2,
+		Admin_ID: &s1,
 	})
 
 	db.Model(&entity.Contract{}).Create(&entity.Contract{
@@ -153,6 +174,8 @@ func SetupDatabase() {
 		End_Date:   endDate,
 		Rate:       2900.00,
 		StudentID:  &s3,
+		RoomID:   &s2,
+		Admin_ID: &s1,
 	})
 
 	// ✅ Seed Room
