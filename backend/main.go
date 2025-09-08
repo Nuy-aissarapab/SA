@@ -59,6 +59,7 @@ func main() {
 		router.DELETE("/student/:id", student.Delete)
 		router.PUT("/student/:id", student.UpdateUser)
 
+		router.PUT("/student/:id/password", student.ChangePassword)
 
 		// Admin
 		router.GET("/admins", admin.GetAll)

@@ -30,9 +30,8 @@ func Authorizes() gin.HandlerFunc {
 
         claims, err := jwtWrapper.ValidateToken(tokenStr)
         if err != nil {
-            // ✨ log ชัด ๆ
             c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-                "error": "invalid token",
+                "error":  "invalid token",
                 "detail": err.Error(),
             })
             return
@@ -40,11 +39,12 @@ func Authorizes() gin.HandlerFunc {
 
         email := claims.Email
 
-        // ลองหาเป็น Student ก่อน
+        // ลองเป็น Student ก่อน
         var st entity.Student
         if err := config.DB().Where("email = ?", email).First(&st).Error; err == nil {
             c.Set("role", "student")
-            c.Set("id", st.ID) // ต้องเป็น Student.ID เพื่อไปเทียบกับ review.StudentID
+            c.Set("id", st.ID)      // ← สำหรับ controller รุ่นเก่า
+            c.Set("userID", st.ID)  // ← สำหรับ controller รุ่นใหม่
             c.Next()
             return
         }
@@ -54,6 +54,7 @@ func Authorizes() gin.HandlerFunc {
         if err := config.DB().Where("email = ?", email).First(&ad).Error; err == nil {
             c.Set("role", "admin")
             c.Set("id", ad.ID)
+            c.Set("userID", ad.ID)
             c.Next()
             return
         }

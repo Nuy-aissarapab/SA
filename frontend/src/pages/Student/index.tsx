@@ -63,26 +63,26 @@ const AdminStudentTable: React.FC = () => {
   };
 
   const submitPwd = async (values: any) => {
-    if (!pwdTarget.id) return;
-    setPwdLoading(true);
-    try {
-      // ⚠️ ปรับ endpoint ตาม backend ของเธอ ถ้ามี route เฉพาะ เช่น /student/:id/password
-      const res = await Update(`/student/${pwdTarget.id}/password`, {
-        new_password: values.newPassword,
-      });
-      if (res?.status === 200) {
-        message.success("อัปเดตรหัสผ่านสำเร็จ");
-        setPwdOpen(false);
-      } else {
-        message.error(res?.data?.error || "อัปเดตรหัสผ่านไม่สำเร็จ");
-      }
-    } catch (e) {
-      console.error(e);
-      message.error("เกิดข้อผิดพลาด");
-    } finally {
-      setPwdLoading(false);
+  if (!pwdTarget.id) return;
+  setPwdLoading(true);
+  try {
+    const res = await Update(`/student/${pwdTarget.id}/password`, {
+      new_password: values.newPassword, // ✅ admin ไม่ต้องส่ง old_password
+    });
+    if (res?.status === 200) {
+      message.success("อัปเดตรหัสผ่านสำเร็จ");
+      setPwdOpen(false);
+    } else {
+      message.error(res?.data?.error || "อัปเดตรหัสผ่านไม่สำเร็จ");
     }
-  };
+  } catch (e) {
+    console.error(e);
+    message.error("เกิดข้อผิดพลาด");
+  } finally {
+    setPwdLoading(false);
+  }
+};
+
 
   const refresh = async () => {
     const res = await GetStudents();
@@ -289,39 +289,36 @@ const StudentSelfInfo: React.FC = () => {
   const [selfPwdForm] = Form.useForm();
 
   const submitSelfPwd = async (values: any) => {
-    if (!user?.ID) return;
+  if (!user?.ID) return;
 
-    // ห้ามใช้รหัสเดิมซ้ำ
-    if (values.currentPassword === values.newPassword) {
-      message.error("รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม");
-      return;
+  if (values.currentPassword === values.newPassword) {
+    message.error("รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม");
+    return;
+  }
+
+  setSelfPwdLoading(true);
+  try {
+    const res = await Update(`/student/${user.ID}/password`, {
+      old_password: values.currentPassword,
+      new_password: values.newPassword,
+    });
+    if (res?.status === 200) {
+      message.success("เปลี่ยนรหัสผ่านสำเร็จ");
+      setSelfPwdOpen(false);
+      selfPwdForm.resetFields();
+    } else if (res?.status === 401) {
+      message.error(res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง");
+    } else {
+      message.error(res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ");
     }
+  } catch (e) {
+    console.error(e);
+    message.error("เกิดข้อผิดพลาด");
+  } finally {
+    setSelfPwdLoading(false);
+  }
+};
 
-    setSelfPwdLoading(true);
-    try {
-      // ปรับชื่อคีย์ให้ตรงกับ backend ของคุณ (นิยม old_password/new_password)
-      const res = await Update(`/student/${user.ID}/password`, {
-        old_password: values.currentPassword,
-        new_password: values.newPassword,
-      });
-
-      if (res?.status === 200) {
-        message.success("เปลี่ยนรหัสผ่านสำเร็จ");
-        setSelfPwdOpen(false);
-        selfPwdForm.resetFields();
-      } else if (res?.status === 400 || res?.status === 401) {
-        // กรณีรหัสเดิมไม่ถูกต้อง/สิทธิ์ไม่ผ่าน
-        message.error(res?.data?.error || "รหัสผ่านเดิมไม่ถูกต้อง");
-      } else {
-        message.error(res?.data?.error || "เปลี่ยนรหัสผ่านไม่สำเร็จ");
-      }
-    } catch (e) {
-      console.error(e);
-      message.error("เกิดข้อผิดพลาด");
-    } finally {
-      setSelfPwdLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!UserID) {

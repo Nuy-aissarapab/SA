@@ -111,23 +111,17 @@ export const Get = async (
     });
 };
 
-export const Update = async (
-  url: string,
-  data: any,
-  requireAuth: boolean = true
-): Promise<AxiosResponse | any> => {
+export const Update = async (url: string, data: any, requireAuth = true) => {
   const config = requireAuth ? getConfig() : getConfigWithoutAuth();
-  return await axios
-    .put(`${API_URL}${url}`, data, config)
-    .then((res) => res.data)
-    .catch((error: AxiosError) => {
-      if (error?.response?.status === 401) {
-        localStorage.clear();
-        window.location.reload();
-      }
-      return error.response;
-    });
+  try {
+    const res = await axios.put(`${API_URL}${url}`, data, config);
+    return res; // important
+  } catch (error: any) {
+    return error.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
 };
+
+
 
 export const Delete = async (
   url: string,
