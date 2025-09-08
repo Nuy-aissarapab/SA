@@ -7,7 +7,7 @@ import (
 
 type Billing struct {
 	gorm.Model
-	Billing_date time.Time `json:"Billing_date"`
+	BillingDate time.Time `json:"Billing_date"`
 	Invoice      time.Time `json:"invoice"`
 	Due_Date     time.Time `json:"due_Date"`
 	Status       *string `json:"status"` // ✅ ต้องเป็น pointer
@@ -15,12 +15,8 @@ type Billing struct {
 
 	// Foreign key → Student
 	StudentID uint    `json:"student_id"`
-	Student   Student `gorm:"foreignKey:StudentID" json:"student"`
-
-	// 1 Billing มีได้หลาย Payment
-	Payment []Payment `gorm:"foreignKey:BillingID" json:"payment"`
+	// Student   Student `gorm:"foreignKey:StudentID" json:"student"`
 
 	// FK → Contract
 	ContractID uint     `json:"contract_id"`
-	Contract   Contract `gorm:"foreignKey:ContractID" json:"contract"`
 }
