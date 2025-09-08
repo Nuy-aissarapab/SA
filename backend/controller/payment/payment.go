@@ -1,17 +1,18 @@
 package payment
 
 import (
-	"net/http"
-	"time"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/SA/config"
 	"github.com/SA/entity"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"strings"
 )
 
-// controller/payment/payment.go (หรือไฟล์ที่คุณวางไว้)
+// --- helper: update Billing status ตามยอดที่จ่ายแล้ว ---
 func recomputeBillingStatus(db *gorm.DB, billingID uint) error {
 	var b entity.Billing
 	if err := db.First(&b, billingID).Error; err != nil {
@@ -27,14 +28,16 @@ func recomputeBillingStatus(db *gorm.DB, billingID uint) error {
 
 	var next *string
 	if totalPaid >= b.AmountDue && b.AmountDue > 0 {
-		v := "paid";    next = &v
+		v := "paid"
+		next = &v
 	} else if totalPaid > 0 {
-		v := "pending"; next = &v
+		v := "pending"
+		next = &v
 	} else {
 		next = nil
 	}
 
-	b.Status = next // ✅ ตอนนี้ชนิดตรงกัน (*string)
+	b.Status = next
 	return db.Save(&b).Error
 }
 
@@ -45,13 +48,19 @@ func GetPayments(c *gin.Context) {
 	billingId := c.Query("billingId")
 	db := config.DB()
 
-	q := db.Preload("Student").Preload("Billing").Preload("Receiver").Order("created_at DESC")
+	q := db.Preload("Evidence").
+		Preload("Student").
+		Preload("Billing").
+		Preload("Receiver").
+		Order("created_at DESC")
+
 	if studentId != "" {
 		q = q.Where("student_id = ?", studentId)
 	}
 	if billingId != "" {
 		q = q.Where("billing_id = ?", billingId)
 	}
+
 	if err := q.Find(&payments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,13 +68,15 @@ func GetPayments(c *gin.Context) {
 	c.JSON(http.StatusOK, payments)
 }
 
-
-
-
 func GetPaymentById(c *gin.Context) {
 	id := c.Param("id")
 	var p entity.Payment
-	if err := config.DB().Preload("Student").Preload("Billing").Preload("Receiver").First(&p, id).Error; err != nil {
+	if err := config.DB().
+		Preload("Evidence").
+		Preload("Student").
+		Preload("Billing").
+		Preload("Receiver").
+		First(&p, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "payment not found"})
 		return
 	}
@@ -73,18 +84,17 @@ func GetPaymentById(c *gin.Context) {
 }
 
 // ---------- create ----------
-// ---------- create ----------
 type createPaymentBody struct {
-	StudentID     uint     `json:"student_id" binding:"required"`
-	BillingID     uint     `json:"billing_id" binding:"required"`
-	Amount        float64  `json:"amount" binding:"required"`
-	Method        string   `json:"method" binding:"required"`
-	PaymentDate   *string  `json:"payment_date"`             // "2006-01-02 15:04:05"
-	PayerName     string   `json:"payer_name"`
-	ReceiptNumber string   `json:"receipt_number"`
-	EvidenceURL   string   `json:"evidence_url"`
-	Status        *string  `json:"status"`                   // null | pending | remaining | paid
-	ReceiverID    *uint    `json:"receiver_id"`              // optional
+	StudentID     uint    `json:"student_id" binding:"required"`
+	BillingID     uint    `json:"billing_id" binding:"required"`
+	Amount        float64 `json:"amount" binding:"required"`
+	Method        string  `json:"method" binding:"required"`
+	PaymentDate   *string `json:"payment_date"` // "2006-01-02 15:04:05"
+	PayerName     string  `json:"payer_name"`
+	ReceiptNumber string  `json:"receipt_number"`
+	EvidenceURL   string  `json:"evidence_url"`
+	Status        *string `json:"status"` // null | pending | remaining | paid
+	ReceiverID    *uint   `json:"receiver_id"`
 }
 
 func CreatePayment(c *gin.Context) {
@@ -95,7 +105,7 @@ func CreatePayment(c *gin.Context) {
 	}
 	db := config.DB()
 
-	// default status = pending, but allow explicit remaining/paid
+	// default status = "pending" (allow override only pending/remaining/paid)
 	def := "pending"
 	if body.Status != nil {
 		s := strings.ToLower(strings.TrimSpace(*body.Status))
@@ -105,21 +115,26 @@ func CreatePayment(c *gin.Context) {
 	}
 
 	p := entity.Payment{
-		StudentID:      body.StudentID,
-		BillingID:      body.BillingID,
-		Amount:         body.Amount,
-		Method:         body.Method,
-		PayerName:      body.PayerName,
-		EvidenceURL:    body.EvidenceURL,
-		ReceiverID:     body.ReceiverID,
-		Payment_Status: &def, // pending | remaining | paid
+		StudentID:   body.StudentID,
+		BillingID:   body.BillingID,
+		Amount:      body.Amount,
+		Method:      body.Method,
+		PayerName:   body.PayerName,
+		EvidenceURL: body.EvidenceURL,
+		ReceiverID:  body.ReceiverID,
 	}
+	// set status pointer
+	p.Payment_Status = &def
 
+	// สร้างเลขใบเสร็จจาก BillingID
 	p.ReceiptNumber = receiptFromBillingID(p.BillingID)
 
+	// วันที่จ่าย
 	if body.PaymentDate != nil {
 		if t, err := time.Parse("2006-01-02 15:04:05", *body.PaymentDate); err == nil {
 			p.Payment_Date = t
+		} else {
+			p.Payment_Date = time.Now()
 		}
 	} else {
 		p.Payment_Date = time.Now()
@@ -136,23 +151,15 @@ func CreatePayment(c *gin.Context) {
 
 // ---------- update status ----------
 type updateStatusBody struct {
-	Status *string `json:"status" binding:"required"` // null ป้องกันตรงนี้, แต่ต้อง deref ตอนใช้
+	Status *string `json:"status"` // allow null to clear
 }
 
 func UpdatePaymentStatus(c *gin.Context) {
 	id := c.Param("id")
 
 	var body updateStatusBody
-	if err := c.ShouldBindJSON(&body); err != nil || body.Status == nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status body"})
-		return
-	}
-
-	s := strings.ToLower(strings.TrimSpace(*body.Status))
-	switch s {
-	case "pending", "remaining", "paid":
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "status must be 'pending', 'remaining' or 'paid'"})
 		return
 	}
 
@@ -163,17 +170,27 @@ func UpdatePaymentStatus(c *gin.Context) {
 		return
 	}
 
-	pay.Payment_Status = &s
-	if s == "paid" && pay.Payment_Date.IsZero() {
-		pay.Payment_Date = time.Now()
+	if body.Status == nil {
+		// set NULL
+		pay.Payment_Status = nil
+	} else {
+		s := strings.ToLower(strings.TrimSpace(*body.Status))
+		switch s {
+		case "pending", "remaining", "paid":
+			pay.Payment_Status = &s
+			if s == "paid" && pay.Payment_Date.IsZero() {
+				pay.Payment_Date = time.Now()
+			}
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "status must be 'pending', 'remaining' or 'paid' (or null)"})
+			return
+		}
 	}
 
 	if err := db.Save(&pay).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	// 🔁 keep Billing in sync
 	_ = recomputeBillingStatus(db, pay.BillingID)
 
 	c.JSON(http.StatusOK, gin.H{"message": "updated", "payment": pay})
@@ -211,7 +228,7 @@ func RejectPayment(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "payment not found"})
 		return
 	}
-	status := "pending" // หรือใช้ "rejected" ถ้าต้องการสถานะนี้
+	status := "pending" // ถ้าต้องการสถานะ "rejected" จริง ๆ ค่อยเพิ่มใน UI/logic
 	pay.Payment_Status = &status
 	if err := db.Save(&pay).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -230,15 +247,17 @@ func UpdatePaymentReceiver(c *gin.Context) {
 	id := c.Param("id")
 	var body updateReceiverBody
 	if err := c.ShouldBindJSON(&body); err != nil {
-	 c.JSON(http.StatusBadRequest, gin.H{"error":"invalid body"})
-	 return
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
+		return
 	}
+
 	db := config.DB()
 	var pay entity.Payment
 	if err := db.First(&pay, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "payment not found"})
 		return
 	}
+
 	if body.ReceiverID != nil {
 		var a entity.Admin
 		if err := db.First(&a, *body.ReceiverID).Error; err != nil {
@@ -249,6 +268,7 @@ func UpdatePaymentReceiver(c *gin.Context) {
 	} else {
 		pay.ReceiverID = nil
 	}
+
 	if err := db.Save(&pay).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -258,16 +278,14 @@ func UpdatePaymentReceiver(c *gin.Context) {
 
 // helper
 func receiptFromBillingID(id uint) string {
-    // จะใช้เป็นแค่เลขดิบก็ได้: return fmt.Sprintf("%d", id)
-    return fmt.Sprintf("B%06d", id) // ตัวอย่าง: B000123
+	return fmt.Sprintf("B%06d", id) // ตัวอย่าง: B000123
 }
 
-// เพิ่มด้านบนไฟล์
+// ---------- method ----------
 type updateMethodBody struct {
 	Method string `json:"method" binding:"required"` // "bank" | "qr" | "cash" | ...
 }
 
-// PATCH /payments/:id/method
 func UpdatePaymentMethod(c *gin.Context) {
 	id := c.Param("id")
 
@@ -277,7 +295,6 @@ func UpdatePaymentMethod(c *gin.Context) {
 		return
 	}
 
-	// อนุญาตเฉพาะค่าที่รองรับ
 	allowed := map[string]bool{"bank": true, "qr": true, "cash": true}
 	if !allowed[body.Method] {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported method"})
@@ -296,6 +313,5 @@ func UpdatePaymentMethod(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "method updated", "payment": pay})
 }
