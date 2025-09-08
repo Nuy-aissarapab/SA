@@ -208,6 +208,48 @@ export async function GetLatestEvidencesByStudents(studentIds: number[]) {
     .then(res => res)              // ⬅️ ให้ได้ AxiosResponse
     .catch(e => e.response);
 }
+
+export async function GetLatestEvidencesByStudent(studentId: number): Promise<AxiosResponse<any>> {
+  const token = localStorage.getItem("token");
+  const tokenType = localStorage.getItem("token_type") || "Bearer";
+
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `${tokenType} ${token}`;
+
+  const base = (apiUrl || "").replace(/\/+$/, "");
+  const url = `${base}/evidences/latest?student_id=${encodeURIComponent(String(studentId))}`;
+
+  try {
+    const res = await axios.get(url, { headers });
+    return res;
+  } catch (e: any) {
+    return e?.response ?? {
+      status: 500,
+      statusText: "Network Error",
+      headers: {},
+      config: {},
+      data: { error: "Network error" },
+    };
+  }
+}
+
+export function normalizeWebPath(p?: string): string | undefined {
+  if (!p) return undefined;
+  const s = p.replace(/\\/g, "/").trim();    // backslash → slash
+  if (/^https?:\/\//i.test(s)) return s;     // absolute → ใช้เลย
+  return "/" + s.replace(/^\/+/, "");        // เติม "/" ต้นทาง
+}
+
+export function evidenceToImgSrc(ev?: {
+  url?: string;
+  address?: string;
+  mime_type?: string;
+}): string | undefined {
+  if (!ev) return undefined;
+  if (ev.url) return ev.url;                 // ถ้า API ให้ absolute แล้ว
+  return normalizeWebPath(ev.address);       // ไม่งั้น normalize path
+}
+
 export async function ConfirmPayment(id: number) {
   return await axios
     .put(`${apiUrl}/payments/${id}/confirm`, {}, requestOptions)
@@ -218,6 +260,27 @@ export async function ConfirmPayment(id: number) {
 export async function RejectPayment(id: number) {
   return await axios
     .put(`${apiUrl}/payments/${id}/reject`, {}, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export async function GetEvidenceByID(id: number) {
+  return await axios
+    .get(`${apiUrl}/evidences/${id}`, requestOptions)   // 👈 ใช้ GET
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export async function UpdateEvidence(id: number, data: any) {
+  return await axios
+    .put(`${apiUrl}/evidences/${id}`, data, requestOptions)  // 👈 ใช้ PUT พร้อมส่ง body
+    .then(res => res)
+    .catch(e => e.response);
+}
+// Service/https/evidence.ts (หรือรวมใน index.ts ของคุณ)
+export async function GetEvidencesByPaymentId(pid: number) {
+  return await axios
+    .get(`${apiUrl}/evidences?payment_id=${pid}`, requestOptions)
     .then(res => res)
     .catch(e => e.response);
 }
@@ -305,7 +368,7 @@ export async function RenewContract(
 export async function RequestRenewContract(
   id: number,
   body: { months?: number; start_date?: string; end_date?: string; rate?: number }
-) {
+) { 
   return await axios
     .put(`${apiUrl}/contracts/${id}/renew-request`, body, requestOptions)
     .then(res => res).catch(e => e.response);
@@ -346,7 +409,14 @@ export async function DeleteContractById(id: string) {
     .then((res) => res)
     .catch((e) => e.response);
 }
-// Service/https/index.tsx
+
+export async function GetRooms() {
+  return await axios
+    .get(`${apiUrl}/rooms`, requestOptions)
+    .then(res => res)
+    .catch(e => e.response);
+}
+
 
 
 
