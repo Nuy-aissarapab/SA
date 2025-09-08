@@ -63,8 +63,6 @@ const ExtendSuccess = Loadable(lazy(() => import("../pages/Contract/Extendcontra
 
 const EvidenceGallery = Loadable(lazy(() => import("../pages/Contract/Extendcontract/EvidenceGallery")));
 
-const History = Loadable(lazy(() => import("../pages/Contract/History")));
-
 const Announcement = Loadable(lazy(() => import("../pages/Announcement")));
 
 
@@ -149,13 +147,6 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
 
           },
 
-          {
-
-            path: "/Contract/History",
-
-            element: <History />,
-
-          },
           {
 
             path: "/Contract/History",
