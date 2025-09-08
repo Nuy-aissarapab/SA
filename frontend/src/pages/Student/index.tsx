@@ -68,7 +68,7 @@ const AdminStudentTable: React.FC = () => {
     try {
       // ⚠️ ปรับ endpoint ตาม backend ของเธอ ถ้ามี route เฉพาะ เช่น /student/:id/password
       const res = await Update(`/student/${pwdTarget.id}/password`, {
-        password: values.newPassword,
+        new_password: values.newPassword,
       });
       if (res?.status === 200) {
         message.success("อัปเดตรหัสผ่านสำเร็จ");
