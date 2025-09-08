@@ -139,7 +139,7 @@ func SetupDatabase() {
 		Address:      "56/78 ถ.มิตรภาพ ต.บ้านเกาะ อ.เมือง จ.นครราชสีมา",
 	})
 
-	//Payment
+	//Payment try
 	db.Create(&entity.Payment{
 		StudentID:    1,
 		BillingID:    1,
