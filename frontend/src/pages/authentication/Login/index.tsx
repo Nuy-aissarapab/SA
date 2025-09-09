@@ -97,7 +97,6 @@ function SignInPages() {
                   <Button type="primary" htmlType="submit" style={{ marginBottom: 10, width: "100%" }}>
                     เข้าสู่ระบบ
                   </Button>
-                    หรือ <a onClick={() => navigate("/signup")}> สมัครสมาชิก!</a>
                 </Form.Item>
               </Form>
             </Col>
