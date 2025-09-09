@@ -1,0 +1,33 @@
+.container{
+    border: 1px solid red;
+    height: 100vh;
+    width: 100vw;
+}
+.nav{
+    border:1px solid red;
+    display:flex;
+    justify-content: space-between;
+    height: 14%;
+}
+.menu{
+    display: flex;
+    width: 200px;
+    justify-content: center;
+    align-items: center;
+}
+.menu a{
+    margin: 10px;
+    font-size: 24px;
+    color: red;
+    font-weight: bold;
+    text-decoration: none;
+}
+.content{
+    border: 1px solid blue;
+    height: 86%;
+}
+.input{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}

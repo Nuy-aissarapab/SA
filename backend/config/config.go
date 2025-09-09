@@ -14,7 +14,7 @@ func HashPassword(password string) (string, error) {
 	start := time.Now()
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), BCRYPT_COST)
 	log.Printf("Password hashing took: %v", time.Since(start))
-	return string(bytes), err
+   return string(bytes), err
 }
 
 // CheckPasswordHash เป็น function สำหรับ check password ที่ hash แล้ว ว่าตรงกันหรือไม่
@@ -23,7 +23,7 @@ func CheckPasswordHash(password, hash string) bool {
 	start := time.Now()
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	log.Printf("Password comparison took: %v", time.Since(start))
-	return err == nil
+   return err == nil
 }
 
 // ฟังก์ชันเพิ่มเติมสำหรับ debug

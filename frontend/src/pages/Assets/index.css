@@ -1,0 +1,4 @@
+/* จัดข้อความในหัวตารางให้อยู่กึ่งกลาง */
+.custom-table-center-header .ant-table-thead > tr > th {
+  text-align: center;
+}

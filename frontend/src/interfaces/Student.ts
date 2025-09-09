@@ -1,30 +1,16 @@
-// interfaces/Student.ts
-export interface StudentInterface {
-  ID?: number;            // <-- เปลี่ยนจาก StudentID เป็น ID
-  username?: string;
-  email?: string;
-  // password ไม่ต้องมีใน interface สำหรับ view
-  first_name?: string;
-  last_name?: string;
-  birthday?: string;      // รับเป็น string แล้วไป format ในหน้า
-  phone?: string;
-  parent_phone?: string;
-  parent_name?: string;
-  address?: string;
-  major?: string;
+import type { Room } from "./Room";
 
-  room_id?: number | null;
-  room?: any;             // ถ้ารู้ shape ก็พิมพ์ชัด ๆ ได้
-  contracts?: any[];
-  payments?: any[];
-}
+export interface Student {
+  ID?: number;
+  CreatedAt?: string;
+  UpdatedAt?: string;
+  DeletedAt?: string | null;
 
-export interface CreateStudentRequest {
-  Email: string;
-  Password: string;
-}
+  first_name: string;
+  Last_lame: string;
+  parent_phone: string;
 
-export interface LoginStudentRequest {
-  Email: string;
-  Password: string;
+  // Relations
+  Room_ID?: number | null;
+  Room?: Room;
 }

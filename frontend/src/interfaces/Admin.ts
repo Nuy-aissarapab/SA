@@ -1,20 +1,15 @@
-// Admin
-export interface AdminInterface {
-  AdminID?: number;
-  Email?: string;
-  Password?: string;
-  first_name?: string;
-  last_name?: string;
-  Birthday?: string;
-  Phone?: string;
-}
+import type { Room } from "./Room";
 
-export interface CreateAdminRequest {
-  Email: string;
-  Password: string;
-}
+export interface Admin {
+  ID?: number;
+  CreatedAt?: string;
+  UpdatedAt?: string;
+  DeletedAt?: string | null;
 
-export interface LoginAdminRequest {
-  Email: string;
-  Password: string;
+  Username: string;
+  first_name: string;
+  last_name: string;
+
+  // Relations
+  Rooms?: Room[];
 }

@@ -1,19 +1,26 @@
 package entity
 
 import (
-	"time"
-	"gorm.io/gorm"
+    "gorm.io/gorm"
+    "time"
 )
 
 type Room struct {
-	gorm.Model
-	RoomNumber		string 		`json:"room_number"`
-	Status			string 		`json:"room_status"`
-	Image			string 		`json:"image"`
-	LastUpdated		time.Time 	`json:"last_updated"`
+    gorm.Model
+    RoomNumber  string    `json:"room_number"`
+    Status      string    `json:"room_status"`
+    Image       string    `json:"image"`
+    BookingTime time.Time `json:"BookingTime"`
+    LastUpdated time.Time  `json:"last_updated"`
 
-	AdminID *uint
-	Admin   Admin `gorm:"foreignKey:AdminID"`
+    // Foreign Keys
+    RoomTypeID uint  
+    StudentID  *uint 
+    AdminID    uint  
 
-
+    // Relations
+    RoomType  *RoomType   `gorm:"foreignKey:RoomTypeID"`
+    Student   *Student    `gorm:"foreignKey:StudentID"`
+    Admin     *Admin      `gorm:"foreignKey:AdminID"`
+    RoomAsset []RoomAsset `gorm:"foreignKey:RoomNumber;references:RoomNumber"`
 }

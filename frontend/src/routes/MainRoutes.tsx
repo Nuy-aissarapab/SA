@@ -8,13 +8,15 @@ import MinimalLayout from "../layout/MinimalLayout";
 
 import Loadable from "../components/third-patry/Loadable";
 
-const LoginPage = Loadable(lazy(() => import("../pages/authentication/Login")));
+
+const MainPages = Loadable(lazy(() => import("../pages/authentication/Login")));
 
 const Registerages = Loadable(
 
   lazy(() => import("../pages/authentication/Register"))
 
 );
+
 
 const MainRoutes = (): RouteObject => {
 
@@ -30,7 +32,7 @@ const MainRoutes = (): RouteObject => {
 
         path: "/",
 
-        element: <LoginPage />,
+        element: <MainPages />,
 
       },
 
@@ -46,11 +48,9 @@ const MainRoutes = (): RouteObject => {
 
         path: "*",
 
-        element: <LoginPage />,
+        element: <MainPages />,
 
       },
-      
-
 
     ],
 

@@ -1,110 +1,145 @@
+import { Button, Card, Form, Input, message, Flex, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../../../Service/https";
+import { SignIn } from "../../../Service/https";
+import type { SignInInterface } from "../../../interfaces/SignIn";
 import logo from "../../../assets/logo.png";
-import type { LoginStudentRequest } from "../../../interfaces/Student";
-import type { LoginAdminRequest } from "../../../interfaces/Admin";
-import { useState } from "react";
-import { Button, Card, Form, Input, message, Flex, Row, Col, Radio } from "antd";
-
-type UserRole = "student" | "admin";
 
 function SignInPages() {
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
-  const [role, setRole] = useState<UserRole>("student"); // เก็บ role เฉพาะ frontend
+  const onFinish = async (values: SignInInterface) => {
+    let res = await SignIn(values);
+    
+    if (res.status == 200) {
+      messageApi.success("Sign-in successful");
+      localStorage.setItem("isLogin", "true");
+      localStorage.setItem("page", "dashboard");
+      localStorage.setItem("token_type", res.data.token_type);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("id", res.data.id);
 
-  const handleLogin = async (values: any) => {
-    try {
-      let res;
-      if (role === "student") res = await authAPI.studentLogin(values);
-      else res = await authAPI.adminLogin(values);
-  
-      if (res?.status === 200 && res?.data) {
-        // เก็บข้อมูลลง localStorage
-        localStorage.setItem("isLogin", "true");
-        localStorage.setItem("role", role);
-        localStorage.setItem("id", res.data.id);
-        localStorage.setItem("email", res.data.email);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("token_type", res.data.token_type ?? "Bearer");
-  
-        message.success("เข้าสู่ระบบสำเร็จ");
-        navigate("/Main");
-      } else if (res?.data?.error) {
-        messageApi.error(res.data.error);
-      } else {
-        messageApi.error("Unexpected error. Please try again.");
-        console.error("Login failed, response:", res);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      messageApi.error("Unexpected error. Please try again.");
+      setTimeout(() => {
+        location.href = "/";
+      }, 2000);
+    } else {
+      messageApi.error(res.data.error);
     }
   };
-  
-  
 
- return (
+  return (
     <>
       {contextHolder}
+
       <Flex justify="center" align="center" className="login">
+
         <Card className="card-login" style={{ width: 500 }}>
-          <Row align={"middle"} justify={"center"} style={{ height: "450px" }}>
-            <Col span={24} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+
+          <Row align={"middle"} justify={"center"} style={{ height: "400px" }}>
+
+            <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+
               <img
+
                 alt="logo"
+
+                style={{ width: "80%" }}
+
                 src={logo}
+
                 className="images-logo"
-                style={{ width: 80 }}
+
               />
-              <h2 style={{ margin: "8px 0 0 0", lineHeight: 1 }}>เข้าสู่ระบบ</h2>
-              <p style={{ margin: "2px 0 0 0" }}>ระบบบริหารจัดการหอพักนักศึกษา</p><br></br>
+
             </Col>
-            <Col span={24}>
+
+            <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+
               <Form
+
                 name="basic"
-                onFinish={handleLogin}
+
+                onFinish={onFinish}
+
                 autoComplete="off"
+
                 layout="vertical"
+
               >
-                {/* ✅ ใช้ state role ไม่ผูกกับ Form */}
-                <Form.Item label="Role">
-                  <Radio.Group
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                  >
-                    <Radio value="student">Student</Radio>
-                    <Radio value="admin">Admin</Radio>
-                  </Radio.Group>
-                </Form.Item>
 
                 <Form.Item
-                  label="email"
+
+                  label="Email"
+
                   name="email"
-                  rules={[{ required: true, message: "Please input your email!" }]}
+
+                  rules={[
+
+                    { required: true, message: "Please input your username!" },
+
+                  ]}
+
                 >
+
                   <Input />
+
                 </Form.Item>
 
+
                 <Form.Item
-                  label="password"
+
+                  label="Password"
+
                   name="password"
-                  rules={[{ required: true, message: "Please input your password!" }]}
+
+                  rules={[
+
+                    { required: true, message: "Please input your password!" },
+
+                  ]}
+
                 >
+
                   <Input.Password />
+
                 </Form.Item>
+
+
                 <Form.Item>
-                  <Button type="primary" htmlType="submit" style={{ marginBottom: 10, width: "100%" }}>
-                    เข้าสู่ระบบ
+
+                  <Button
+
+                    type="primary"
+
+                    htmlType="submit"
+
+                    className="login-form-button"
+
+                    style={{ marginBottom: 20 }}
+
+                  >
+
+                    Log in
+
                   </Button>
+
+                  Or <a onClick={() => navigate("/signup")}>signup now !</a>
+
                 </Form.Item>
+
               </Form>
+
             </Col>
+
           </Row>
+
         </Card>
+
       </Flex>
+
     </>
+
   );
+
 }
 
 export default SignInPages;

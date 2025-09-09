@@ -6,9 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/SA/entity"
-
 	"gorm.io/driver/sqlite"
-
 	"gorm.io/gorm"
 
 	"time"
@@ -25,18 +23,19 @@ func ConnectionDB() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	fmt.Println("connected database")
+	fmt.Println("✅ Connected to database")
 	db = database
 }
 
 func SetupDatabase() {
-	// Migrate the schema
 	db.AutoMigrate(
 		&entity.Admin{},
 		&entity.Billing{},
 		&entity.Payment{},
 		&entity.Contract{},
 		&entity.Room{},
+		&entity.RoomAsset{},
+		&entity.RoomType{},
 		&entity.Student{},
 		&entity.Evidence{},
 		&entity.ReviewTopic{},
@@ -47,8 +46,85 @@ func SetupDatabase() {
 		&entity.AnnouncementTarget{},
 		&entity.AnnouncementType{},
 		&entity.Announcement{},
+		&entity.AssetType{},
 	)
 
+// -----------------------------
+//  Seeding Data
+// -----------------------------
+
+func CreateAdmins() {
+	admins := []entity.Admin{
+		{Username: "admin01", First_Name: "Alice", Last_Name: "Anderson"},
+		{Username: "admin02", First_Name: "Bob", Last_Name: "Brown"},
+		{Username: "admin03", First_Name: "Charlie", Last_Name: "Clark"},
+		{Username: "admin04", First_Name: "Diana", Last_Name: "Davis"},
+		{Username: "admin05", First_Name: "Eve", Last_Name: "Edwards"},
+	}
+	db.Create(&admins)
+	fmt.Println("✅ Admins created")
+}
+
+func CreateStudents() {
+	students := []entity.Student{
+		{First_Name: "Tom", Last_Name: "Taylor", Parent_Phone: "0811111111"},
+		{First_Name: "Jerry", Last_Name: "Johnson", Parent_Phone: "0822222222"},
+		{First_Name: "Sam", Last_Name: "Smith", Parent_Phone: "0833333333"},
+		{First_Name: "Nina", Last_Name: "Nelson", Parent_Phone: "0844444444"},
+		{First_Name: "Oliver", Last_Name: "Owens", Parent_Phone: "0855555555"},
+	}
+	db.Create(&students)
+	fmt.Println("✅ Students created")
+}
+
+func CreateRoomTypes() {
+	roomTypes := []entity.RoomType{
+		{RoomTypeName: "Fan Room", RentalPrice: 5000},
+		{RoomTypeName: "Air Room", RentalPrice: 8000},
+	}
+	db.Create(&roomTypes)
+	fmt.Println("✅ RoomTypes created")
+}
+
+func CreateRooms() {
+	rooms := []entity.Room{
+		{RoomNumber: "R101", Status: "ว่าง", Image: "room1.jpg", BookingTime: time.Time{}, RoomTypeID: 1, StudentID: nil, AdminID: 1},
+		{RoomNumber: "R102", Status: "ไม่ว่าง", Image: "room2.jpg", BookingTime: time.Now(), RoomTypeID: 2, StudentID: uintPtr(2), AdminID: 1},
+		{RoomNumber: "R103", Status: "ว่าง", Image: "room3.jpg", BookingTime: time.Time{}, RoomTypeID: 1, StudentID: nil, AdminID: 2},
+		{RoomNumber: "R104", Status: "ไม่ว่าง", Image: "room4.jpg", BookingTime: time.Now(), RoomTypeID: 2, StudentID: uintPtr(4), AdminID: 2},
+		{RoomNumber: "R105", Status: "ว่าง", Image: "room5.jpg", BookingTime: time.Time{}, RoomTypeID: 1, StudentID: nil, AdminID: 3},
+	}
+	db.Create(&rooms)
+	fmt.Println("✅ Rooms created")
+}
+
+func uintPtr(i uint) *uint {
+	return &i
+}
+
+func CreateAssets() {
+	assets := []entity.AssetType{
+		{Name: "Table", Type: "furniture", PenaltyFee: 200, Date: time.Now()},
+		{Name: "Chair", Type: "furniture", PenaltyFee: 100, Date: time.Now()},
+		{Name: "Fan", Type: "facility", PenaltyFee: 150, Date: time.Now()},
+		{Name: "Lamp", Type: "facility", PenaltyFee: 80, Date: time.Now()},
+		{Name: "Bed", Type: "furniture", PenaltyFee: 300, Date: time.Now()},
+	}
+	db.Create(&assets)
+	fmt.Println("✅ Assets created")
+}
+
+func CreateRoomAssets() {
+	roomAssets := []entity.RoomAsset{
+		{RoomNumber: "R101", AssetTypeID: 1, Quantity: 1, Condition: "good", Status: "ok", CreatedDate: time.Now(), CheckDate: time.Now()},
+		{RoomNumber: "R102", AssetTypeID: 2, Quantity: 2, Condition: "fair", Status: "ok", CreatedDate: time.Now(), CheckDate: time.Now()},
+		{RoomNumber: "R103", AssetTypeID: 3, Quantity: 1, Condition: "good", Status: "ok", CreatedDate: time.Now(), CheckDate: time.Now()},
+		{RoomNumber: "R104", AssetTypeID: 4, Quantity: 1, Condition: "good", Status: "ok", CreatedDate: time.Now(), CheckDate: time.Now()},
+		{RoomNumber: "R105", AssetTypeID: 5, Quantity: 1, Condition: "good", Status: "ok", CreatedDate: time.Now(), CheckDate: time.Now()},
+	}
+}
+	db.Create(&roomAssets)
+	fmt.Println("✅ RoomAssets created")
 	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
 
 	// Admin Base

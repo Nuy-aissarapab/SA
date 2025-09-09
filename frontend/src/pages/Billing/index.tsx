@@ -173,7 +173,7 @@ function Billing() {
 
   const deleteUserById = async (id: string) => {
 
-    const res = await DeleteUsersById(id);
+    let res = await DeleteUsersById(id);
 
 
     if (res.status == 200) {
@@ -205,7 +205,7 @@ function Billing() {
 
   const getUsers = async () => {
 
-    const res = await GetUsers();
+    let res = await GetUsers();
 
    
 

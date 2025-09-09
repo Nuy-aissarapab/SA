@@ -1,477 +1,477 @@
-// import {
+import {
 
-//   Space,
+  Space,
 
-//   Button,
+  Button,
 
-//   Col,
+  Col,
 
-//   Row,
+  Row,
 
-//   Divider,
+  Divider,
 
-//   Form,
+  Form,
 
-//   Input,
+  Input,
 
-//   Card,
+  Card,
 
-//   message,
+  message,
 
-//   DatePicker,
+  DatePicker,
 
-//   InputNumber,
+  InputNumber,
 
-//   Select,
+  Select,
 
-// } from "antd";
+} from "antd";
 
-// import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-// import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 
-// import type { UsersInterface } from "../../../interfaces/IUser";
+import type { UsersInterface } from "../../../interfaces/IUser";
 
-// import type { GenderInterface } from "../../../interfaces/Gender";
+import type { GenderInterface } from "../../../interfaces/Gender";
 
-// import { GetGender, CreateUser } from "../../../Service/https";
+import { GetGender, CreateUser } from "../../../Service/https";
 
-// import { useNavigate, Link } from "react-router-dom";
-
-
-// function CustomerCreate() {
-
-//   const navigate = useNavigate();
+import { useNavigate, Link } from "react-router-dom";
 
 
-//   const [messageApi, contextHolder] = message.useMessage();
+function CustomerCreate() {
 
-//   const [gender, setGender] = useState<GenderInterface[]>([]);
-
-
-//   const onGetGender = async () => {
-
-//     let res = await GetGender();
-
-//     if (res.status == 200) {
-
-//       setGender(res.data);
-
-//     } else {
-
-//       messageApi.open({
-
-//         type: "error",
-
-//         content: "ไม่พบข้อมูลเพศ",
-
-//       });
-
-//       setTimeout(() => {
-
-//         navigate("/customer");
-
-//       }, 2000);
-
-//     }
-
-//   };
+  const navigate = useNavigate();
 
 
-//   const onFinish = async (values: UsersInterface) => {
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const [gender, setGender] = useState<GenderInterface[]>([]);
 
 
-//     let res = await CreateUser(values);
+  const onGetGender = async () => {
+
+    let res = await GetGender();
+
+    if (res.status == 200) {
+
+      setGender(res.data);
+
+    } else {
+
+      messageApi.open({
+
+        type: "error",
+
+        content: "ไม่พบข้อมูลเพศ",
+
+      });
+
+      setTimeout(() => {
+
+        navigate("/customer");
+
+      }, 2000);
+
+    }
+
+  };
+
+
+  const onFinish = async (values: UsersInterface) => {
+
+
+    let res = await CreateUser(values);
 
    
 
-//     if (res.status == 201) {
+    if (res.status == 201) {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "success",
+        type: "success",
 
-//         content: res.data.message,
+        content: res.data.message,
 
-//       });
+      });
 
-//       setTimeout(function () {
+      setTimeout(function () {
 
-//         navigate("/customer");
+        navigate("/customer");
 
-//       }, 2000);
+      }, 2000);
 
-//     } else {
+    } else {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "error",
+        type: "error",
 
-//         content: res.data.error,
+        content: res.data.error,
 
-//       });
+      });
 
-//     }
+    }
 
-//   };
+  };
 
 
-//   useEffect(() => {
+  useEffect(() => {
 
-//     onGetGender();
+    onGetGender();
 
-//     return () => {};
+    return () => {};
 
-//   }, []);
+  }, []);
 
 
-//   return (
+  return (
 
-//     <div>
+    <div>
 
-//       {contextHolder}
+      {contextHolder}
 
-//       <Card>
+      <Card>
 
-//         <h2>เพิ่มข้อมูล ผู้ดูแลระบบ</h2>
+        <h2>เพิ่มข้อมูล ผู้ดูแลระบบ</h2>
 
-//         <Divider />
+        <Divider />
 
 
-//         <Form
+        <Form
 
-//           name="basic"
+          name="basic"
 
-//           layout="vertical"
+          layout="vertical"
 
-//           onFinish={onFinish}
+          onFinish={onFinish}
 
-//           autoComplete="off"
+          autoComplete="off"
 
-//         >
+        >
 
-//           <Row gutter={[16, 0]}>
+          <Row gutter={[16, 0]}>
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="ชื่อจริง"
+                label="ชื่อจริง"
 
-//                 name="first_name"
+                name="first_name"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกชื่อ !",
+                    message: "กรุณากรอกชื่อ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="นามกสุล"
+                label="นามกสุล"
 
-//                 name="last_name"
+                name="last_name"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกนามสกุล !",
+                    message: "กรุณากรอกนามสกุล !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="อีเมล"
+                label="อีเมล"
 
-//                 name="email"
+                name="email"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     type: "email",
+                    type: "email",
 
-//                     message: "รูปแบบอีเมลไม่ถูกต้อง !",
+                    message: "รูปแบบอีเมลไม่ถูกต้อง !",
 
-//                   },
+                  },
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกอีเมล !",
+                    message: "กรุณากรอกอีเมล !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="รหัสผ่าน"
+                label="รหัสผ่าน"
 
-//                 name="password"
+                name="password"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกรหัสผ่าน !",
+                    message: "กรุณากรอกรหัสผ่าน !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input.Password />
+                <Input.Password />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="วัน/เดือน/ปี เกิด"
+                label="วัน/เดือน/ปี เกิด"
 
-//                 name="birthday"
+                name="birthday"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณาเลือกวัน/เดือน/ปี เกิด !",
+                    message: "กรุณาเลือกวัน/เดือน/ปี เกิด !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: "100%" }} />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="อายุ"
+                label="อายุ"
 
-//                 name="age"
+                name="age"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกอายุ !",
+                    message: "กรุณากรอกอายุ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <InputNumber
+                <InputNumber
 
-//                   min={0}
+                  min={0}
 
-//                   max={99}
+                  max={99}
 
-//                   defaultValue={0}
+                  defaultValue={0}
 
-//                   style={{ width: "100%" }}
+                  style={{ width: "100%" }}
 
-//                 />
+                />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//               <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+              <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="ที่อยู่"
+                label="ที่อยู่"
 
-//                 name="address"
+                name="address"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกที่อยู่ !",
+                    message: "กรุณากรอกที่อยู่ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input
+                <Input
 
-//                   style={{ width: "100%" }}
+                  style={{ width: "100%" }}
 
-//                 />
+                />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
             
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="เพศ"
+                label="เพศ"
 
-//                 name="gender_id"
+                name="gender_id"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณาเลือกเพศ !",
+                    message: "กรุณาเลือกเพศ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                  <Select defaultValue="" style={{ width: "100%" }}>
+                 <Select defaultValue="" style={{ width: "100%" }}>
 
-//                   {gender?.map((item) => (
+                  {gender?.map((item) => (
 
-//                     <Select.Option
-//                       key={item?.ID}
-//                       value={item?.ID}
+                    <Select.Option
+                      key={item?.ID}
+                      value={item?.ID}
 
-//                     >
+                    >
 
-//                       {item?.gender}
+                      {item?.gender}
 
-//                     </Select.Option>
+                    </Select.Option>
 
-//                   ))}
+                  ))}
 
-//                 </Select>
+                </Select>
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//           </Row>
-
-
-//           <Row justify="end">
-
-//             <Col style={{ marginTop: "40px" }}>
-
-//               <Form.Item>
-
-//                 <Space>
-
-//                   <Link to="/customer">
-
-//                     <Button htmlType="button" style={{ marginRight: "10px" }}>
-
-//                       ยกเลิก
-
-//                     </Button>
-
-//                   </Link>
+          </Row>
 
 
-//                   <Button
+          <Row justify="end">
 
-//                     type="primary"
+            <Col style={{ marginTop: "40px" }}>
 
-//                     htmlType="submit"
+              <Form.Item>
 
-//                     icon={<PlusOutlined />}
+                <Space>
 
-//                   >
+                  <Link to="/customer">
 
-//                     ยืนยัน
+                    <Button htmlType="button" style={{ marginRight: "10px" }}>
 
-//                   </Button>
+                      ยกเลิก
 
-//                 </Space>
+                    </Button>
 
-//               </Form.Item>
-
-//             </Col>
-
-//           </Row>
-
-//         </Form>
-
-//       </Card>
-
-//     </div>
-
-//   );
-
-// }
+                  </Link>
 
 
-// export default CustomerCreate;
+                  <Button
+
+                    type="primary"
+
+                    htmlType="submit"
+
+                    icon={<PlusOutlined />}
+
+                  >
+
+                    ยืนยัน
+
+                  </Button>
+
+                </Space>
+
+              </Form.Item>
+
+            </Col>
+
+          </Row>
+
+        </Form>
+
+      </Card>
+
+    </div>
+
+  );
+
+}
+
+
+export default CustomerCreate;

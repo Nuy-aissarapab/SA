@@ -1,498 +1,498 @@
-// import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-// import {
+import {
 
-//   Space,
+  Space,
 
-//   Button,
+  Button,
 
-//   Col,
+  Col,
 
-//   Row,
+  Row,
 
-//   Divider,
+  Divider,
 
-//   Form,
+  Form,
 
-//   Input,
+  Input,
 
-//   Card,
+  Card,
 
-//   message,
+  message,
 
-//   DatePicker,
+  DatePicker,
 
-//   InputNumber,
+  InputNumber,
 
-//   Select,
+  Select,
 
-// } from "antd";
+} from "antd";
 
-// import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 
-// import type { UsersInterface } from "../../../interfaces/IUser";
+import type { UsersInterface } from "../../../interfaces/IUser";
 
-// import type { GenderInterface } from "../../../interfaces/Gender";
+import type { GenderInterface } from "../../../interfaces/Gender";
 
-// import { GetGender, GetUsersById, UpdateUsersById } from "../../../Service/https/index";
+import { GetGender, GetUsersById, UpdateUsersById } from "../../../Service/https/index";
 
-// import { useNavigate, Link, useParams } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 
-// import dayjs from "dayjs";
+import dayjs from "dayjs";
 
 
-// function CustomerEdit() {
+function CustomerEdit() {
 
-//   const navigate = useNavigate();
+  const navigate = useNavigate();
 
-//   const { id } = useParams<{ id: any }>();
+  const { id } = useParams<{ id: any }>();
 
-//   const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage();
 
-//   const [gender, setGender] = useState<GenderInterface[]>([]);
+  const [gender, setGender] = useState<GenderInterface[]>([]);
 
-//   const [form] = Form.useForm();
+  const [form] = Form.useForm();
 
 
-//  const onGetGender = async () => {
+ const onGetGender = async () => {
 
-//     let res = await GetGender();
+    let res = await GetGender();
 
-//     if (res.status == 200) {
+    if (res.status == 200) {
 
-//       setGender(res.data);
+      setGender(res.data);
 
-//     } else {
+    } else {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "error",
+        type: "error",
 
-//         content: "ไม่พบข้อมูลเพศ",
+        content: "ไม่พบข้อมูลเพศ",
 
-//       });
+      });
 
-//       setTimeout(() => {
+      setTimeout(() => {
 
-//         navigate("/customer");
+        navigate("/customer");
 
-//       }, 2000);
+      }, 2000);
 
-//     }
+    }
 
-//   };
+  };
 
 
-//   const getUserById = async (id: string) => {
+  const getUserById = async (id: string) => {
 
-//     let res = await GetUsersById(id);
+    let res = await GetUsersById(id);
 
-//     if (res.status == 200) {
+    if (res.status == 200) {
 
-//       form.setFieldsValue({
+      form.setFieldsValue({
 
-//         first_name: res.data.first_name,
+        first_name: res.data.first_name,
 
-//         last_name: res.data.last_name,
+        last_name: res.data.last_name,
 
-//         email: res.data.email,
+        email: res.data.email,
 
-//         birthday: dayjs(res.data.birthday),
+        birthday: dayjs(res.data.birthday),
 
-//         address: res.data.address,
+        address: res.data.address,
 
-//         age: res.data.age,
+        age: res.data.age,
 
-//         gender_id: res.data.gender?.ID,
+        gender_id: res.data.gender?.ID,
 
-//       });
+      });
 
-//     } else {
+    } else {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "error",
+        type: "error",
 
-//         content: "ไม่พบข้อมูลผู้ใช้",
+        content: "ไม่พบข้อมูลผู้ใช้",
 
-//       });
+      });
 
-//       setTimeout(() => {
+      setTimeout(() => {
 
-//         navigate("/customer");
+        navigate("/customer");
 
-//       }, 2000);
+      }, 2000);
 
-//     }
+    }
 
-//   };
+  };
 
 
-//   const onFinish = async (values: UsersInterface) => {
+  const onFinish = async (values: UsersInterface) => {
 
-//     let payload = {
+    let payload = {
 
-//       ...values,
+      ...values,
 
-//     };
+    };
 
 
-//     const res = await UpdateUsersById(id, payload);
+    const res = await UpdateUsersById(id, payload);
 
-//     if (res.status == 200) {
+    if (res.status == 200) {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "success",
+        type: "success",
 
-//         content: res.data.message,
+        content: res.data.message,
 
-//       });
+      });
 
-//       setTimeout(() => {
+      setTimeout(() => {
 
-//         navigate("/customer");
+        navigate("/customer");
 
-//       }, 2000);
+      }, 2000);
 
-//     } else {
+    } else {
 
-//       messageApi.open({
+      messageApi.open({
 
-//         type: "error",
+        type: "error",
 
-//         content: res.data.error,
+        content: res.data.error,
 
-//       });
+      });
 
-//     }
+    }
 
-//   };
+  };
 
 
-//   useEffect(() => {
+  useEffect(() => {
 
-//     onGetGender();
+    onGetGender();
 
-//     getUserById(id);
+    getUserById(id);
 
-//   }, []);
+  }, []);
 
 
-//   return (
+  return (
 
-//     <div>
+    <div>
 
-//       {contextHolder}
+      {contextHolder}
 
-//       <Card>
+      <Card>
 
-//         <h2>แก้ไขข้อมูล ผู้ดูแลระบบ</h2>
+        <h2>แก้ไขข้อมูล ผู้ดูแลระบบ</h2>
 
-//         <Divider />
+        <Divider />
 
 
-//         <Form
+        <Form
 
-//           name="basic"
+          name="basic"
 
-//           form={form}
+          form={form}
 
-//           layout="vertical"
+          layout="vertical"
 
-//           onFinish={onFinish}
+          onFinish={onFinish}
 
-//           autoComplete="off"
+          autoComplete="off"
 
-//         >
+        >
 
-//           <Row gutter={[16, 0]}>
+          <Row gutter={[16, 0]}>
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="ชื่อจริง"
+                label="ชื่อจริง"
 
-//                 name="first_name"
+                name="first_name"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกชื่อ !",
+                    message: "กรุณากรอกชื่อ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="นามกสุล"
+                label="นามกสุล"
 
-//                 name="last_name"
+                name="last_name"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกนามสกุล !",
+                    message: "กรุณากรอกนามสกุล !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="อีเมล"
+                label="อีเมล"
 
-//                 name="email"
+                name="email"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     type: "email",
+                    type: "email",
 
-//                     message: "รูปแบบอีเมลไม่ถูกต้อง !",
+                    message: "รูปแบบอีเมลไม่ถูกต้อง !",
 
-//                   },
+                  },
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกอีเมล !",
+                    message: "กรุณากรอกอีเมล !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input />
+                <Input />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="วัน/เดือน/ปี เกิด"
+                label="วัน/เดือน/ปี เกิด"
 
-//                 name="birthday"
+                name="birthday"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณาเลือกวัน/เดือน/ปี เกิด !",
+                    message: "กรุณาเลือกวัน/เดือน/ปี เกิด !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: "100%" }} />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="อายุ"
+                label="อายุ"
 
-//                 name="age"
+                name="age"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกอายุ !",
+                    message: "กรุณากรอกอายุ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <InputNumber
+                <InputNumber
 
-//                   min={0}
+                  min={0}
 
-//                   max={99}
+                  max={99}
 
-//                   defaultValue={0}
+                  defaultValue={0}
 
-//                   style={{ width: "100%" }}
+                  style={{ width: "100%" }}
 
-//                 />
+                />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//               <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+              <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="ที่อยู่"
+                label="ที่อยู่"
 
-//                 name="address"
+                name="address"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณากรอกที่อยู่ !",
+                    message: "กรุณากรอกที่อยู่ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Input
+                <Input
 
-//                   style={{ width: "100%" }}
+                  style={{ width: "100%" }}
 
-//                 />
+                />
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//             <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
 
-//               <Form.Item
+              <Form.Item
 
-//                 label="เพศ"
+                label="เพศ"
 
-//                 name="gender_id"
+                name="gender_id"
 
-//                 rules={[
+                rules={[
 
-//                   {
+                  {
 
-//                     required: true,
+                    required: true,
 
-//                     message: "กรุณาเลือกเพศ !",
+                    message: "กรุณาเลือกเพศ !",
 
-//                   },
+                  },
 
-//                 ]}
+                ]}
 
-//               >
+              >
 
-//                 <Select defaultValue="" style={{ width: "100%" }}>
+                <Select defaultValue="" style={{ width: "100%" }}>
 
-//                   {gender?.map((item) => (
+                  {gender?.map((item) => (
 
-//                     <Select.Option value={item?.ID}>
+                    <Select.Option value={item?.ID}>
 
-//                       {item?.gender}
+                      {item?.gender}
 
-//                     </Select.Option>
+                    </Select.Option>
 
-//                   ))}
+                  ))}
 
-//                 </Select>
+                </Select>
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//           </Row>
+          </Row>
 
 
-//           <Row justify="end">
+          <Row justify="end">
 
-//             <Col style={{ marginTop: "40px" }}>
+            <Col style={{ marginTop: "40px" }}>
 
-//               <Form.Item>
+              <Form.Item>
 
-//                 <Space>
+                <Space>
 
-//                   <Link to="/customer">
+                  <Link to="/customer">
 
-//                     <Button htmlType="button" style={{ marginRight: "10px" }}>
+                    <Button htmlType="button" style={{ marginRight: "10px" }}>
 
-//                       ยกเลิก
+                      ยกเลิก
 
-//                     </Button>
+                    </Button>
 
-//                   </Link>
+                  </Link>
 
 
-//                   <Button
+                  <Button
 
-//                     type="primary"
+                    type="primary"
 
-//                     htmlType="submit"
+                    htmlType="submit"
 
-//                     icon={<PlusOutlined />}
+                    icon={<PlusOutlined />}
 
-//                   >
+                  >
 
-//                     บันทึก
+                    บันทึก
 
-//                   </Button>
+                  </Button>
 
-//                 </Space>
+                </Space>
 
-//               </Form.Item>
+              </Form.Item>
 
-//             </Col>
+            </Col>
 
-//           </Row>
+          </Row>
 
-//         </Form>
+        </Form>
 
-//       </Card>
+      </Card>
 
-//     </div>
+    </div>
 
-//   );
+  );
 
-// }
+}
 
-// export default CustomerEdit;
+export default CustomerEdit;

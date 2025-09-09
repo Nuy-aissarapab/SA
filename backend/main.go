@@ -39,9 +39,59 @@ func main() {
 	// เชื่อมต่อผ่าน config (ใช้ที่อื่น ๆ ในโปรเจกต์)
 	config.ConnectionDB()
 	config.SetupDatabase()
+r := gin.Default()
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"http://localhost:5173"},
+	// 	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// 	MaxAge:           12 * time.Hour,
+	// }))
 
-	r := gin.Default()
-	r.Use(CORSMiddleware())
+
+	// -----------------------------
+	// API กลุ่ม Room-Type(ประเภทห้อง)
+	// -----------------------------
+	r.GET("/room-types",room.GetAllRoomType)
+
+	// -----------------------------
+	// 6. API กลุ่ม Room (ห้อง)
+	// -----------------------------
+	r.GET("/rooms",room.GetAllRooms)
+	r.GET("/rooms/:id", room.GetRoomByID)
+	r.POST("/rooms/book", room.BookRoom)
+	r.POST("/rooms/cancel-booking", room.CancelBooking)
+	r.POST("/rooms",room.PostAllRooms)
+	r.PUT("/rooms/:id",room.UpdateAllRoom)
+	r.DELETE("/rooms/:id",room.DeleteAllRoom)
+	
+	
+	// -----------------------------
+	//  API กลุ่ม RoomAsset (ความสัมพันธ์ ห้อง-ครุภัณฑ์)
+	// -----------------------------
+	r.GET("/room-assets",roomasset.GetAllRoomAssets)
+	r.GET("/room-assets/:id", roomasset.GetRoomAssetById)
+	r.POST("/room-assets",roomasset.CreateRoomAsset)
+	r.PUT("/room-assets/:id", roomasset.UpdateRoomAsset)
+	r.DELETE("/room-assets/:id", roomasset.DeleteRoomAsset)
+
+	// -----------------------------
+	//  API กลุ่ม Asset (ประเภท)
+	// -----------------------------
+	r.GET("/asset-types",roomasset.GetAllAssetTypes)
+	// -----------------------------
+	// 9. API กลุ่ม Image (รูปภาพ)
+	// -----------------------------
+	// ดึงรายการรูปภาพทั้งหมด
+	r.Static("/images", "./static/image")
+	// -----------------------------
+// 10. API ตรวจสอบสถานะการจองห้องของนักศึกษา
+// -----------------------------
+
+
+
+r.Use(CORSMiddleware())
 
 
 	// ===== Public routes (ไม่ต้องใช้ token) =====

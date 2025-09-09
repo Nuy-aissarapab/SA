@@ -1,99 +1,302 @@
-import { useEffect, useState } from "react";
-import { Button, Table, Rate, message } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
-import { GetReviews, DeleteReview } from "../../Service/https";
-import type { ReviewInterface } from "../../interfaces/Review";
+import { useState, useEffect } from "react";
+
+import { Space, Table, Button, Col, Row, Divider, message } from "antd";
+
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+
 import type { ColumnsType } from "antd/es/table";
+
+import { GetUsers, DeleteUsersById } from "../../Service/https/index";
+
+import type { UsersInterface } from "../../interfaces/IUser";
+
+import { Link, useNavigate } from "react-router-dom";
+
 import dayjs from "dayjs";
 
-export default function ReviewPage() {
-  const [reviews, setReviews] = useState<ReviewInterface[]>([]);
+
+function Review() {
+
+  const navigate = useNavigate();
+
+  const [users, setUsers] = useState<UsersInterface[]>([]);
+
   const [messageApi, contextHolder] = message.useMessage();
 
-  const role = localStorage.getItem("role");   // "student" | "admin"
   const myId = localStorage.getItem("id");
 
-  const getTitle = (r: any) => r?.Title ?? r?.title ?? "-";
-  const getFirstName = (r:any) => r?.Student?.first_name ?? r?.student?.first_name ?? r?.Student?.First_Name ?? "-";
-  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.room_number ?? "-";
-  const getTopic = (r:any) => r?.ReviewTopic?.TopicName ?? r?.review_topic?.topic_name ?? "-";
-  const getRating = (r: any) => r?.Rating ?? r?.rating ?? 0;
-  const getDate = (r: any) => r?.ReviewDate ?? r?.review_date;
-  const getOwnerId = (r:any) => r?.StudentID ?? r?.student_id ?? r?.Student?.ID ?? r?.student?.id;
-  const isOwner = (r:any) => myId && getOwnerId(r)?.toString() === myId.toString();
-  const getComment = (r: any) => r?.Comment ?? r?.comment ?? "-";
 
-  const columns: ColumnsType<any> = [
-    { title: "รหัส", dataIndex: "ID" },
-    { title: "หัวข้อ", render: (_: any, r: any) => getTitle(r) },
-    { title: "ประเภท", render: (_: any, r: any) => getTopic(r) },
-    { title: "ผู้รีวิว", render: (_: any, r: any) => getFirstName(r) },
-    { title: "ห้อง", render: (_: any, r: any) => getRoomNumber(r) },
-    { title: "คะแนน", render: (_: any, r: any) => <Rate disabled defaultValue={getRating(r)} /> },
-    { title: "ความคิดเห็น", render: (_: any, r: any) => getComment(r) },
+  const columns: ColumnsType<UsersInterface> = [
+
     {
-      title: "วันที่รีวิว",
-      render: (_: any, r: any) => {
-        const d = getDate(r);
-        return d ? dayjs(d).format("DD/MM/YYYY") : "-";
-      },
-    },
-    {
-  title: "การจัดการ",
-  render: (_: any, record: any) => {
-    if (role === "admin") {
-      return <Button danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>;
-    }
-    if (role === "student" && isOwner(record)) {
-      return (
+
+      title: "",
+
+      render: (record) => (
+
         <>
-          <Link to={`/Review/Edit/${record.ID}`}>
-            <Button icon={<EditOutlined />} style={{ marginRight: 8 }}>แก้ไข</Button>
-          </Link>
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>
-        </>
-      );
-    }
-    return null;
-  },
 
-  },
+          {myId == record?.ID ? (
+
+            <></>
+
+          ) : (
+
+            <Button
+
+              type="dashed"
+
+              danger
+
+              icon={<DeleteOutlined />}
+
+              onClick={() => deleteUserById(record.ID)}
+
+            ></Button>
+
+          )}
+
+        </>
+
+      ),
+
+    },
+
+    {
+
+      title: "ลำดับ",
+
+      dataIndex: "ID",
+
+      key: "id",
+
+    },
+
+    {
+
+      title: "ชื่อ",
+
+      dataIndex: "first_name",
+
+      key: "first_name",
+
+    },
+
+    {
+
+      title: "นามสกุุล",
+
+      dataIndex: "last_name",
+
+      key: "last_name",
+
+    },
+
+    {
+
+      title: "อีเมล",
+
+      dataIndex: "email",
+
+      key: "email",
+
+    },
+
+    {
+
+      title: "วัน/เดือน/ปี เกิด",
+
+      key: "birthday",
+
+      render: (record) => <>{dayjs(record.birthday).format("DD/MM/YYYY")}</>,
+
+    },
+
+    {
+
+      title: "อายุ",
+
+      dataIndex: "age",
+
+      key: "age",
+
+    },
+
+    {
+      title: "ที่อยู่",
+
+      dataIndex: "address",
+    
+      key: "address",
+    },
+
+    {
+
+      title: "เพศ",
+
+      key: "gender",
+
+      render: (record) => <>{record?.gender?.gender}</>,
+
+    },
+
+    {
+
+      title: "",
+
+      render: (record) => (
+
+        <>
+
+          <Button
+
+            type="primary"
+
+            icon={<DeleteOutlined />}
+
+            onClick={() => navigate(`/customer/edit/${record.ID}`)}
+
+          >
+
+            แก้ไขข้อมูล
+
+          </Button>
+
+        </>
+
+      ),
+
+    },
+
   ];
 
-  const fetchAll = async () => {
-    const res = await GetReviews();
-    if (res?.status === 200) setReviews(res.data);
-    else messageApi.error(res?.data?.error || "โหลดข้อมูลรีวิวล้มเหลว");
+
+  const deleteUserById = async (id: string) => {
+
+    let res = await DeleteUsersById(id);
+
+
+    if (res.status == 200) {
+
+      messageApi.open({
+
+        type: "success",
+
+        content: res.data.message,
+
+      });
+
+      await getUsers();
+
+    } else {
+
+      messageApi.open({
+
+        type: "error",
+
+        content: res.data.error,
+
+      });
+
+    }
+
   };
 
-  const handleDelete = async (id: number) => {
-    const res = await DeleteReview(id.toString());
-    if (res?.status === 200) {
-      messageApi.success("ลบรีวิวสำเร็จ");
-      fetchAll();
+
+  const getUsers = async () => {
+
+    let res = await GetUsers();
+
+   
+
+    if (res.status == 200) {
+
+      setUsers(res.data);
+
     } else {
-      messageApi.error(res?.data?.error || "ลบไม่สำเร็จ");
+
+      setUsers([]);
+
+      messageApi.open({
+
+        type: "error",
+
+        content: res.data.error,
+
+      });
+
     }
+
   };
+
 
   useEffect(() => {
-    fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+
+    getUsers();
+
+  }, []);
+
 
   return (
-    <div>
+
+    <>
+
       {contextHolder}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
-        <h2>รีวิวและประเมินหอพัก</h2>
-        {role === "student" && (
-          <Link to="/Review/Create">
-            <Button type="primary" icon={<PlusOutlined />}>เขียนรีวิวใหม่</Button>
-          </Link>
-        )}
+
+      <Row>
+
+        <Col span={12}>
+
+          <h2>ตรวจสอบสัญญาเช่า</h2>
+
+        </Col>
+
+
+        <Col span={12} style={{ textAlign: "end", alignSelf: "center" }}>
+
+          <Space>
+
+            <Link to="/customer/create">
+
+              <Button type="primary" icon={<PlusOutlined />}>
+
+                สร้างข้อมูล
+
+              </Button>
+
+            </Link>
+
+          </Space>
+
+        </Col>
+
+      </Row>
+
+
+      <Divider />
+
+
+      <div style={{ marginTop: 20 }}>
+
+        <Table
+
+          rowKey="ID"
+
+          columns={columns}
+
+          dataSource={users}
+
+          style={{ width: "100%", overflow: "scroll" }}
+
+        />
+
       </div>
-      <Table rowKey="ID" columns={columns} dataSource={reviews} pagination={{ pageSize: 10 }} />
-    </div>
+
+    </>
+
   );
+
 }
+
+
+export default Review;
