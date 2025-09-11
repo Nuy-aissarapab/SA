@@ -255,17 +255,6 @@ const FullLayout: React.FC = () => {
                   <span>Announcement</span>
                 </Link>
               </Menu.Item>
-
-              <Menu.Item
-                key="customer"
-                onClick={() => setCurrentPage("customer")}
-              >
-                <Link to="/">
-                  <KeyOutlined />
-
-                  <span>เปลี่ยนรหัสผ่าน</span>
-                </Link>
-              </Menu.Item>
             </Menu>
           </div>
         </div>
@@ -287,11 +276,6 @@ const FullLayout: React.FC = () => {
             <Menu.Item key="Review" style={itemStyle} onClick={() => setCurrentPage("Review")}>
               <Link to="/Review">รีวิวและประเมินหอพัก</Link>
             </Menu.Item>
-
-            <Menu.Item key="customer" style={itemStyle} onClick={() => setCurrentPage("customer")}>
-              <Link to="/">ติดต่อเจ้าหน้าที่</Link>
-            </Menu.Item>
-
             <Menu.Item
               key="Logout"
               style={itemStyle}
@@ -300,12 +284,6 @@ const FullLayout: React.FC = () => {
               }}
             >
               <Link to="/">ออกจากระบบ</Link>
-            </Menu.Item>
-
-            <Menu.Item key="lang" style={itemStyle} onClick={() => setCurrentPage("customer")}>
-              <Link to="/">
-                เปลี่ยนภาษา <DownOutlined />
-              </Link>
             </Menu.Item>
           </Menu>
         </Header>
