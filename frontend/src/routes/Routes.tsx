@@ -34,8 +34,6 @@ const MaintenanceCreate = Loadable(lazy(() => import("../pages/Maintenance/Creat
 
 const MaintenanceEdit = Loadable(lazy(() => import("../pages/Maintenance/Edit")));
 
-const MaintenanceStatus = Loadable(lazy(() => import("../pages/Maintenance/Status")));
-
 const Review = Loadable(lazy(() => import("../pages/Review")));
 
 const ReviewCreate = Loadable(lazy(() => import("../pages/Review/Create")));
@@ -254,8 +252,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
         children: [
           { path: "/Maintenance", element: <Maintenance /> },
           { path: "/Maintenance/Create", element: <MaintenanceCreate /> },
-          { path: "/Maintenance/Edit/:id", element: <MaintenanceEdit /> }, // ✅ มี :id
-          { path: "/Maintenance/Status/:id", element:<MaintenanceStatus /> }, 
+          { path: "/Maintenance/Edit/:id", element: <MaintenanceEdit /> }, 
         ],
       },
 
@@ -264,7 +261,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
         children: [
           { path: "/Review", element: <Review /> },
           { path: "/Review/Create", element: <ReviewCreate /> },
-          { path: "/Review/Edit/:id", element: <ReviewEdit /> }, // ✅ ต้องมี :id
+          { path: "/Review/Edit/:id", element: <ReviewEdit /> }, 
         ],
       },
       {
