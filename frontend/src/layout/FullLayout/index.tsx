@@ -60,8 +60,6 @@ import MaintenanceCreate from "../../pages/Maintenance/Create";
 
 import MaintenanceEdit from "../../pages/Maintenance/Edit";
 
-import MaintenanceStatus from "../../pages/Maintenance/Status"
-
 import Review from "../../pages/Review"
 
 import ReviewEdit from "../../pages/Review/Edit";
@@ -337,13 +335,8 @@ const FullLayout: React.FC = () => {
               <Route path="/Assets" element={<Assets />} />
               <Route path="/Room" element={<Room />} />
               <Route path="/Maintenance" element={<Maintenance />} />
-
               <Route path="/Maintenance/Create" element={<MaintenanceCreate />} />
-
               <Route path="/Maintenance/Edit/:id" element={<MaintenanceEdit />} />
-
-              <Route path="/Maintenance/Status/:id" element={<MaintenanceStatus />} />
-
               <Route path="/Review" element={<Review />} />
               <Route path="/Review/Create" element={<ReviewCreate />} />
               <Route path="/Review/Edit/:id" element={<ReviewEdit />} />{" "}
