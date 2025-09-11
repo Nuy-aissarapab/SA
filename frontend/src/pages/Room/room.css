@@ -1,0 +1,48 @@
+/* กำหนดกล่องหลักให้ใช้ Flexbox จัดเรียงองค์ประกอบภายในเป็นแนวนอน */
+.box-filter-search {
+  display: inline-flex;           /* เปิดโหมด flex */
+  justify-content:end;
+  align-items: center;     /* จัดให้องค์ประกอบตรงกลางแนวตั้ง */
+  gap: 10px;               /* เว้นระยะห่างระหว่าง element 10px */
+  padding: 5px;           /* กำหนดพื้นที่รอบ ๆ กล่อง */
+  border: 1px solid #ccc;  /* เส้นขอบสีเทาอ่อน */
+  border-radius: 5px;      /* ขอบโค้งมน */
+  background-color: #f9f9f9; /* พื้นหลังสีอ่อน */
+}
+
+/* จัดสไตล์ปุ่มค้นหา */
+.box-filter-search input[type="button"] {
+  padding: 5px 15px;       /* ระยะภายในปุ่ม */
+  font-size: 14px;          /* ขนาดตัวอักษร */
+  background-color: #007bff; /* สีพื้นหลังปุ่ม (น้ำเงิน) */
+  color: white;             /* สีตัวอักษรปุ่ม */
+  border: none;             /* ลบเส้นขอบปุ่ม */
+  border-radius: 4px;       /* ขอบโค้งมน */
+  cursor: pointer;          /* เปลี่ยน cursor เมื่อ hover */
+}
+
+/* สไตล์เมื่อเอาเมาส์ไปชี้ที่ปุ่ม */
+.box-filter-search input[type="button"]:hover {
+  background-color: #0056b3; /* เปลี่ยนสีปุ่มเข้มขึ้น */
+}
+
+/* จัดสไตล์ input ของกล่องค้นหา */
+.search-room input {
+  padding: 5px 10px;       /* ระยะภายในของ input */
+  font-size: 14px;          /* ขนาดตัวอักษร */
+  border: 1px solid #ccc;   /* เส้นขอบ input */
+  border-radius: 4px;       /* ขอบโค้งมน */
+}
+
+/* จัดสไตล์ select dropdown */
+.search-type select {
+  padding: 5px 30px;       /* ระยะภายในของ select */
+  font-size: 14px;          /* ขนาดตัวอักษร */
+  border: 1px solid #ccc;   /* เส้นขอบ select */
+  border-radius: 4px;       /* ขอบโค้งมน */
+}
+
+/* จัดข้อความในหัวตารางให้อยู่กึ่งกลาง */
+.custom-table-center-header .ant-table-thead > tr > th {
+  text-align: center;
+}

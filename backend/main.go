@@ -4,20 +4,22 @@ import (
 	"net/http"
 
 	"github.com/SA/config"
+	"github.com/SA/controller/RoomAsset"
 	"github.com/SA/controller/admin"
 	"github.com/SA/controller/announcement"
 	"github.com/SA/controller/announcement_target"
 	"github.com/SA/controller/announcement_type"
 	"github.com/SA/controller/contract"
 	"github.com/SA/controller/evidence"
-	"github.com/SA/controller/media"
-	"github.com/SA/controller/payment"
-	"github.com/SA/controller/room"
 	"github.com/SA/controller/maintenance"
 	"github.com/SA/controller/maintenancestatus"
+	"github.com/SA/controller/media"
+	"github.com/SA/controller/payment"
 	"github.com/SA/controller/problemtype"
 	"github.com/SA/controller/review"
 	"github.com/SA/controller/reviewTopic"
+	"github.com/SA/controller/Room"
+
 	"github.com/SA/controller/student"
 	"github.com/SA/entity"
 	"github.com/SA/middlewares"
@@ -42,7 +44,6 @@ func main() {
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
-
 
 	// ===== Public routes (ไม่ต้องใช้ token) =====
 	r.GET("/", func(c *gin.Context) {
@@ -94,10 +95,10 @@ func main() {
 
 		// Evidence
 		router.GET("/evidences", evidence.ListEvidences)
-		router.GET("/evidences/latest", evidence.GetLatestByStudent)          
+		router.GET("/evidences/latest", evidence.GetLatestByStudent)
 		router.GET("/students/:id/evidence/latest", evidence.GetLatestByStudent)
-		router.GET("/evidences/:id",evidence.GetEvidenceByID) 
-		router.PUT("/evidences/:id",evidence.UpdateEvidence)   
+		router.GET("/evidences/:id", evidence.GetEvidenceByID)
+		router.PUT("/evidences/:id", evidence.UpdateEvidence)
 
 		// Contracts
 		router.GET("/contracts", contract.ListContracts)
@@ -117,11 +118,11 @@ func main() {
 		// Maintenance (JSON)
 		router.GET("/maintenances", maintenance.List)
 		router.GET("/maintenance/:id", maintenance.Get)
-		router.POST("/maintenances", maintenance.Create)                 // JSON
-		router.PUT("/maintenance/:id", maintenance.Update)               // JSON
-		router.PATCH("/maintenance/:id/status", maintenance.UpdateStatus)// JSON
+		router.POST("/maintenances", maintenance.Create)                  // JSON
+		router.PUT("/maintenance/:id", maintenance.Update)                // JSON
+		router.PATCH("/maintenance/:id/status", maintenance.UpdateStatus) // JSON
 		router.DELETE("/maintenance/:id", maintenance.Delete)
-		
+
 		// Reviews
 		router.GET("/reviews", review.List)
 		router.POST("/reviews", review.Create) // student only
@@ -147,7 +148,32 @@ func main() {
 		router.GET("/announcement-targets", announcementtarget.ListAnnouncementTargets)
 		router.GET("/announcement-targets/:id", announcementtarget.GetAnnouncementTarget)
 
+		// Room Asset
+		router.GET("/room-assets", roomasset.GetAllRoomAssets)
+		router.GET("/room-assets/:id", roomasset.GetRoomAssetById)
+		router.POST("/room-assets", roomasset.CreateRoomAsset)
+		router.PUT("/room-assets/:id", roomasset.UpdateRoomAsset)
+		router.DELETE("/room-assets/:id", roomasset.DeleteRoomAsset)
+
+		// Room
+		router.GET("/room", room.GetAllRooms)
+		router.GET("/rooms/:id", room.GetRoomByID)
+		router.POST("/rooms/book", room.BookRoom)
+		router.POST("/rooms/cancel-booking", room.CancelBooking)
+		router.POST("/rooms", room.PostAllRooms)
+		router.PUT("/rooms/:id", room.UpdateAllRoom)
+		router.DELETE("/rooms/:id", room.DeleteAllRoom)
+
+		// RoomType
+		router.GET("/room-types",room.GetAllRoomType)
+
+		//Asset
+		router.GET("/asset-types",roomasset.GetAllAssetTypes)
+
+		//Image
+		router.Static("/images", "./static/image")
 	}
+
 
 	// ✅ AutoMigrate (รวม Evidence)
 	config.DB().AutoMigrate(

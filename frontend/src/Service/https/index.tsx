@@ -15,8 +15,9 @@ import type { ContractInterface } from "../../interfaces/Contract";
 import type { ReviewInterface } from "../../interfaces/Review";
 import type { MaintenanceInterface } from "../../interfaces/Maintenance";
 import type { CreateAnnouncementRequest } from "../../interfaces/CreateAnnouncementRequest";
-
+import type { RoomInterface } from "../../interfaces/Room";
 import axios, { AxiosError } from "axios";
+
 import type { AxiosResponse } from "axios";
 
 // =============================
@@ -685,3 +686,129 @@ export async function DeleteMaintenance(id: number) {
     .then((r) => r)
     .catch((e) => e.response);
 }
+
+
+// =============================
+// Rooms
+// =============================
+// Header สำหรับ auth
+const getAuthHeader = () => ({
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `${localStorage.getItem("token_type")} ${localStorage.getItem("token")}`,
+  },
+});
+
+// ---------------------- Room ----------------------
+export async function PostAllRooms(data: RoomInterface) {
+  return axios
+    .post(`${API_URL}/rooms`, data, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetAllRooms() {
+  return axios
+    .get(`${API_URL}/room`, getAuthHeader())
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+export async function DeleteAllRoom(id: number) {
+  return axios
+    .delete(`${API_URL}/rooms/${id}`, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetRoomById(id: number) {
+  return axios
+    .get(`${API_URL}/rooms/${id}`, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function UpdateAllRoom(id: number, data: any) {
+  return axios
+    .put(`${API_URL}/rooms/${id}`, data, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function BookRoom(room_id: number, student_id: number) {
+  return axios
+    .post(
+      `${API_URL}/rooms/book`,
+      { room_id, student_id },
+      getAuthHeader()
+    )
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function CancelBooking(room_id: number, student_id: number) {
+  return axios
+    .post(`${API_URL}/rooms/cancel-booking`, { room_id, student_id }, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+
+// ---------------------- RoomType ----------------------
+export async function GetAllRoomTypes() {
+  return axios
+    .get(`${API_URL}/room-types`, getAuthHeader())
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+// ---------------------- RoomAsset ----------------------
+export async function CreateRoomAsset(data: any) {
+  return axios.post(`${API_URL}/room-assets`, data, getAuthHeader());
+}
+
+export async function GetAllRoomAssets() {
+  return axios
+    .get(`${API_URL}/room-assets`, getAuthHeader())
+    .then((res) => res.data)
+    .catch((e) => e.response);
+}
+
+export async function DeleteRoomAsset(id: number) {
+  return axios
+    .delete(`${API_URL}/room-assets/${id}`, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function UpdateRoomAsset(id: number, data: any) {
+  return axios
+    .put(`${API_URL}/room-assets/${id}`, data, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetRoomAssetById(id: number) {
+  return axios
+    .get(`${API_URL}/room-assets/${id}`, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetAllAssetTypes() {
+  try {
+    const res = await axios.get(`${API_URL}/asset-types`, getAuthHeader());
+    return { status: res.status, data: res.data }; // ✅ คืนทั้ง status + data
+  } catch (e: any) {
+    return e?.response ?? { status: 500, data: [] };
+  }
+}
+
+// ---------------------- Student ----------------------
+
+// export async function GetStudentBookingStatus(student_id: number) {
+//   return axios
+//     .get(`${API_URL}/students/${student_id}/booking-status`, getAuthHeader())
+//     .then((res) => res)
+//     .catch((e) => e.response);
+// }

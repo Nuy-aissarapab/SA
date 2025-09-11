@@ -47,6 +47,9 @@ func SetupDatabase() {
 		&entity.AnnouncementTarget{},
 		&entity.AnnouncementType{},
 		&entity.Announcement{},
+		&entity.RoomType{},
+		&entity.AssetType{},
+		&entity.RoomAsset{},
 	)
 
 	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
@@ -138,19 +141,78 @@ func SetupDatabase() {
 		Major:        "ระบบสารสนเทศทางธุรกิจ",
 		Address:      "56/78 ถ.มิตรภาพ ต.บ้านเกาะ อ.เมือง จ.นครราชสีมา",
 	})
-
-	//Payment try
-	db.Create(&entity.Payment{
-		StudentID:    1,
-		BillingID:    1,
-		ContractID:   1,
-		EvidenceID:   1,
-		ReceiverID:   UPtr(1),
-		Amount:       2900,
-		Payment_Date: time.Now(),
-		Method:       "-",
-		PayerName:    "ผู้ปกครอง A",
+		//RoomType
+	db.Create(&entity.RoomType{
+		RoomTypeName:    "Air Room",
+		RentalPrice: 2900.00,
 	})
+	db.Create(&entity.RoomType{
+		RoomTypeName:    "Fan Room",
+		RentalPrice: 2500.00,
+	})
+	//Room
+// ✅ Seed Room (เพิ่ม RoomTypeID ให้ทุกห้อง)
+rooms := []entity.Room{
+    {RoomNumber: "100", Status: "ว่าง", Image: "room1.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "101", Status: "ไม่ว่าง", Image: "room2.jpg", RoomTypeID: 1, StudentID: &r1, AdminID: 1},
+    {RoomNumber: "102", Status: "ไม่ว่าง", Image: "room3.jpg", RoomTypeID: 1, StudentID: &r2, AdminID: 1},
+    {RoomNumber: "103", Status: "ว่าง", Image: "room4.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "104", Status: "ว่าง", Image: "room5.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "105", Status: "ว่าง", Image: "room6.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "201", Status: "ว่าง", Image: "room7.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "202", Status: "ว่าง", Image: "room8.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "203", Status: "ว่าง", Image: "room9.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "204", Status: "ว่าง", Image: "room10.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "205", Status: "ว่าง", Image: "room11.jpg", RoomTypeID: 1, AdminID: 1},
+}
+
+for _, r := range rooms {
+    db.FirstOrCreate(&entity.Room{}, r)
+}
+
+		//AssetType
+	db.Create(&entity.AssetType{
+		Name: "เตียง",
+		Type: "เฟอร์นิเจอร์",
+		PenaltyFee: 500.00,
+		Date: time.Now(),
+	})
+	db.Create(&entity.AssetType{
+		Name: "Wi-Fi",
+		Type: "สิ่งอำนวยความสะดวก",
+		PenaltyFee: 1000.00,
+		Date: time.Now(),
+	})
+	//RoomAsset
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+		Condition:   "ดี",
+		Status:      "ใช้งานได้",
+		CreatedDate: time.Now(),
+		CheckDate:   time.Now(),
+		RoomNumber:  "101",
+		AssetTypeID: 1,
+	})
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+		Condition:   "ดี",
+		Status:      "ใช้งานได้",
+		CreatedDate: time.Now(),
+		CheckDate:   time.Now(),
+		RoomNumber:  "102",
+		AssetTypeID: 1,
+	})
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+		Condition:   "ดี",
+		Status:      "ใช้งานได้",
+		CreatedDate: time.Now(),
+		CheckDate:   time.Now(),
+		RoomNumber:  "103",
+		AssetTypeID: 2,
+	})
+	
+
 
 	db.Create(&entity.Payment{
 		StudentID:    2,
@@ -210,11 +272,11 @@ func SetupDatabase() {
 		Admin_ID:   &s1,
 	})
 
-	// ✅ Seed Room
-	RoomNumber := []string{"101", "102", "103", "104", "105", "201", "202", "203", "204", "205"}
-	for _, name := range RoomNumber {
-		db.FirstOrCreate(&entity.Room{}, entity.Room{RoomNumber: name})
-	}
+	// // ✅ Seed Room
+	// RoomNumber := []string{"101", "102", "103", "104", "105", "201", "202", "203", "204", "205"}
+	// for _, name := range RoomNumber {
+	// 	db.FirstOrCreate(&entity.Room{}, entity.Room{RoomNumber: name})
+	// }
 
 	// ✅ Seed ProblemType (ComboBox) and MaintenanceStatus (ComboBox)
 	problemTypes := []string{"ไฟฟ้า", "ประปา", "เฟอร์นิเจอร์", "อื่นๆ"}

@@ -24,9 +24,17 @@ const Payment = Loadable(lazy(() => import("../pages/Payment")));
 
 const Student = Loadable(lazy(() => import("../pages/Student")));
 
-const Assets = Loadable(lazy(() => import("../pages/Assets")));
+const Asset = Loadable(lazy(() => import("../pages/Assets")));
+const CreateRoomAssetsForm = Loadable(lazy(() => import("../pages/Assets/CreateAssets")));
+const AssetRoom = Loadable(lazy(() => import("../pages/Assets/assetroom")));
+const RoomAssetEdit = Loadable(lazy(() => import("../pages/Assets/RoomAssetEdit")));
 
-const Room = Loadable(lazy(() => import("../pages/Room")));
+
+const RoomPage = Loadable(lazy(() => import("../pages/Room")));
+const CreateRoomForm = Loadable(lazy(() => import("../pages/Room/CreateRoom")));
+const RoomDetails = Loadable(lazy(() => import("../pages/Room/RoomDetails")));
+const Booking = Loadable(lazy(() => import("../pages/Room/Booking")));
+const RoomEdit = Loadable(lazy(() => import("../pages/Room/RoomEdit")));
 
 const Maintenance = Loadable(lazy(() => import("../pages/Maintenance")));
 
@@ -238,15 +246,41 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       },
 
       {
-        path: "/Assets",
-
-        element: <Assets />,
+        path: "/Assets",  
+        children: [
+          { path: "", element: <Asset /> },
+          { path: "assetroom", element: <AssetRoom /> },
+          { path: "room/:roomNumber", element: <Asset /> },
+          { path: "create", element: <CreateRoomAssetsForm /> },
+          { path: "edit/:id", element: <RoomAssetEdit /> }, // ✅ ต้องมี :id
+           // เพิ่มเส้นทางสำหรับ CreateAssets โดยมีพารามิเตอร์ roomNumber
+        ],
       },
 
       {
         path: "/Room",
-
-        element: <Room />,
+        children: [
+          {
+            path: "",
+            element: <RoomPage />,
+          },
+                    {
+            path: "createroom",
+            element: <CreateRoomForm />,
+          },
+          {
+            path: "RoomDetail/:id",
+            element: <RoomDetails />,
+          },
+          {
+            path: "booking/:id",
+            element: <Booking />,
+          },
+          {
+             path:"RoomEdit/:id" ,
+             element:<RoomEdit />
+          }
+        ],
       },
 
       {

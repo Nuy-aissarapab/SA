@@ -50,9 +50,17 @@ import Student from "../../pages/Student";
 
 import UpdateInfo from "../../pages/Student/UpdateInfo/UpdateInfo";
 
-import Assets from "../../pages/Assets";
+import Asset from "../../pages/Assets";
+import AssetRoom from "../../pages/Assets/assetroom";
+import CreateRoomAssetsForm from "../../pages/Assets/CreateAssets";
+import RoomAssetEdit from "../../pages/Assets/RoomAssetEdit";
 
-import Room from "../../pages/Room";
+
+import RoomPage from "../../pages/Room";
+import CreateRoomForm from "../../pages/Room/CreateRoom";
+import RoomDetails from "../../pages/Room/RoomDetails";
+import Booking from "../../pages/Room/Booking";
+import RoomEdit from "../../pages/Room/RoomEdit";
 
 import Maintenance from "../../pages/Maintenance";
 
@@ -218,7 +226,7 @@ const FullLayout: React.FC = () => {
               </Menu.Item>
 
               <Menu.Item key="Assets" onClick={() => setCurrentPage("Assets")}>
-                <Link to="/Assets">
+                <Link to="/Assets/assetroom">
                   <HomeOutlined />
 
                   <span>ทรัพย์สินหอพัก</span>
@@ -334,8 +342,21 @@ const FullLayout: React.FC = () => {
               <Route path="/Billing" element={<Billing />} />
               <Route path="/Billing/Payment" element={<Payment />} />
               <Route path="/Student" element={<Student />} />
-              <Route path="/Assets" element={<Assets />} />
-              <Route path="/Room" element={<Room />} />
+
+              <Route path="/Assets" element={<AssetRoom />} />
+              <Route path="/Assets/assetroom" element={<AssetRoom />} />
+              <Route path="/Assets/room/:roomNumber" element={<Asset />} />
+              <Route path="/Assets/create" element={<CreateRoomAssetsForm />} />
+              <Route path="/Assets/edit/:id" element={<RoomAssetEdit />} />
+
+
+
+              <Route path="/Room" element={<RoomPage />} />
+              <Route path="/Room/createroom" element={<CreateRoomForm />} />
+              <Route path="/Room/RoomDetail/:id" element={<RoomDetails />} />
+              <Route path="/Room/booking/:id" element={<Booking />} />
+              <Route path="/Room/RoomEdit/:id" element={<RoomEdit />} />
+
               <Route path="/Maintenance" element={<Maintenance />} />
 
               <Route path="/Maintenance/Create" element={<MaintenanceCreate />} />
