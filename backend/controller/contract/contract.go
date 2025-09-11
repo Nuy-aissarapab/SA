@@ -10,7 +10,6 @@ import (
 	"github.com/SA/entity"
 )
 
-
 // ===== Types =====
 type renewBody struct {
 	Months    *int     `json:"months"`      
@@ -158,18 +157,21 @@ func GetContracts(c *gin.Context) {
   
 func Create(c *gin.Context) {
     db := config.DB()
+
     var payload struct {
-        StartDate string   `json:"start_date"`
-        EndDate   string   `json:"end_date"`
-        Rate      float64  `json:"rate"`
-        StudentID uint     `json:"StudentID"`
-        RoomID    *uint    `json:"Room_ID"`   // ถ้ามี
-        AdminID   *uint    `json:"Admin_ID"`  // ถ้ามี
+        StartDate string  `json:"start_date"`
+        EndDate   string  `json:"end_date"`
+        Rate      float64 `json:"rate"`
+        StudentID uint    `json:"StudentID"`
+        RoomID    *uint   `json:"Room_ID"`
+        AdminID   *uint   `json:"Admin_ID"`
     }
+
     if err := c.ShouldBindJSON(&payload); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+
     s, err1 := parseYMD(payload.StartDate)
     e, err2 := parseYMD(payload.EndDate)
     if err1 != nil || err2 != nil {
@@ -177,17 +179,34 @@ func Create(c *gin.Context) {
         return
     }
 
-    ct := entity.Contract{
-        Start_Date: s, End_Date: e, Rate: payload.Rate,
-        StudentID: &payload.StudentID,
-        RoomID: payload.RoomID, Admin_ID: payload.AdminID,
+    // ❗️Duplicate check: student already has any contract
+    var exist entity.Contract
+    if err := db.Where("student_id = ?", payload.StudentID).First(&exist).Error; err == nil {
+        c.JSON(http.StatusConflict, gin.H{
+            "error": "student already has a contract; cannot create another",
+        })
+        return
+    } else if err != gorm.ErrRecordNotFound {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
     }
+
+    ct := entity.Contract{
+        Start_Date: s,
+        End_Date:   e,
+        Rate:       payload.Rate,
+        StudentID:  &payload.StudentID,
+        RoomID:     payload.RoomID,
+        Admin_ID:   payload.AdminID,
+    }
+
     if err := db.Create(&ct).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
     c.JSON(http.StatusCreated, ct)
 }
+
 
 func Update(c *gin.Context) {
 	db := config.DB()
