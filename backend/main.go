@@ -155,6 +155,7 @@ func main() {
 		router.PUT("/room-assets/:id", roomasset.UpdateRoomAsset)
 		router.DELETE("/room-assets/:id", roomasset.DeleteRoomAsset)
 
+		
 		// Room
 		router.GET("/room", room.GetAllRooms)
 		router.GET("/rooms/:id", room.GetRoomByID)
@@ -167,8 +168,11 @@ func main() {
 		// RoomType
 		router.GET("/room-types",room.GetAllRoomType)
 
-		//Asset
+		//Asset Type
 		router.GET("/asset-types",roomasset.GetAllAssetTypes)
+		router.POST("/asset-types", roomasset.CreateAssetType)
+		router.PUT("/asset-types", roomasset.UpdateAssetType)
+
 
 		//Image
 		router.Static("/images", "./static/image")

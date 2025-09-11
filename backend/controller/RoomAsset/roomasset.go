@@ -137,3 +137,58 @@ func GetAllAssetTypes(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, assetTypes)
 }
+// CreateAssetType - API สำหรับสร้างประเภททรัพย์สินใหม่
+func CreateAssetType(c *gin.Context) {
+	var assetType entity.AssetType
+
+	// Bind JSON จาก frontend เข้ามา
+	if err := c.ShouldBindJSON(&assetType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// กำหนดวันที่สร้าง (กันพลาดถ้า frontend ไม่ส่ง)
+	if assetType.Date.IsZero() {
+		assetType.Date = time.Now()
+	}
+
+	// Save ลง Database
+	if err := config.DB().Create(&assetType).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถสร้างประเภททรัพย์สินได้"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"data": assetType})
+}// UpdateAssetType - แก้ไขประเภททรัพย์สิน
+// UpdateAssetType - อัปเดตโดยใช้ข้อมูลจาก body (ไม่ใช้ param id)
+func UpdateAssetType(c *gin.Context) {
+    var input entity.AssetType
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    if input.ID == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ ID"})
+        return
+    }
+
+    var assetType entity.AssetType
+    if err := config.DB().First(&assetType, input.ID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบประเภททรัพย์สิน"})
+        return
+    }
+
+    // อัปเดต field
+    assetType.Name = input.Name
+    assetType.Type = input.Type
+    assetType.PenaltyFee = input.PenaltyFee
+    assetType.Date = time.Now()
+
+    if err := config.DB().Save(&assetType).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดตได้"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": assetType})
+}

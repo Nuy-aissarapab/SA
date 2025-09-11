@@ -5,6 +5,7 @@ import type { RouteObject } from "react-router-dom";
 import Loadable from "../components/third-patry/Loadable";
 
 import FullLayout from "../layout/FullLayout";
+import EditAssetType from "../pages/Assets/EditAssetType";
 
 const MainPages = Loadable(lazy(() => import("../pages/authentication/Login")));
 
@@ -28,6 +29,8 @@ const Asset = Loadable(lazy(() => import("../pages/Assets")));
 const CreateRoomAssetsForm = Loadable(lazy(() => import("../pages/Assets/CreateAssets")));
 const AssetRoom = Loadable(lazy(() => import("../pages/Assets/assetroom")));
 const RoomAssetEdit = Loadable(lazy(() => import("../pages/Assets/RoomAssetEdit")));
+const CreateAssetsTypeForm = Loadable(lazy(() => import("../pages/Assets/CreateAssetsType")));
+const EditAssetTypes = Loadable(lazy(() => import("../pages/Assets/EditAssetType")));
 
 
 const RoomPage = Loadable(lazy(() => import("../pages/Room")));
@@ -253,6 +256,8 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           { path: "room/:roomNumber", element: <Asset /> },
           { path: "create", element: <CreateRoomAssetsForm /> },
           { path: "edit/:id", element: <RoomAssetEdit /> }, // ✅ ต้องมี :id
+          { path: "create-asset-type", element: <CreateAssetsTypeForm /> },
+          { path: "edit-asset-type", element: <EditAssetTypes /> },
            // เพิ่มเส้นทางสำหรับ CreateAssets โดยมีพารามิเตอร์ roomNumber
         ],
       },

@@ -795,6 +795,8 @@ export async function GetRoomAssetById(id: number) {
     .catch((e) => e.response);
 }
 
+
+  //Asset Type
 export async function GetAllAssetTypes() {
   try {
     const res = await axios.get(`${API_URL}/asset-types`, getAuthHeader());
@@ -803,6 +805,22 @@ export async function GetAllAssetTypes() {
     return e?.response ?? { status: 500, data: [] };
   }
 }
+export async function CreateAssetType(payload: any) {
+  try {
+    return await axios.post(`${API_URL}/asset-types`, payload, getConfig());
+  } catch (err: any) {
+    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
+}
+
+export async function UpdateAssetType(id: number, payload: any) {
+  try {
+    return await axios.put(`${API_URL}/asset-types`, payload, getConfig());
+  } catch (err: any) {
+    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
+}
+
 
 // ---------------------- Student ----------------------
 

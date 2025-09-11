@@ -11,7 +11,7 @@ import {
   Select,
   Spin,
 } from "antd";
-import { SearchOutlined, HomeOutlined } from "@ant-design/icons";
+import { SearchOutlined, HomeOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate, Link } from "react-router-dom";
 import dayjs from "dayjs";
@@ -157,6 +157,22 @@ const AssetRoom = () => {
                 <h2>Admin Portal - ห้องพัก</h2>
               </Space>
             </Col>
+            </Row>
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Space>
+                <Link to="/Assets/create-asset-type/">
+                  <Button type="primary" icon={<PlusOutlined />}>
+                    เพิ่มประเภททรัพย์สิน
+                  </Button>
+                </Link>
+                <Link to="/Assets/edit-asset-type">
+                  <Button type="default">✏️ แก้ไขประเภททรัพย์สิน</Button>
+                </Link>
+              </Space>
+            </Col>
+
+            {/* ฝั่งขวา: ค้นหา */}
             <Col>
               <Space>
                 <Input

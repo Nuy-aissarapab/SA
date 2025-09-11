@@ -55,6 +55,8 @@ import AssetRoom from "../../pages/Assets/assetroom";
 import CreateRoomAssetsForm from "../../pages/Assets/CreateAssets";
 import RoomAssetEdit from "../../pages/Assets/RoomAssetEdit";
 
+import CreateAssetsTypeForm from "../../pages/Assets/CreateAssetsType";
+import EditAssetTypes from "../../pages/Assets/EditAssetType";
 
 import RoomPage from "../../pages/Room";
 import CreateRoomForm from "../../pages/Room/CreateRoom";
@@ -349,6 +351,8 @@ const FullLayout: React.FC = () => {
               <Route path="/Assets/create" element={<CreateRoomAssetsForm />} />
               <Route path="/Assets/edit/:id" element={<RoomAssetEdit />} />
 
+              <Route path="/Assets/create-asset-type" element={<CreateAssetsTypeForm />} />
+              <Route path="/Assets/edit-asset-type" element={<EditAssetTypes />} />
 
 
               <Route path="/Room" element={<RoomPage />} />
