@@ -186,6 +186,15 @@ const FullLayout: React.FC = () => {
               mode="inline"
             >
               <Menu.Item
+                key="Announcement"
+                onClick={() => setCurrentPage("Announcement")}
+              >
+                <Link to="/Announcement">
+                  <UserOutlined />
+                  <span>ข่าวสารหอพัก</span>
+                </Link>
+              </Menu.Item>
+              <Menu.Item
                 key="Contract"
                 onClick={() => setCurrentPage("Contract")}
               >
@@ -242,17 +251,6 @@ const FullLayout: React.FC = () => {
                   <ExceptionOutlined />
 
                   <span>บิลและใบแจ้งหนี้</span>
-                </Link>
-              </Menu.Item>
-
-              <Menu.Item
-                key="Announcement"
-                onClick={() => setCurrentPage("Announcement")}
-              >
-                <Link to="/Announcement">
-                  <UserOutlined />
-
-                  <span>Announcement</span>
                 </Link>
               </Menu.Item>
             </Menu>
