@@ -25,13 +25,11 @@ export default function ReviewCreate() {
   }));
 
   const onFinish = async (values: any) => {
-  const contractId = localStorage.getItem("contractId");
   const payload = {
     title: values.title,
     comment: values.comment,
     rating: values.rating,
-    review_topic_id: values.topicId,            // ✅ snake_case
-    contract_id: contractId ? parseInt(contractId) : undefined,
+    review_topic_id: values.topicId,          
   };
   const res = await CreateReview(payload as any);
     if (res?.status === 201) {
