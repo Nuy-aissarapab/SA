@@ -16,7 +16,7 @@ export default function ReviewPage() {
 
   const getTitle = (r: any) => r?.Title ?? r?.title ?? "-";
   const getFirstName = (r:any) => r?.Student?.first_name ?? r?.student?.first_name ?? r?.Student?.First_Name ?? "-";
-  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.room_number ?? "-";
+  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.RoomNumber;
   const getTopic = (r:any) => r?.ReviewTopic?.TopicName ?? r?.review_topic?.topic_name ?? "-";
   const getRating = (r: any) => r?.Rating ?? r?.rating ?? 0;
   const getDate = (r: any) => r?.ReviewDate ?? r?.review_date;
