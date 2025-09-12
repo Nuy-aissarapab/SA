@@ -8,6 +8,7 @@ import (
 
 type Room struct {
     gorm.Model
+    
     RoomNumber  string    `gorm:"uniqueIndex"`
     Status      string  
     Image       string   
@@ -23,4 +24,10 @@ type Room struct {
     Student   *Student    `gorm:"foreignKey:StudentID"`
     Admin     *Admin      `gorm:"foreignKey:AdminID"`
     RoomAsset []RoomAsset `gorm:"foreignKey:RoomNumber;references:RoomNumber"`
+
+    Billing []Billing `gorm:"foreignKey:RoomID" json:"Bills"`
+
+    MeterRecords []MeterRecord `gorm:"foreignKey:RoomID"`
+
+    
 }

@@ -2,6 +2,8 @@ import type { RoomType } from "./RoomType";
 import type { StudentInterface } from "./Student";
 import type { AdminInterface } from "./Admin";
 import type { RoomAsset } from "./RoomAsset";
+import type { MeterInterface } from "./Meter";
+import type { BillInterface } from "./Bill";
 
 export interface RoomInterface {
   CreatedAt?: string;
@@ -24,4 +26,14 @@ export interface RoomInterface {
   Student?: StudentInterface;
   Admin?: AdminInterface;
   RoomAsset?: RoomAsset[];
+}
+
+export interface RoomMeterInterface {
+  ID: number;
+  RoomNumber?: string;
+
+  Student?: StudentInterface;       // ✅ array ของ student
+  MeterRecords?: MeterInterface[];     // ✅ array ของ meter record
+  Bills?: BillInterface[]; 
+  
 }

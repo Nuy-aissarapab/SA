@@ -55,9 +55,6 @@ import AssetRoom from "../../pages/Assets/assetroom";
 import CreateRoomAssetsForm from "../../pages/Assets/CreateAssets";
 import RoomAssetEdit from "../../pages/Assets/RoomAssetEdit";
 
-import CreateAssetsTypeForm from "../../pages/Assets/CreateAssetsType";
-import EditAssetTypes from "../../pages/Assets/EditAssetType";
-
 import RoomPage from "../../pages/Room";
 import CreateRoomForm from "../../pages/Room/CreateRoom";
 import RoomDetails from "../../pages/Room/RoomDetails";
@@ -97,6 +94,26 @@ import CreateStudentPage from "../../pages/Student/CreateStudentPage/CreateStude
 
 import CreateAnnouncementPage from "../../pages/Announcement/CreateAnnouncementPage/CreateAnnouncementPage";
 import EditAnnouncementPage from "../../pages/Announcement/EditAnnouncementPage/EditAnnouncementPage";
+
+import MeterList from "../../pages/Meter";
+
+import MeterCreate from "../../pages/Meter/MeterDetail/Create";
+
+import MeterEdit from "../../pages/Meter/MeterDetail/Edit";
+
+import MeterDetail from "../../pages/Meter/MeterDetail";
+
+import AdminGuard from "../../components/guards/AdminGuard";
+
+import StudentGuard from "../../components/guards/StudentGuard";
+
+import BillList from "../../pages/Billing";
+
+import BillHistory from "../../pages/Billing/BillHistory";
+
+import BillingDetail from "../../pages/Billing/BillHistory/BillingDetail";
+
+import BillingCreate from "../../pages/Billing/BillHistory/BillingCreate";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -256,14 +273,59 @@ const FullLayout: React.FC = () => {
                 </Link>
               </Menu.Item>
 
+             {localStorage.getItem("role") === "student" && localStorage.getItem("room_id") && localStorage.getItem("room_id") !== "0" && (
+  <Menu.Item key="Billing" onClick={() => setCurrentPage("Billing")}>
+    <Link to={`/Billing/BillHistory/${localStorage.getItem("room_id")}`}>
+      <ExceptionOutlined />
+      <span>บิลและใบแจ้งหนี้</span>
+    </Link>
+  </Menu.Item>
+)}
+
+
+{localStorage.getItem("role") === "admin" && (
+  <Menu.Item key="Billing" onClick={() => setCurrentPage("Billing")}>
+    <Link to="/Billing">
+      <ExceptionOutlined />
+      <span>บิลและใบแจ้งหนี้</span>
+    </Link>
+  </Menu.Item>
+)}
+
+
+              {localStorage.getItem("role") === "admin" &&(
+
               <Menu.Item
-                key="Billing"
-                onClick={() => setCurrentPage("Billing")}
+                key="Meter"
+                onClick={() => setCurrentPage("Meter")}
               >
-                <Link to="/Billing">
+                <Link to="/Meter">
                   <ExceptionOutlined />
 
-                  <span>บิลและใบแจ้งหนี้</span>
+                  <span>มิเตอร์</span>
+                </Link>
+              </Menu.Item>
+              )}
+
+              <Menu.Item
+                key="Announcement"
+                onClick={() => setCurrentPage("Announcement")}
+              >
+                <Link to="/Announcement">
+                  <UserOutlined />
+
+                  <span>Announcement</span>
+                </Link>
+              </Menu.Item>
+
+              <Menu.Item
+                key="customer"
+                onClick={() => setCurrentPage("customer")}
+              >
+                <Link to="/">
+                  <KeyOutlined />
+
+                  <span>เปลี่ยนรหัสผ่าน</span>
                 </Link>
               </Menu.Item>
             </Menu>
@@ -328,8 +390,6 @@ const FullLayout: React.FC = () => {
               <Route path="/Assets/create" element={<CreateRoomAssetsForm />} />
               <Route path="/Assets/edit/:id" element={<RoomAssetEdit />} />
 
-              <Route path="/Assets/create-asset-type" element={<CreateAssetsTypeForm />} />
-              <Route path="/Assets/edit-asset-type" element={<EditAssetTypes />} />
 
 
               <Route path="/Room" element={<RoomPage />} />
@@ -391,6 +451,65 @@ const FullLayout: React.FC = () => {
                 element={<CreateAnnouncementPage />}
               />
               <Route path="/announcements/:id/edit" element={<EditAnnouncementPage />} />
+
+              <Route path="/Billing" element={<AdminGuard><BillList /></AdminGuard> }/>
+
+              <Route path="/Billing/BillHistory/:room_id/BillingCreate" element={<AdminGuard><BillingCreate /></AdminGuard>}/>
+
+{/* Student + Admin Routes */}
+<Route
+  path="/Billing/BillHistory/:room_id"
+  element={
+    <StudentGuard>
+      <BillHistory />
+    </StudentGuard>
+  }
+/>
+
+<Route
+  path="/Billing/BillHistory/:room_id/BillingDetail/:billId"
+  element={
+    <StudentGuard>
+      <BillingDetail />
+    </StudentGuard>
+  }
+/>
+
+<Route
+  path="/Meter"
+  element={
+    <AdminGuard>
+      <MeterList />
+    </AdminGuard>
+  }
+/>
+
+<Route
+  path="/Meter/MeterDetail/:id"
+  element={
+    <AdminGuard>
+      <MeterDetail />
+    </AdminGuard>
+  }
+/>
+
+<Route
+  path="/Meter/MeterDetail/:id/Create"
+  element={
+    <AdminGuard>
+      <MeterCreate />
+    </AdminGuard>
+  }
+/>
+
+<Route
+  path="/Meter/MeterDetail/:id/Edit"
+  element={
+    <AdminGuard>
+      <MeterEdit />
+    </AdminGuard>
+  }
+/>
             </Routes>
           </div>
         </Content>

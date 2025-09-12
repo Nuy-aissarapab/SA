@@ -409,7 +409,7 @@ function RoomPage() {
                   placeholder="ประเภท"
                   value={roomTypeFilter}
                   onChange={(value) => {
-                    setRoomTypeFilter(value);
+                    setRoomTypeFilter(value); 
                     filterRooms(roomNumberFilter, value);
                   }}
                   allowClear

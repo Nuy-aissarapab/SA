@@ -32,4 +32,11 @@ type Student struct {
 	// Contract_ID ทำหน้าที่เป็น FK
 
 	Payments []Payment `gorm:"foreignKey:StudentID"`
+
+	
+
+	
+
+	
+
 }

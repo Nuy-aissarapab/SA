@@ -112,10 +112,16 @@ func SignIn(c *gin.Context) {
        c.JSON(http.StatusBadRequest, gin.H{"error": "error signing token"})
        return
    }
-   c.JSON(http.StatusOK, gin.H{
-        "token_type": "Bearer",
-        "token":      signedToken,
-        "id":         user.ID,
-        "email":      user.Email, //มี email ด้วย
-    })
+   var roomID uint = 0
+if user.Room_ID != nil {
+    roomID = *user.Room_ID
+}
+
+c.JSON(http.StatusOK, gin.H{
+    "token_type": "Bearer",
+    "token":      signedToken,
+    "id":         user.ID,
+    "email":      user.Email,
+    "room_id":    roomID, // ส่งเป็น number จริง ๆ
+})
 }

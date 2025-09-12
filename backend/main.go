@@ -20,7 +20,10 @@ import (
 	"github.com/SA/controller/review"
 	"github.com/SA/controller/reviewTopic"
 	"github.com/SA/controller/room"
-
+	"github.com/SA/controller/bill"
+	"github.com/SA/controller/billitem"
+	"github.com/SA/controller/meter"
+	"github.com/SA/controller/metertype"
 	"github.com/SA/controller/student"
 	"github.com/SA/entity"
 	"github.com/SA/middlewares"
@@ -157,7 +160,6 @@ func main() {
 		router.PUT("/room-assets/:id", roomasset.UpdateRoomAsset)
 		router.DELETE("/room-assets/:id", roomasset.DeleteRoomAsset)
 
-		
 		// Room
 		router.GET("/room", room.GetAllRooms)
 		router.GET("/rooms/:id", room.GetRoomByID)
@@ -173,7 +175,7 @@ func main() {
 		router.PUT("/room-types/:id", room.UpdateRoomType)
 		router.DELETE("/room-types/:id", room.DeleteRoomType)
 
-		//Asset Type
+		//Asset
 		router.GET("/asset-types",roomasset.GetAllAssetTypes)
 		router.POST("/asset-types", roomasset.CreateAssetType)
 		router.PUT("/asset-types/:id", roomasset.UpdateAssetType)
@@ -181,18 +183,45 @@ func main() {
 
 
 		
+
+		//Image
+		router.Static("/images", "./static/image")
+
+
+		router.GET("/room/meter", room.GetRoomByMeter) 
+		router.GET("/meter", meter.Getmeter)
+		router.GET("/meter/:room_id", meter.GetMeterByRoom) 
+		router.POST("/meter", meter.CreateMeter)
+		router.GET("/meter/by-id/:id", meter.GetMeterById)
+		router.DELETE("/meter/:id", meter.DeleteMeter)
+		router.PUT("/meter/:id", meter.UpdateMeter)
+		router.GET("/meter/last", meter.GetLastMeterRecord)
+
+		router.GET("/metertype", metertype.GetMeterType)
+		//kuy
+		router.GET("/room/bill", room.GetRoomByBill) 
+		router.GET("/bill/room/:room_id", bill.GetBillByRoom)
+		router.DELETE("/bill/:id", bill.DeleteBill)
+		router.POST("/bill", bill.CreateBill)
+		router.GET("/bill/:room_id/preview", bill.PreviewBill)         
+		r.GET("/bill/:room_id/preview-items", bill.PreviewBillItems) 
+		r.GET("/billitem/:billId", billitem.GetBillItemsByBillId)
 	}
 
 
 	// ✅ AutoMigrate (รวม Evidence)
 	config.DB().AutoMigrate(
 		&entity.Billing{},
+		&entity.BillItem{},
 		&entity.Payment{},
 		&entity.Contract{},
 		&entity.Room{},
 		&entity.Student{},
 		&entity.Evidence{},
 		&entity.Admin{},
+		&entity.MeterRecord{},
+		&entity.MeterType{},
+		&entity.RatePerUnit{},
 	)
 
 	// ✅ เปิดรับทุกอินเตอร์เฟส (ย้ายเครื่องได้)

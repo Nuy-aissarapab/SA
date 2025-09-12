@@ -7,11 +7,12 @@ import (
 
 type Billing struct {
 	gorm.Model
+	
+	ID           uint       `json:"id"`
 	BillingDate time.Time `json:"Billing_date"`
-	Invoice      time.Time `json:"invoice"`
-	Due_Date     time.Time `json:"due_Date"`
-	Status       *string `json:"status"` // ✅ ต้องเป็น pointer
-	AmountDue    float64  `json:"amount_due" gorm:"type:decimal(10,2)"` // ✅ ยอดที่ต้องชำระ
+	AmountDue		float64		`json:"amount_due" gorm:"type:decimal(10,2)"`
+	DueDate			time.Time	`json:"due_date" `
+	Status			*string		`json:"status"`
 
 	// Foreign key → Student
 	StudentID uint    `json:"student_id"`
@@ -19,4 +20,11 @@ type Billing struct {
 
 	// FK → Contract
 	ContractID uint     `json:"contract_id"`
+
+	BillItem []BillItem `gorm:"foreignKey:BillingID"`
+
+	Payment []Payment `gorm:"foreignKey:BillingID"`
+	
+	RoomID uint
+	Room   Room `gorm:"foreignKey:RoomID" json:"room"`
 }
