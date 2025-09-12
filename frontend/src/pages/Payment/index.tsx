@@ -4,11 +4,11 @@ import type { ColumnsType } from "antd/es/table";
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
-import { 
-  GetPayment, 
-  GetStudents, 
+import {
+  GetPayment,
+  GetStudents,
   GetEvidencesByPaymentId,
-  GetContracts,               // ★ ดึงสัญญามา join
+  GetContracts, // ★ ดึงสัญญามา join
 } from "../../Service/https/index";
 
 import type { PaymentInterface } from "../../interfaces/Payment";
@@ -16,7 +16,6 @@ import type { StudentInterface } from "../../interfaces/Student";
 import type { ContractInterface } from "../../interfaces/Contract"; // ★ ใช้ type สัญญา
 
 function Payment() {
-
   const navigate = useNavigate();
 
   type EvidenceBrief = {
@@ -36,19 +35,23 @@ function Payment() {
     renewal_status?: "approved" | "pending" | "rejected" | string | null;
   };
 
-  const [payment, setPayment] = useState<PaymentRow[]>([]); 
+  const [payment, setPayment] = useState<PaymentRow[]>([]);
   const [student, setStudent] = useState<StudentInterface[]>([]);
   const [messageApi, contextHolder] = message.useMessage();
   const role = localStorage.getItem("role"); // "student" | "admin"
 
   // บลิสต์ PaymentInterface[] แล้วเติม field evidence (ตัวล่าสุด) ให้แต่ละ payment
-  const enrichWithEvidence = async (list: PaymentInterface[]): Promise<PaymentRow[]> => {
-    return await Promise.all( 
+  const enrichWithEvidence = async (
+    list: PaymentInterface[]
+  ): Promise<PaymentRow[]> => {
+    return await Promise.all(
       list.map(async (p) => {
         try {
           const evRes = await GetEvidencesByPaymentId(p.ID!);
           const latest: EvidenceBrief | null =
-            evRes?.status === 200 && Array.isArray(evRes.data) ? evRes.data[0] : null;
+            evRes?.status === 200 && Array.isArray(evRes.data)
+              ? evRes.data[0]
+              : null;
           return { ...(p as PaymentRow), evidence: latest };
         } catch {
           return { ...(p as PaymentRow), evidence: null };
@@ -57,13 +60,15 @@ function Payment() {
     );
   };
 
-  const pickLatestContract = (arr: ContractInterface[]): ContractInterface | undefined => {
+  const pickLatestContract = (
+    arr: ContractInterface[]
+  ): ContractInterface | undefined => {
     if (!Array.isArray(arr) || arr.length === 0) return undefined;
     const valid = [...arr].sort((a, b) => {
       const ad = dayjs(a.end_date);
       const bd = dayjs(b.end_date);
       if (ad.isValid() && bd.isValid()) {
-        if (ad.isBefore(bd)) return 1; 
+        if (ad.isBefore(bd)) return 1;
         if (ad.isAfter(bd)) return -1;
         return 0;
       }
@@ -75,7 +80,7 @@ function Payment() {
   // ผสาน renewal_status จาก contracts -> payments
   const mergeRenewalStatus = (
     payments: PaymentRow[],
-    contracts: ContractInterface[],
+    contracts: ContractInterface[]
   ): PaymentRow[] => {
     // สร้าง map ต่อ StudentID -> สัญญาล่าสุด
     const map = new Map<number, ContractInterface>();
@@ -98,7 +103,10 @@ function Payment() {
       const latest = sid ? map.get(sid) : undefined;
       return {
         ...p,
-        renewal_status: latest?.renewal_status ?? (latest as any)?.renewal_pending ? "pending" : p.renewal_status ?? null,
+        renewal_status:
+          latest?.renewal_status ?? (latest as any)?.renewal_pending
+            ? "pending"
+            : p.renewal_status ?? null,
       };
     });
   };
@@ -113,7 +121,8 @@ function Payment() {
 
       // ดึงสัญญาของนักศึกษาคนนี้มารวม
       const cRes = await GetContracts(id ?? undefined);
-      const contracts: ContractInterface[] = cRes?.status === 200 ? cRes.data : [];
+      const contracts: ContractInterface[] =
+        cRes?.status === 200 ? cRes.data : [];
 
       setPayment(mergeRenewalStatus(withEv, contracts));
     } else {
@@ -130,12 +139,16 @@ function Payment() {
 
       // ดึงสัญญาทั้งหมดครั้งเดียว แล้ว join ตาม StudentID
       const cRes = await GetContracts();
-      const contracts: ContractInterface[] = cRes?.status === 200 ? cRes.data : [];
+      const contracts: ContractInterface[] =
+        cRes?.status === 200 ? cRes.data : [];
 
       setPayment(mergeRenewalStatus(withEv, contracts));
     } else {
       setPayment([]);
-      messageApi.open({ type: "error", content: res.data?.error || "โหลดข้อมูลไม่สำเร็จ" });
+      messageApi.open({
+        type: "error",
+        content: res.data?.error || "โหลดข้อมูลไม่สำเร็จ",
+      });
     }
   };
 
@@ -145,7 +158,10 @@ function Payment() {
       setStudent(res.data);
     } else {
       setStudent([]);
-      messageApi.open({ type: "error", content: res.data?.error || "โหลดรายชื่อนักศึกษาไม่สำเร็จ" });
+      messageApi.open({
+        type: "error",
+        content: res.data?.error || "โหลดรายชื่อนักศึกษาไม่สำเร็จ",
+      });
     }
   };
 
@@ -161,8 +177,15 @@ function Payment() {
     title: "วันที่หลักฐาน",
     key: "evidence_date",
     render: (_: any, row: any) =>
-      row?.evidence?.date ? dayjs(row.evidence.date).format("YYYY-MM-DD HH:mm") : "-"
+      row?.evidence?.date
+        ? dayjs(row.evidence.date).format("YYYY-MM-DD HH:mm")
+        : "-",
   };
+
+  const formatBaht = (n?: number) =>
+    typeof n === "number"
+      ? new Intl.NumberFormat("th-TH", { minimumFractionDigits: 2 }).format(n)
+      : "-";
 
   const adminColumns: ColumnsType<PaymentRow> = [
     {
@@ -183,9 +206,12 @@ function Payment() {
     evidenceDateCol,
     {
       title: "จำนวนเงิน (฿)",
-      dataIndex: "amount",
-      key: "amount",
+      dataIndex: "amount_due",
+      key: "amount_due",
+      align: "right",
+      render: (v: number | undefined) => formatBaht(v),
     },
+
     // ★ แสดงจาก renewal_status ก่อน ถ้าไม่มีค่อย fallback payment_status
     {
       title: "สถานะการชำระเงิน",
@@ -215,7 +241,14 @@ function Payment() {
       {contextHolder}
       <Row>
         <Col span={24}>
-          <h2 style={{ fontSize: '27px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <h2
+            style={{
+              fontSize: "27px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             กรุณาชำระเงินและแนบหลักฐานการโอน
           </h2>
         </Col>
@@ -288,7 +321,8 @@ function Payment() {
               marginBottom: "20px",
             }}
           >
-            <Link to="/Payment/Bank"
+            <Link
+              to="/Payment/Bank"
               onClick={() => {
                 localStorage.setItem("payment_method", "bank");
                 localStorage.removeItem("selected_bank");
@@ -309,7 +343,8 @@ function Payment() {
               </Button>
             </Link>
 
-            <Link to="/Payment/QRCode"
+            <Link
+              to="/Payment/QRCode"
               onClick={() => {
                 localStorage.setItem("payment_method", "qr");
               }}

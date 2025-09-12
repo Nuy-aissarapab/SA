@@ -51,8 +51,8 @@ func GetBillByRoom(c *gin.Context) {
 	db := config.DB()
 	result := db.
 		Preload("Room").
-		Preload("BillItem").
-		Preload("Payment").
+		Preload("BillItems").   // ✅ เปลี่ยนเป็น BillItems
+		Preload("Payments").    // ✅ เปลี่ยนเป็น Payments
 		Where("room_id = ?", roomID).
 		Find(&bills)
 
@@ -147,7 +147,7 @@ if len(items) > 0 {
 
 		// อัปเดต AmountDue = ผลรวมของ BillItem
 		var total float64
-		for _, item := range newBill.BillItem {
+		for _, item := range newBill.BillItems {
 			total += item.Amount
 		}
 		newBill.AmountDue = total

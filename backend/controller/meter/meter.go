@@ -114,7 +114,7 @@ func CreateMeter(c *gin.Context) {
         NewValue:    req.NewValue,
         UnitUsed:    req.NewValue - last.NewValue,
         TotalAmount: (req.NewValue - last.NewValue) * pricePerUnit,
-        RateID:      &rate.ID,
+        RatePerUnitID:      &rate.ID,
         MeterTypeID: &req.MeterTypeID,
         RoomID:      &req.RoomID,
     }

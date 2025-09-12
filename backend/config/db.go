@@ -31,31 +31,36 @@ func SetupDatabase() {
 	// === AutoMigrate ===
 	if err := db.AutoMigrate(
 		&entity.Admin{},
-		&entity.Billing{},
-		&entity.BillItem{},
-		&entity.Payment{},
-		&entity.Contract{},
+		&entity.RoomType{},
+		&entity.AssetType{},
 		&entity.Room{},
 		&entity.Student{},
 		&entity.Evidence{},
+		&entity.Contract{},
+		&entity.Billing{},
+		&entity.BillItem{},
+		&entity.Payment{},
+
+		// 👇 พวกคอมโบ/ประกาศ
+		&entity.AnnouncementTarget{},
+		&entity.AnnouncementType{},
+		&entity.Announcement{},
 		&entity.ReviewTopic{},
 		&entity.Review{},
 		&entity.MaintenanceStatus{},
 		&entity.ProblemType{},
 		&entity.Maintenance{},
-		&entity.AnnouncementTarget{},
-		&entity.AnnouncementType{},
-		&entity.Announcement{},
-	&entity.RoomType{},
-		&entity.AssetType{},
+
 		&entity.RoomAsset{},
-	&entity.MeterRecord{},
+
+		// 👇 สำคัญ: แม่ก่อนลูก
 		&entity.MeterType{},
 		&entity.RatePerUnit{},
+		&entity.MeterRecord{},
 	); err != nil {
 		panic(err)
 	}
-		
+
 	// ใช้ Transaction เพื่อความถูกต้องครบชุด
 	tx := db.Begin()
 	defer func() {
@@ -64,7 +69,6 @@ func SetupDatabase() {
 			panic(r)
 		}
 	}()
-		
 
 	// === Seed base password ===
 	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
@@ -89,7 +93,6 @@ func SetupDatabase() {
 			panic(err)
 		}
 	}
-
 
 	// ===== Student (เอกลักษณ์ด้วย Email) =====
 	r1, r2, r3 := uint(1), uint(2), uint(3)
@@ -220,124 +223,135 @@ func SetupDatabase() {
 		}
 	}
 
-	
+	// ===== RoomType (idempotent) =====
+	rtSeeds := []struct {
+		Name  string
+		Price float64
+	}{
+		{"Air Room", 2900.00},
+		{"Fan Room", 2500.00},
+	}
+	for _, s := range rtSeeds {
+		var rt entity.RoomType
+		if err := tx.Where(&entity.RoomType{RoomTypeName: s.Name}).
+			Attrs(entity.RoomType{RentalPrice: s.Price}).
+			FirstOrCreate(&rt).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
 
-// ===== RoomType (idempotent) =====
-rtSeeds := []struct {
-    Name  string
-    Price float64
-}{
-    {"Air Room", 2900.00},
-    {"Fan Room", 2500.00},
-}
-for _, s := range rtSeeds {
-    var rt entity.RoomType
-    if err := tx.Where(&entity.RoomType{RoomTypeName: s.Name}).
-        Attrs(entity.RoomType{RentalPrice: s.Price}).
-        FirstOrCreate(&rt).Error; err != nil {
-        tx.Rollback(); panic(err)
-    }
-}
+	// ดึง RoomType IDs
+	var rtAir, rtFan entity.RoomType
+	if err := tx.First(&rtAir, "room_type_name = ?", "Air Room").Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	if err := tx.First(&rtFan, "room_type_name = ?", "Fan Room").Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-// ดึง RoomType IDs
-var rtAir, rtFan entity.RoomType
-if err := tx.First(&rtAir, "room_type_name = ?", "Air Room").Error; err != nil { tx.Rollback(); panic(err) }
-if err := tx.First(&rtFan, "room_type_name = ?", "Fan Room").Error; err != nil { tx.Rollback(); panic(err) }
+	// ===== Room (อย่าเดา ID ให้ผูกด้วย RoomNumber และเซ็ต RoomTypeID ที่ดึงมาจริง) =====
+	roomSeeds := []struct {
+		Number string
+		Status string
+		Image  string
+		RTID   uint
+		StudID *uint // ใส่ให้อยู่ทีหลังเมื่อมี Students แล้วก็ได้ (ตอนนี้ค่าว่างไว้ก่อนจะปลอดภัยกว่า)
+	}{
+		{"100", "ว่าง", "room1.jpg", rtAir.ID, nil},
+		{"101", "ไม่ว่าง", "room2.jpg", rtAir.ID, nil},
+		{"102", "ไม่ว่าง", "room3.jpg", rtAir.ID, nil},
+		{"103", "ว่าง", "room4.jpg", rtFan.ID, nil},
+		{"104", "ว่าง", "room5.jpg", rtFan.ID, nil},
+		{"105", "ว่าง", "room6.jpg", rtFan.ID, nil},
+		{"201", "ว่าง", "room7.jpg", rtAir.ID, nil},
+		{"202", "ว่าง", "room8.jpg", rtAir.ID, nil},
+		{"203", "ว่าง", "room9.jpg", rtFan.ID, nil},
+		{"204", "ว่าง", "room10.jpg", rtFan.ID, nil},
+		{"205", "ว่าง", "room11.jpg", rtAir.ID, nil},
+	}
+	for _, r := range roomSeeds {
+		var rm entity.Room
+		if err := tx.Where(&entity.Room{RoomNumber: r.Number}).
+			Attrs(entity.Room{
+				Status:     r.Status,
+				Image:      r.Image,
+				RoomTypeID: r.RTID,
+				AdminID:    1, // ใช้ admin seed ตัวแรก
+			}).
+			FirstOrCreate(&rm).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
 
-// ===== Room (อย่าเดา ID ให้ผูกด้วย RoomNumber และเซ็ต RoomTypeID ที่ดึงมาจริง) =====
-roomSeeds := []struct {
-    Number string
-    Status string
-    Image  string
-    RTID   uint
-    StudID *uint // ใส่ให้อยู่ทีหลังเมื่อมี Students แล้วก็ได้ (ตอนนี้ค่าว่างไว้ก่อนจะปลอดภัยกว่า)
-}{
-    {"100", "ว่าง",   "room1.jpg",  rtAir.ID, nil},
-    {"101", "ไม่ว่าง","room2.jpg",  rtAir.ID, nil},
-    {"102", "ไม่ว่าง","room3.jpg",  rtAir.ID, nil},
-    {"103", "ว่าง",   "room4.jpg",  rtFan.ID, nil},
-    {"104", "ว่าง",   "room5.jpg",  rtFan.ID, nil},
-    {"105", "ว่าง",   "room6.jpg",  rtFan.ID, nil},
-    {"201", "ว่าง",   "room7.jpg",  rtAir.ID, nil},
-    {"202", "ว่าง",   "room8.jpg",  rtAir.ID, nil},
-    {"203", "ว่าง",   "room9.jpg",  rtFan.ID, nil},
-    {"204", "ว่าง",   "room10.jpg", rtFan.ID, nil},
-    {"205", "ว่าง",   "room11.jpg", rtAir.ID, nil},
-}
-for _, r := range roomSeeds {
-    var rm entity.Room
-    if err := tx.Where(&entity.Room{RoomNumber: r.Number}).
-        Attrs(entity.Room{
-            Status:     r.Status,
-            Image:      r.Image,
-            RoomTypeID: r.RTID,
-            AdminID:    1, // ใช้ admin seed ตัวแรก
-        }).
-        FirstOrCreate(&rm).Error; err != nil {
-        tx.Rollback(); panic(err)
-    }
-}
+	// สร้าง map: roomNumber -> roomID (เอาไว้ใช้ต่อ)
+	var roomList []entity.Room
+	if err := tx.Find(&roomList).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	roomIDByNumber := map[string]uint{}
+	for _, r := range roomList {
+		roomIDByNumber[r.RoomNumber] = r.ID
+	}
 
-// สร้าง map: roomNumber -> roomID (เอาไว้ใช้ต่อ)
-var roomList []entity.Room
-if err := tx.Find(&roomList).Error; err != nil { tx.Rollback(); panic(err) }
-roomIDByNumber := map[string]uint{}
-for _, r := range roomList { roomIDByNumber[r.RoomNumber] = r.ID }
+	// ===== AssetType =====
+	atSeeds := []struct {
+		Name       string
+		Type       string
+		PenaltyFee float64
+	}{
+		{"เตียง", "เฟอร์นิเจอร์", 500.00},
+		{"Wi-Fi", "สิ่งอำนวยความสะดวก", 1000.00},
+	}
+	now := time.Now()
+	for _, s := range atSeeds {
+		var at entity.AssetType
+		if err := tx.Where(&entity.AssetType{Name: s.Name}).
+			Attrs(entity.AssetType{Type: s.Type, PenaltyFee: s.PenaltyFee, Date: now}).
+			FirstOrCreate(&at).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
 
-// ===== AssetType =====
-atSeeds := []struct {
-    Name       string
-    Type       string
-    PenaltyFee float64
-}{
-    {"เตียง", "เฟอร์นิเจอร์", 500.00},
-    {"Wi-Fi", "สิ่งอำนวยความสะดวก", 1000.00},
-}
-now := time.Now()
-for _, s := range atSeeds {
-    var at entity.AssetType
-    if err := tx.Where(&entity.AssetType{Name: s.Name}).
-        Attrs(entity.AssetType{Type: s.Type, PenaltyFee: s.PenaltyFee, Date: now}).
-        FirstOrCreate(&at).Error; err != nil {
-        tx.Rollback(); panic(err)
-    }
-}
+	// ดึง AssetType เป็น map ชื่อ -> ID
+	var atList []entity.AssetType
+	if err := tx.Find(&atList).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	atID := map[string]uint{}
+	for _, a := range atList {
+		atID[a.Name] = a.ID
+	}
 
-// ดึง AssetType เป็น map ชื่อ -> ID
-var atList []entity.AssetType
-if err := tx.Find(&atList).Error; err != nil { tx.Rollback(); panic(err) }
-atID := map[string]uint{}
-for _, a := range atList { atID[a.Name] = a.ID }
-
-// ===== RoomAsset (ใช้ FirstOrCreate กันซ้ำ และอ้างด้วย RoomNumber + AssetTypeID) =====
-raSeeds := []struct {
-    RoomNumber  string
-    AssetName   string
-    Qty         int
-}{
-    {"101", "เตียง", 1},
-    {"102", "เตียง", 1},
-    {"103", "Wi-Fi", 1},
-}
-for _, s := range raSeeds {
-    var ra entity.RoomAsset
-    if err := tx.Where(&entity.RoomAsset{
-        RoomNumber:  s.RoomNumber,
-        AssetTypeID: atID[s.AssetName],
-    }).Attrs(entity.RoomAsset{
-        Quantity:  s.Qty,
-        CheckDate: &now,
-    }).FirstOrCreate(&ra).Error; err != nil {
-        tx.Rollback(); panic(err)
-    }
-}
-
-
-
-
-
-
-
+	// ===== RoomAsset (ใช้ FirstOrCreate กันซ้ำ และอ้างด้วย RoomNumber + AssetTypeID) =====
+	raSeeds := []struct {
+		RoomNumber string
+		AssetName  string
+		Qty        int
+	}{
+		{"101", "เตียง", 1},
+		{"102", "เตียง", 1},
+		{"103", "Wi-Fi", 1},
+	}
+	for _, s := range raSeeds {
+		var ra entity.RoomAsset
+		if err := tx.Where(&entity.RoomAsset{
+			RoomNumber:  s.RoomNumber,
+			AssetTypeID: atID[s.AssetName],
+		}).Attrs(entity.RoomAsset{
+			Quantity:  s.Qty,
+			CheckDate: &now,
+		}).FirstOrCreate(&ra).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
 
 	// ===== ComboBox Seeds =====
 	// ProblemType
@@ -440,141 +454,164 @@ for _, s := range raSeeds {
 			FirstOrCreate(&a)
 	}
 
-	// --- MeterTypes ---
-    meterElectric := entity.MeterType{MeterName: "ค่าไฟ"}
-    db.FirstOrCreate(&meterElectric, entity.MeterType{MeterName: "ค่าไฟ"})
+	// ====== 0) Helpers ======
+	periodStart := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.Local)
 
-    meterWater := entity.MeterType{MeterName: "ค่าน้ำ"}
-    db.FirstOrCreate(&meterWater, entity.MeterType{MeterName: "ค่าน้ำ"})
+	// ดึงห้องด้วย RoomNumber (ไม่เดา 1/2)
+	var room101, room102 entity.Room
+	if err := tx.Where(&entity.Room{RoomNumber: "101"}).First(&room101).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	if err := tx.Where(&entity.Room{RoomNumber: "102"}).First(&room102).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-    // --- Rate (สมมุติว่ามีค่าเริ่มต้น) ---
-    electricRate := entity.RatePerUnit{
-    PricePerUnit: 5,
-    MeterTypeID:  &meterElectric.ID,
-}
-    db.FirstOrCreate(&electricRate, entity.RatePerUnit{MeterTypeID: &meterElectric.ID})
+	// ดึงนักศึกษาด้วย Email (ไม่เดา 1/2)
+	var stu1, stu2 entity.Student
+	if err := tx.Where(&entity.Student{Email: "sa@gmail.com"}).First(&stu1).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	if err := tx.Where(&entity.Student{Email: "sa1@gmail.com"}).First(&stu2).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-    waterRate := entity.RatePerUnit{
-    PricePerUnit: 3,
-    MeterTypeID:  &meterWater.ID,
-}
-    db.FirstOrCreate(&waterRate, entity.RatePerUnit{MeterTypeID: &meterWater.ID})
+	// ====== 1) MeterTypes ======
+	var mtElec, mtWater entity.MeterType
+	if err := tx.Where(&entity.MeterType{MeterName: "ค่าไฟ"}).
+		Attrs(entity.MeterType{MeterName: "ค่าไฟ"}).
+		FirstOrCreate(&mtElec).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-   
-    
+	if err := tx.Where(&entity.MeterType{MeterName: "ค่าน้ำ"}).
+		Attrs(entity.MeterType{MeterName: "ค่าน้ำ"}).
+		FirstOrCreate(&mtWater).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-    // --- MeterRecords ---
-   // --- MeterRecords ---
-room1ID := uint(1)
-room2ID := uint(2)
-student1ID := uint(1)
-student2ID := uint(2)
+	// ===== Rates =====
+	var rateElec, rateWater entity.RatePerUnit
 
-db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
-    RoomID:      &room1ID,
-    MeterTypeID: &meterElectric.ID,
-    StudentID:   &student1ID,
-}, entity.MeterRecord{
-    RecordDate:  time.Now(),
-    OldValue:    100,
-    NewValue:    150,
-    UnitUsed:    50,
-    TotalAmount: 50 * electricRate.PricePerUnit,
-    RateID:      &electricRate.ID,
-})
+	if err := tx.Where(&entity.RatePerUnit{MeterTypeID: mtElec.ID}).
+		Attrs(entity.RatePerUnit{PricePerUnit: 5}).
+		FirstOrCreate(&rateElec).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
 
-db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
-    RoomID:      &room1ID,
-    MeterTypeID: &meterWater.ID,
-    StudentID:   &student1ID,
-}, entity.MeterRecord{
-    RecordDate:  time.Now(),
-    OldValue:    120,
-    NewValue:    150,
-    UnitUsed:    30,
-    TotalAmount: 30 * waterRate.PricePerUnit,
-    RateID:      &waterRate.ID,
-})
+	if err := tx.Where(&entity.RatePerUnit{MeterTypeID: mtWater.ID}).
+		Attrs(entity.RatePerUnit{PricePerUnit: 3}).
+		FirstOrCreate(&rateWater).Error; err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	// ====== 3) MeterRecords (คีย์ค้นหา = room + meterType + periodStart) ======
+	type mrSeed struct {
+		RoomID        uint
+		MeterTypeID   uint
+		StudentID     uint
+		Old, New      float64
+		RatePerUnitID uint
+	}
 
-db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
-    RoomID:      &room2ID,
-    MeterTypeID: &meterElectric.ID,
-    StudentID:   &student2ID,
-}, entity.MeterRecord{
-    RecordDate:  time.Now(),
-    OldValue:    100,
-    NewValue:    150,
-    UnitUsed:    50,
-    TotalAmount: 50 * electricRate.PricePerUnit,
-    RateID:      &electricRate.ID,
-})
+	seeds := []mrSeed{
+		{room101.ID, mtElec.ID, stu1.ID, 100, 150, rateElec.ID},
+		{room101.ID, mtWater.ID, stu1.ID, 120, 150, rateWater.ID},
+		{room102.ID, mtElec.ID, stu2.ID, 100, 150, rateElec.ID},
+		{room102.ID, mtWater.ID, stu2.ID, 120, 150, rateWater.ID},
+	}
 
-db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
-    RoomID:      &room2ID,
-    MeterTypeID: &meterWater.ID,
-    StudentID:   &student2ID,
-}, entity.MeterRecord{
-    RecordDate:  time.Now(),
-    OldValue:    120,
-    NewValue:    150,
-    UnitUsed:    30,
-    TotalAmount: 30 * waterRate.PricePerUnit,
-    RateID:      &waterRate.ID,
-})
+	for _, s := range seeds {
+		unit := s.New - s.Old
+		amount := unit
+		if s.RatePerUnitID == rateElec.ID {
+			amount = unit * rateElec.PricePerUnit
+		}
+		if s.RatePerUnitID == rateWater.ID {
+			amount = unit * rateWater.PricePerUnit
+		}
 
+		var rec entity.MeterRecord
+		if err := tx.Where(&entity.MeterRecord{
+			RoomID:      &s.RoomID,
+			MeterTypeID: &s.MeterTypeID,
+			PeriodStart: periodStart,
+		}).Attrs(entity.MeterRecord{
+			RecordDate:    time.Now(),
+			OldValue:      s.Old,
+			NewValue:      s.New,
+			UnitUsed:      unit,
+			TotalAmount:   amount,
+			RatePerUnitID: &s.RatePerUnitID, // 👈 เปลี่ยนตรงนี้
+			StudentID:     &s.StudentID,
+		}).FirstOrCreate(&rec).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
 
-	// =======================
-	// 2️⃣ ดึง Room ที่มีอยู่
-	// =======================
-	var room1, room2 entity.Room
-	db.First(&room1, 1)
-	db.First(&room2, 2)
-
+	// ====== 4) Billing (คีย์ค้นหา = room + periodStart) ======
 	statusPaid := "จ่ายแล้ว"
 	statusUnpaid := "ไม่มี ไม่หนี ไม่จ่าย"
 
-	bill1 := entity.Billing{
-		RoomID:      room1.ID,
-		BillingDate: time.Now(),
-		AmountDue:   4700,
-		DueDate:     time.Now().AddDate(0, 0, 30),
-		Status:      &statusUnpaid,
+	var bill1, bill2 entity.Billing
+	if err := tx.Where(&entity.Billing{RoomID: room101.ID, PeriodStart: periodStart}).
+		Attrs(entity.Billing{
+			BillingDate: time.Now(),
+			AmountDue:   4700,
+			DueDate:     periodStart.AddDate(0, 0, 30),
+			Status:      &statusUnpaid,
+		}).FirstOrCreate(&bill1).Error; err != nil {
+		tx.Rollback()
+		panic(err)
 	}
-	db.FirstOrCreate(&bill1, entity.Billing{RoomID: room1.ID})
 
-	bill2 := entity.Billing{
-		RoomID:      room2.ID,
-		BillingDate: time.Now(),
-		AmountDue:   5200,
-		DueDate:     time.Now().AddDate(0, 0, 30),
-		Status:      &statusPaid,
+	if err := tx.Where(&entity.Billing{RoomID: room102.ID, PeriodStart: periodStart}).
+		Attrs(entity.Billing{
+			BillingDate: time.Now(),
+			AmountDue:   5200,
+			DueDate:     periodStart.AddDate(0, 0, 30),
+			Status:      &statusPaid,
+		}).FirstOrCreate(&bill2).Error; err != nil {
+		tx.Rollback()
+		panic(err)
 	}
-	db.FirstOrCreate(&bill2, entity.Billing{RoomID: room2.ID})
 
-	// =======================
-	// 5️⃣ สร้าง BillItems
-	// =======================
-	billItemsRoom1 := []entity.BillItem{
+	// ====== 5) BillItems (คีย์ค้นหา = billing + item_type) ======
+	items1 := []entity.BillItem{
 		{BillingID: bill1.ID, ItemType: "ค่าหอ", Amount: 4000},
 		{BillingID: bill1.ID, ItemType: "ค่าไฟ", Amount: 250},
 		{BillingID: bill1.ID, ItemType: "ค่าน้ำ", Amount: 90},
 	}
-
-	billItemsRoom2 := []entity.BillItem{
+	items2 := []entity.BillItem{
 		{BillingID: bill2.ID, ItemType: "ค่าหอ", Amount: 4500},
 		{BillingID: bill2.ID, ItemType: "ค่าไฟ", Amount: 300},
 		{BillingID: bill2.ID, ItemType: "ค่าน้ำ", Amount: 100},
 	}
-
-	for _, item := range billItemsRoom1 {
-		db.FirstOrCreate(&item, entity.BillItem{BillingID: bill1.ID, ItemType: item.ItemType})
+	for _, it := range items1 {
+		bi := it // สำเนา กัน pointer reuse
+		if err := tx.Where(&entity.BillItem{BillingID: bill1.ID, ItemType: bi.ItemType}).
+			Attrs(entity.BillItem{Amount: bi.Amount}).
+			FirstOrCreate(&bi).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
 	}
-	for _, item := range billItemsRoom2 {
-		db.FirstOrCreate(&item, entity.BillItem{BillingID: bill2.ID, ItemType: item.ItemType})
+	for _, it := range items2 {
+		bi := it
+		if err := tx.Where(&entity.BillItem{BillingID: bill2.ID, ItemType: bi.ItemType}).
+			Attrs(entity.BillItem{Amount: bi.Amount}).
+			FirstOrCreate(&bi).Error; err != nil {
+			tx.Rollback()
+			panic(err)
+		}
 	}
-
-
-
 
 	// ตัวอย่างประกาศพื้นฐาน
 	seedAnnouncement(
@@ -607,4 +644,3 @@ db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
 		panic(err)
 	}
 }
-

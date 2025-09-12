@@ -1,6 +1,7 @@
 import type { StudentInterface } from "./Student";
 import type { AdminInterface } from "./Admin";
 import type { EvidenceInterface } from "./Evidence";
+import type { BillInterface } from "./Bill";
 
 export interface PaymentInterface {
   ID?: number;
@@ -23,7 +24,7 @@ export interface PaymentInterface {
   evidence?: EvidenceInterface;
 
   billing_id?: number;
-  billing?: any;
+  billing?: BillInterface;
 
   contract_id?: number;
 }

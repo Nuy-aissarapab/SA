@@ -307,27 +307,6 @@ const FullLayout: React.FC = () => {
               </Menu.Item>
               )}
 
-              <Menu.Item
-                key="Announcement"
-                onClick={() => setCurrentPage("Announcement")}
-              >
-                <Link to="/Announcement">
-                  <UserOutlined />
-
-                  <span>Announcement</span>
-                </Link>
-              </Menu.Item>
-
-              <Menu.Item
-                key="customer"
-                onClick={() => setCurrentPage("customer")}
-              >
-                <Link to="/">
-                  <KeyOutlined />
-
-                  <span>เปลี่ยนรหัสผ่าน</span>
-                </Link>
-              </Menu.Item>
             </Menu>
           </div>
         </div>

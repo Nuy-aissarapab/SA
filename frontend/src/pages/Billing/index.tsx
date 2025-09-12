@@ -16,6 +16,7 @@ function BillList() {
   const getRooms = async () => {
     try {
       const res = await GetRoomByBill();
+      console.log("data",res.data);
       if (res.status === 200) {
         setRooms(res.data);
       } else {
@@ -29,6 +30,7 @@ function BillList() {
   };
 
   useEffect(() => {
+    
     getRooms();
   }, []);
 
@@ -40,6 +42,7 @@ function BillList() {
         ? prev
         : curr
     );
+
   };
 
   const columns: ColumnsType<RoomMeterInterface> = [
