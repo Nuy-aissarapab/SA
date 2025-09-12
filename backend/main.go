@@ -60,7 +60,8 @@ func main() {
 	r.POST("/admin/signup", admin.SignUp)
 
 	r.Static("/uploads", "./uploads")
-	// main.go
+	//Image
+	// r.Static("/images", "./static")
 	r.MaxMultipartMemory = 16 << 20 // 16MB
 
 	// public หรือจะย้ายเข้า group auth ก็ได้ (ถ้าให้เฉพาะ admin อัปได้)
@@ -167,15 +168,18 @@ func main() {
 
 		// RoomType
 		router.GET("/room-types",room.GetAllRoomType)
+		router.POST("/room-types", room.CreateRoomType)
+		router.PUT("/room-types/:id", room.UpdateRoomType)
+		router.DELETE("/room-types/:id", room.DeleteRoomType)
 
 		//Asset Type
 		router.GET("/asset-types",roomasset.GetAllAssetTypes)
 		router.POST("/asset-types", roomasset.CreateAssetType)
-		router.PUT("/asset-types", roomasset.UpdateAssetType)
+		router.PUT("/asset-types/:id", roomasset.UpdateAssetType)
+		router.DELETE("/asset-types/:id", roomasset.DeleteAssetType)
 
 
-		//Image
-		router.Static("/images", "./static/image")
+		
 	}
 
 

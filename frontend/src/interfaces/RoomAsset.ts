@@ -8,9 +8,8 @@ export interface RoomAsset {
   DeletedAt: string | null;
 
   Quantity: number;
-  Condition: string;
-  Status: string;
-  CreatedDate: string; // ISO date string
+
+ 
   CheckDate: string;   // ISO date string
 
   // Foreign Keys

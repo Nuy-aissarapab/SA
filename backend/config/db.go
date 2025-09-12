@@ -184,30 +184,29 @@ for _, r := range rooms {
 		Date: time.Now(),
 	})
 	//RoomAsset
+	now := time.Now()
 	db.Create(&entity.RoomAsset{
 		Quantity:    1,
-		Condition:   "ดี",
-		Status:      "ใช้งานได้",
-		CreatedDate: time.Now(),
-		CheckDate:   time.Now(),
+
+
+		
+		CheckDate:   &now,
 		RoomNumber:  "101",
 		AssetTypeID: 1,
 	})
 	db.Create(&entity.RoomAsset{
 		Quantity:    1,
-		Condition:   "ดี",
-		Status:      "ใช้งานได้",
-		CreatedDate: time.Now(),
-		CheckDate:   time.Now(),
+
+		
+		CheckDate:   &now,
 		RoomNumber:  "102",
 		AssetTypeID: 1,
 	})
 	db.Create(&entity.RoomAsset{
 		Quantity:    1,
-		Condition:   "ดี",
-		Status:      "ใช้งานได้",
-		CreatedDate: time.Now(),
-		CheckDate:   time.Now(),
+
+		
+		CheckDate:   &now,
 		RoomNumber:  "103",
 		AssetTypeID: 2,
 	})

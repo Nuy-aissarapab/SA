@@ -9,7 +9,7 @@ import {
   Upload,
   message,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined,ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
   PostAllRooms,
@@ -102,6 +102,18 @@ function CreateRoomForm() {
   return (
     <>
       {contextHolder}
+      <Row justify="start">
+        <Col>
+          <Button
+            type="default"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/Room")}
+            style={{ marginBottom: 16, borderRadius: 6 }}
+          >
+            ย้อนกลับ
+          </Button>
+        </Col>
+      </Row>
       <Row justify="center">
         <Col span={16}>
           <h2>➕ เพิ่มห้องพักใหม่</h2>

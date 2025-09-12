@@ -246,6 +246,74 @@ func GetAllRoomType(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, list)
 }
+// CreateRoomType - API สำหรับสร้าง RoomType
+func CreateRoomType(c *gin.Context) {
+	var roomType entity.RoomType
+
+	if err := c.ShouldBindJSON(&roomType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// กันพลาดถ้าไม่ได้ส่งเวลามา
+	if roomType.CreatedAt.IsZero() {
+		roomType.CreatedAt = time.Now()
+	}
+
+	if err := config.DB().Create(&roomType).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถสร้าง RoomType ได้"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"data": roomType})
+}
+// UpdateRoomType - อัปเดต RoomType โดยไม่ใช้ ID แต่ใช้ชื่อเดิม
+// PUT /room-types/:id
+func UpdateRoomType(c *gin.Context) {
+    id := c.Param("id")
+    var input entity.RoomType
+
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    var roomType entity.RoomType
+    if err := config.DB().First(&roomType, id).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบ RoomType"})
+        return
+    }
+
+    // อัปเดต field
+    if input.RoomTypeName != "" {
+        roomType.RoomTypeName = input.RoomTypeName
+    }
+    roomType.RentalPrice = input.RentalPrice
+
+    if err := config.DB().Save(&roomType).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถอัปเดต RoomType ได้"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": roomType})
+}
+
+func DeleteRoomType(c *gin.Context) {
+    id := c.Param("id")
+    if id == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ ID"})
+        return
+    }
+
+    if err := config.DB().Delete(&entity.RoomType{}, id).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถลบประเภทห้องได้"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "ลบประเภทห้องสำเร็จ"})
+}
+
+
 
 
 

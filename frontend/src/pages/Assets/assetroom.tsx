@@ -39,7 +39,9 @@ const AssetRoom = () => {
 
   const navigate = useNavigate();
   const role: string = localStorage.getItem("role") || "admin";
-  const studentID = localStorage.getItem("studentID") || "1";
+  // ---- แก้ตรงนี้ ----
+const myId = Number(localStorage.getItem("id") || "0");
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -136,10 +138,11 @@ const AssetRoom = () => {
     },
   ];
 
-  const userData = dataSource.filter((item) => {
-    const student = item.Student;
-    return student ? Number(studentID) === student.ID : false;
-  });
+ const userData = dataSource.filter((item) => {
+  const student = item.Student;
+  return student ? myId === student.ID : false;
+});
+
 
   return (
     <>

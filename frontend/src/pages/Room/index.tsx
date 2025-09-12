@@ -363,13 +363,35 @@ function RoomPage() {
       {modalContextHolder}
       {role === "admin" ? (
         <>
-          <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+          <Row
+            justify="space-between"
+            align="middle"
+            style={{ marginBottom: 16 }}
+          >
             <Col>
               <Space>
                 <HomeOutlined style={{ fontSize: 24 }} />
                 <h2>Admin Portal - ห้องพัก</h2>
               </Space>
             </Col>
+          </Row>
+          <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+            {/* ฝั่งซ้าย: Title + ปุ่มจัดการ */}
+            <Col>
+              <Space>
+                <Link to="/Room/CreateRoom">
+                  <Button type="primary" icon={<PlusOutlined />}>เพิ่มห้อง</Button>
+                </Link>
+                <Link to="/Room/CreateRoomType">
+                  <Button type="primary" icon={<PlusOutlined />}>เพิ่มประเภทห้อง</Button>
+                </Link>
+                <Link to="/Room/edit-room-type">
+                  <Button type="default">✏️ แก้ไขประเภทห้อง</Button>
+                </Link>
+              </Space>
+            </Col>
+
+            {/* ฝั่งขวา: Search bar */}
             <Col>
               <Space>
                 <Input
@@ -381,6 +403,7 @@ function RoomPage() {
                     filterRooms(value, roomTypeFilter);
                   }}
                   suffix={<SearchOutlined />}
+                  style={{ width: 160 }}
                 />
                 <Select
                   placeholder="ประเภท"
@@ -398,13 +421,11 @@ function RoomPage() {
                     </Option>
                   ))}
                 </Select>
-                <Button onClick={handleSearch}>ค้นหา</Button>
-                <Link to="/Room/CreateRoom">
-                  <Button type="primary" icon={<PlusOutlined />}>เพิ่มห้อง</Button>
-                </Link>
+                
               </Space>
             </Col>
           </Row>
+
           <Divider />
           {loading ? (
             <div style={{ textAlign: "center", padding: 40 }}>

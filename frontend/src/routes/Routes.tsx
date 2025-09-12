@@ -29,6 +29,7 @@ const Asset = Loadable(lazy(() => import("../pages/Assets")));
 const CreateRoomAssetsForm = Loadable(lazy(() => import("../pages/Assets/CreateAssets")));
 const AssetRoom = Loadable(lazy(() => import("../pages/Assets/assetroom")));
 const RoomAssetEdit = Loadable(lazy(() => import("../pages/Assets/RoomAssetEdit")));
+
 const CreateAssetsTypeForm = Loadable(lazy(() => import("../pages/Assets/CreateAssetsType")));
 const EditAssetTypes = Loadable(lazy(() => import("../pages/Assets/EditAssetType")));
 
@@ -38,6 +39,9 @@ const CreateRoomForm = Loadable(lazy(() => import("../pages/Room/CreateRoom")));
 const RoomDetails = Loadable(lazy(() => import("../pages/Room/RoomDetails")));
 const Booking = Loadable(lazy(() => import("../pages/Room/Booking")));
 const RoomEdit = Loadable(lazy(() => import("../pages/Room/RoomEdit")));
+
+const CreateRoomTypeForm = Loadable(lazy(() => import("../pages/Room/CreateRoomType")));
+const EditRoomType = Loadable(lazy(() => import("../pages/Room/EditRoomType")));
 
 const Maintenance = Loadable(lazy(() => import("../pages/Maintenance")));
 
@@ -190,7 +194,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
             element: <ExtendSuccess />,
 
           },
-          
+
           {
 
             path: "/Contract/Extendcontract/EvidenceGallery",
@@ -249,7 +253,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       },
 
       {
-        path: "/Assets",  
+        path: "/Assets",
         children: [
           { path: "", element: <Asset /> },
           { path: "assetroom", element: <AssetRoom /> },
@@ -258,33 +262,20 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           { path: "edit/:id", element: <RoomAssetEdit /> }, // ✅ ต้องมี :id
           { path: "create-asset-type", element: <CreateAssetsTypeForm /> },
           { path: "edit-asset-type", element: <EditAssetTypes /> },
-           // เพิ่มเส้นทางสำหรับ CreateAssets โดยมีพารามิเตอร์ roomNumber
+          // เพิ่มเส้นทางสำหรับ CreateAssets โดยมีพารามิเตอร์ roomNumber
         ],
       },
 
       {
         path: "/Room",
         children: [
-          {
-            path: "",
-            element: <RoomPage />,
-          },
-                    {
-            path: "createroom",
-            element: <CreateRoomForm />,
-          },
-          {
-            path: "RoomDetail/:id",
-            element: <RoomDetails />,
-          },
-          {
-            path: "booking/:id",
-            element: <Booking />,
-          },
-          {
-             path:"RoomEdit/:id" ,
-             element:<RoomEdit />
-          }
+          {path: "",element: <RoomPage />,},
+          {path: "createroom",element: <CreateRoomForm />,},
+          {path: "RoomDetail/:id",element: <RoomDetails />,},
+          {path: "booking/:id",element: <Booking />,},
+          {path: "RoomEdit/:id",element: <RoomEdit />},
+          {path: "createroomtype",element: <CreateRoomTypeForm />,},
+          {path: "edit-room-type",element: <EditRoomType />,},
         ],
       },
 
@@ -294,7 +285,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           { path: "/Maintenance", element: <Maintenance /> },
           { path: "/Maintenance/Create", element: <MaintenanceCreate /> },
           { path: "/Maintenance/Edit/:id", element: <MaintenanceEdit /> }, // ✅ มี :id
-          { path: "/Maintenance/Status/:id", element:<MaintenanceStatus /> }, 
+          { path: "/Maintenance/Status/:id", element: <MaintenanceStatus /> },
         ],
       },
 
@@ -316,12 +307,12 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       {
         path: "/announcements/create",
 
-        element: <CreateAnnouncementPage  />,
+        element: <CreateAnnouncementPage />,
       },
       {
         path: "/announcements/:id/edit",
 
-        element: <EditAnnouncementPage  />,
+        element: <EditAnnouncementPage />,
       },
 
       {

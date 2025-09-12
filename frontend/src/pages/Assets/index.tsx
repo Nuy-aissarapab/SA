@@ -10,7 +10,13 @@ import {
   Spin,
   Space,
 } from "antd";
-import { EditOutlined, DeleteOutlined, HomeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  HomeOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate, useParams } from "react-router-dom";
 import type { RoomAsset } from "../../interfaces/RoomAsset";
@@ -19,6 +25,9 @@ import { GetAllRoomAssets, DeleteRoomAsset } from "../../Service/https/index";
 interface RoomAssetData extends RoomAsset {
   key: string;
 }
+
+// ---- Helpers ----
+const getCheckDate = (r: RoomAsset) => r.CheckDate;
 
 const Asset = () => {
   const { roomNumber } = useParams<{ roomNumber: string }>();
@@ -42,11 +51,8 @@ const Asset = () => {
       );
 
       const filteredAssets = formatted.filter(
-        (item: RoomAssetData) =>
-          item.Room?.RoomNumber === roomNumber ||
-          item.Room?.RoomNumber === roomNumber
+        (item: RoomAssetData) => item.Room?.RoomNumber === roomNumber
       );
-
 
       setDataSource(filteredAssets);
     } catch (error) {
@@ -111,18 +117,19 @@ const Asset = () => {
     },
     {
       title: "วันที่ตรวจสอบ",
-      dataIndex: "CheckDate",
       key: "checkDate",
       align: "center",
+      render: (_, r) =>
+        getCheckDate(r) && getCheckDate(r) !== "0001-01-01T00:00:00Z"
+          ? dayjs(getCheckDate(r)).format("DD/MM/YYYY")
+          : "ยังไม่ตรวจสอบ",
     },
     {
       title: "ผู้จอง",
-      dataIndex: ["Room", "Student", "FirstName"],
       key: "student",
-      render: (_, record) => record.Room?.Student?.first_name || "-",
       align: "center",
+      render: (_, record) => record.Room?.Student?.first_name || "-",
     },
-
     {
       title: "จัดการ",
       key: "action",
@@ -150,9 +157,7 @@ const Asset = () => {
   ];
 
   return (
-
     <>
-
       {contextHolder}
       {modalContextHolder}
 
@@ -181,7 +186,6 @@ const Asset = () => {
               <span style={{ color: "#1890ff" }}>{roomNumber}</span>
             </h2>
           </Space>
-
         </Col>
 
         <Col>
@@ -194,7 +198,6 @@ const Asset = () => {
           </Button>
         </Col>
       </Row>
-
 
       <Divider />
 

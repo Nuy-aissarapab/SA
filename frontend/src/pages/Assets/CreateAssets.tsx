@@ -97,9 +97,8 @@ function CreateRoomAssetForm() {
         room_number: roomNumber,
         asset_type_id: selected.ID ?? selected.id,
         Quantity: Number(values.quantity),
-        Condition: "ปกติ",
-        Status: "ok",
-        CreatedDate: new Date().toISOString(),
+       
+        
         CheckDate: new Date().toISOString(),
       };
 

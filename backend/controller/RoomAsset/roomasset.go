@@ -64,15 +64,14 @@ func CreateRoomAsset(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบประเภททรัพย์สิน"})
 		return
 	}
-
+	now := time.Now()
 	roomAsset := entity.RoomAsset{
 		RoomNumber:  req.RoomNumber,
 		AssetTypeID: req.AssetTypeID,
 		Quantity:    req.Quantity,
-		Condition:   req.Condition,
-		Status:      req.Status,
-		CreatedDate: time.Now(),
-		CheckDate:   time.Now(),
+		
+		
+		CheckDate:   &now,
 	}
 
 	if err := config.DB().Create(&roomAsset).Error; err != nil {
@@ -90,7 +89,7 @@ func UpdateRoomAsset(c *gin.Context) {
 		Quantity  int       `json:"quantity"`
 		Condition string    `json:"condition"`
 		Status    string    `json:"status"`
-		CheckDate time.Time `json:"check_date"`
+		CheckDate *time.Time `json:"check_date"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -105,8 +104,7 @@ func UpdateRoomAsset(c *gin.Context) {
 	}
 
 	roomAsset.Quantity = req.Quantity
-	roomAsset.Condition = req.Condition
-	roomAsset.Status = req.Status
+	
 	roomAsset.CheckDate = req.CheckDate
 
 	if err := config.DB().Save(&roomAsset).Error; err != nil {
@@ -161,23 +159,22 @@ func CreateAssetType(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": assetType})
 }// UpdateAssetType - แก้ไขประเภททรัพย์สิน
 // UpdateAssetType - อัปเดตโดยใช้ข้อมูลจาก body (ไม่ใช้ param id)
+
 func UpdateAssetType(c *gin.Context) {
+    id := c.Param("id")
+
+    var assetType entity.AssetType
+    if err := config.DB().First(&assetType, id).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบประเภททรัพย์สิน"})
+        return
+    }
+
     var input entity.AssetType
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    if input.ID == 0 {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "ต้องระบุ ID"})
-        return
-    }
-
-    var assetType entity.AssetType
-    if err := config.DB().First(&assetType, input.ID).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบประเภททรัพย์สิน"})
-        return
-    }
 
     // อัปเดต field
     assetType.Name = input.Name
@@ -191,4 +188,14 @@ func UpdateAssetType(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, gin.H{"data": assetType})
+}
+func DeleteAssetType(c *gin.Context) {
+    id := c.Param("id")
+
+    if tx := config.DB().Delete(&entity.AssetType{}, id); tx.RowsAffected == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "ไม่พบ AssetType"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "ลบ AssetType สำเร็จ"})
 }

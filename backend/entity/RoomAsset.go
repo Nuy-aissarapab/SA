@@ -8,10 +8,10 @@ import (
 type RoomAsset struct {
     gorm.Model
     Quantity    int       `json:"Quantity"`
-    Condition   string    `json:"Condition"`
-    Status      string    `json:"Status"`
-    CreatedDate time.Time `json:"CreatedDate"`
-    CheckDate   time.Time `json:"CheckDate"`
+
+
+    
+    CheckDate   *time.Time `json:"CheckDate"`
 
     // Foreign Keys
     RoomNumber  string `json:"RoomNumber"`

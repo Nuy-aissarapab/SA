@@ -762,6 +762,31 @@ export async function GetAllRoomTypes() {
     .catch((e) => e.response);
 }
 
+export async function CreateRoomType(payload: any) {
+  try {
+    return await axios.post(`${API_URL}/room-types`, payload, getAuthHeader());
+  } catch (err: any) {
+    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
+}
+export async function UpdateRoomType(id: number, payload: any) {
+  try {
+    return await axios.put(`${API_URL}/room-types/${id}`, payload, getConfig());
+  } catch (err: any) {
+    console.error("🔥 UpdateRoomType error:", err?.response || err);
+    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
+}
+
+export async function DeleteRoomType(id: number) {
+  return axios
+    .delete(`${API_URL}/room-types/${id}`, getAuthHeader())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+
+
 // ---------------------- RoomAsset ----------------------
 export async function CreateRoomAsset(data: any) {
   return axios.post(`${API_URL}/room-assets`, data, getAuthHeader());
@@ -813,9 +838,16 @@ export async function CreateAssetType(payload: any) {
   }
 }
 
-export async function UpdateAssetType(id: number, payload: any) {
+export async function UpdateAssetType( id: number, payload: any) {
   try {
-    return await axios.put(`${API_URL}/asset-types`, payload, getConfig());
+    return await axios.put(`${API_URL}/asset-types/${id}`, payload, getConfig());
+  } catch (err: any) {
+    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+  }
+}
+export async function DeleteAssetType(id: number) {
+  try {
+    return await axios.delete(`${API_URL}/asset-types/${id}`, getConfig());
   } catch (err: any) {
     return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
   }

@@ -21,8 +21,8 @@ const RoomAssetEdit = () => {
       form.setFieldsValue({
         AssetName: data.AssetType?.Name,
         Quantity: data.Quantity,
-        Condition: data.Condition,
-        Status: data.Status,
+      
+        
         CheckDate: data.CheckDate ? dayjs(data.CheckDate) : null,
       });
     } catch (err) {
@@ -81,16 +81,13 @@ const RoomAssetEdit = () => {
             <InputNumber min={1} style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item label="สภาพ" name="Condition">
-            <Input />
-          </Form.Item>
 
-          <Form.Item label="สถานะ" name="Status">
-            <Input />
-          </Form.Item>
+
+
+
 
           <Form.Item label="วันที่ตรวจสอบ" name="CheckDate">
-            <DatePicker style={{ width: "100%" }} />
+            <DatePicker style={{ width: "100%" }}format="YYYY-MM-DD" disabled />
           </Form.Item>
 
           <Form.Item>

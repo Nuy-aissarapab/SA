@@ -64,6 +64,9 @@ import RoomDetails from "../../pages/Room/RoomDetails";
 import Booking from "../../pages/Room/Booking";
 import RoomEdit from "../../pages/Room/RoomEdit";
 
+import CreateRoomTypeForm from "../../pages/Room/CreateRoomType";
+import EditRoomType from "../../pages/Room/EditRoomType";
+
 import Maintenance from "../../pages/Maintenance";
 
 import MaintenanceCreate from "../../pages/Maintenance/Create";
@@ -360,6 +363,9 @@ const FullLayout: React.FC = () => {
               <Route path="/Room/RoomDetail/:id" element={<RoomDetails />} />
               <Route path="/Room/booking/:id" element={<Booking />} />
               <Route path="/Room/RoomEdit/:id" element={<RoomEdit />} />
+
+              <Route path="/Room/createroomtype" element={<CreateRoomTypeForm />} />
+              <Route path="/Room/edit-room-type" element={<EditRoomType />} />
 
               <Route path="/Maintenance" element={<Maintenance />} />
 
