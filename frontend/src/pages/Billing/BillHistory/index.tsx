@@ -132,7 +132,7 @@ function BillHistory() {
             )}
           </Col>
           <Col style={{ flexGrow: 1, textAlign: "center" }}>
-            <h2 style={{ margin: 0 }}>ประวัติบิล ห้อง {roomNumber || room_id}</h2>
+            <h2 style={{ margin: 0 }}>ประวัติบิล </h2>
           </Col>
           <Col>
             <Space>
