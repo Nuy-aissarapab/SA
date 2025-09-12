@@ -187,12 +187,12 @@ func main() {
 		router.GET("/meter/last", meter.GetLastMeterRecord)
 
 		router.GET("/metertype", metertype.GetMeterType)
-
-		r.GET("/room/bill", room.GetRoomByBill) 
-		r.GET("/bill/room/:room_id", bill.GetBillByRoom)
-		r.DELETE("/bill/:id", bill.DeleteBill)
-		r.POST("/bill", bill.CreateBill)
-		r.GET("/bill/:room_id/preview", bill.PreviewBill)         
+		//kuy
+		router.GET("/room/bill", room.GetRoomByBill) 
+		router.GET("/bill/room/:room_id", bill.GetBillByRoom)
+		router.DELETE("/bill/:id", bill.DeleteBill)
+		router.POST("/bill", bill.CreateBill)
+		router.GET("/bill/:room_id/preview", bill.PreviewBill)         
 		r.GET("/bill/:room_id/preview-items", bill.PreviewBillItems) 
 		r.GET("/billitem/:billId", billitem.GetBillItemsByBillId)
 	}
