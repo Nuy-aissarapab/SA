@@ -30,7 +30,7 @@ export default function MaintenancePage() {
     name: r?.MaintenanceStatus?.StatusName ?? r?.maintenance_status?.status_name ?? "-",
   });
 
-  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.room_number ?? "-";
+  const getRoomNumber = (r: any) => r?.Room?.RoomNumber ?? r?.room?.RoomNumber ;
   const getStudentName = (r: any) =>
     r?.Student?.First_Name ?? r?.student?.first_name ?? r?.Student?.first_name ?? "-";
   const getTitle = (r: any) => r?.Title ?? r?.title ?? "-";

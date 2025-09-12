@@ -44,10 +44,13 @@ func SetupDatabase() {
 		&entity.Maintenance{},
 		&entity.AnnouncementTarget{},
 		&entity.AnnouncementType{},
-		&entity.Announcement{},
+		&entity.Announcement{},&entity.RoomType{},
+		&entity.AssetType{},
+		&entity.RoomAsset{},
 	); err != nil {
 		panic(err)
 	}
+		
 
 	// ใช้ Transaction เพื่อความถูกต้องครบชุด
 	tx := db.Begin()
@@ -178,6 +181,131 @@ func SetupDatabase() {
 			panic(err)
 		}
 	}
+	db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:     "SA1",
+		Password:     string(password),
+		Email:        "sa1@gmail.com",
+		First_Name:   "วิชญ์",
+		Last_Name:    "อินทรโชติ",
+		Birthday:     time.Date(2003, 4, 21, 0, 0, 0, 0, time.UTC),
+		Phone:        "0823456789",
+		Parent_Phone: "0812349876",
+		Parent_Name:  "สมหมาย อินทรโชติ",
+		Major:        "เทคโนโลยีสารสนเทศ",
+		Address:      "88/9 ถ.สุรนารายณ์ ต.ในเมือง อ.เมือง จ.นครราชสีมา",
+		Room_ID:      &r2,
+	})
+	db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:     "SA2",
+		Password:     string(password),
+		Email:        "sa2@gmail.com",
+		First_Name:   "พิมพ์ชนก",
+		Last_Name:    "บุญมาก",
+		Birthday:     time.Date(2004, 1, 17, 0, 0, 0, 0, time.UTC),
+		Phone:        "0865432198",
+		Parent_Phone: "0856789123",
+		Parent_Name:  "อำไพ บุญมาก",
+		Major:        "วิทยาการข้อมูล",
+		Address:      "129 หมู่ 7 ต.โคกกรวด อ.เมือง จ.นครราชสีมา",
+		Room_ID:      &r3,
+	})
+	db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:     "SA3",
+		Password:     string(password),
+		Email:        "sa3@gmail.com",
+		First_Name:   "ศรัณย์",
+		Last_Name:    "อุดมสุข",
+		Birthday:     time.Date(2002, 9, 9, 0, 0, 0, 0, time.UTC),
+		Phone:        "0832224455",
+		Parent_Phone: "0891234560",
+		Parent_Name:  "มยุรี อุดมสุข",
+		Major:        "วิศวกรรมซอฟต์แวร์",
+		Address:      "12/3 ต.หนองบัวศาลา อ.เมือง จ.นครราชสีมา",
+	})
+	db.Model(&entity.Student{}).Create(&entity.Student{
+		Username:     "SA4",
+		Password:     string(password),
+		Email:        "sa4@gmail.com",
+		First_Name:   "กฤษณะ",
+		Last_Name:    "สีทอง",
+		Birthday:     time.Date(2003, 6, 28, 0, 0, 0, 0, time.UTC),
+		Phone:        "0845556677",
+		Parent_Phone: "0823331122",
+		Parent_Name:  "บุญส่ง สีทอง",
+		Major:        "ระบบสารสนเทศทางธุรกิจ",
+		Address:      "56/78 ถ.มิตรภาพ ต.บ้านเกาะ อ.เมือง จ.นครราชสีมา",
+	})
+		//RoomType
+	db.Create(&entity.RoomType{
+		RoomTypeName:    "Air Room",
+		RentalPrice: 2900.00,
+	})
+	db.Create(&entity.RoomType{
+		RoomTypeName:    "Fan Room",
+		RentalPrice: 2500.00,
+	})
+	//Room
+// ✅ Seed Room (เพิ่ม RoomTypeID ให้ทุกห้อง)
+rooms := []entity.Room{
+    {RoomNumber: "100", Status: "ว่าง", Image: "room1.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "101", Status: "ไม่ว่าง", Image: "room2.jpg", RoomTypeID: 1, StudentID: &r1, AdminID: 1},
+    {RoomNumber: "102", Status: "ไม่ว่าง", Image: "room3.jpg", RoomTypeID: 1, StudentID: &r2, AdminID: 1},
+    {RoomNumber: "103", Status: "ว่าง", Image: "room4.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "104", Status: "ว่าง", Image: "room5.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "105", Status: "ว่าง", Image: "room6.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "201", Status: "ว่าง", Image: "room7.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "202", Status: "ว่าง", Image: "room8.jpg", RoomTypeID: 1, AdminID: 1},
+    {RoomNumber: "203", Status: "ว่าง", Image: "room9.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "204", Status: "ว่าง", Image: "room10.jpg", RoomTypeID: 2, AdminID: 1},
+    {RoomNumber: "205", Status: "ว่าง", Image: "room11.jpg", RoomTypeID: 1, AdminID: 1},
+}
+
+for _, r := range rooms {
+    db.FirstOrCreate(&entity.Room{}, r)
+}
+
+		//AssetType
+	db.Create(&entity.AssetType{
+		Name: "เตียง",
+		Type: "เฟอร์นิเจอร์",
+		PenaltyFee: 500.00,
+		Date: time.Now(),
+	})
+	db.Create(&entity.AssetType{
+		Name: "Wi-Fi",
+		Type: "สิ่งอำนวยความสะดวก",
+		PenaltyFee: 1000.00,
+		Date: time.Now(),
+	})
+	//RoomAsset
+	now := time.Now()
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+
+
+		
+		CheckDate:   &now,
+		RoomNumber:  "101",
+		AssetTypeID: 1,
+	})
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+
+		
+		CheckDate:   &now,
+		RoomNumber:  "102",
+		AssetTypeID: 1,
+	})
+	db.Create(&entity.RoomAsset{
+		Quantity:    1,
+
+		
+		CheckDate:   &now,
+		RoomNumber:  "103",
+		AssetTypeID: 2,
+	})
+	
+
 
 	// ===== Contract (เอกลักษณ์: StudentID + Start_Date + End_Date) =====
 	startDate, _ := time.Parse("2006-01-02", "2025-01-01")
