@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Table, Rate, message } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -21,8 +21,14 @@ export default function ReviewPage() {
   const getRating = (r: any) => r?.Rating ?? r?.rating ?? 0;
   const getDate = (r: any) => r?.ReviewDate ?? r?.review_date;
   const getOwnerId = (r:any) => r?.StudentID ?? r?.student_id ?? r?.Student?.ID ?? r?.student?.id;
-  const isOwner = (r:any) => myId && getOwnerId(r)?.toString() === myId.toString();
+  const isOwner = (r:any) => myId && getOwnerId(r)?.toString() === myId?.toString();
   const getComment = (r: any) => r?.Comment ?? r?.comment ?? "-";
+
+  // นักศึกษา 1 คนเขียนได้ 1 รีวิว: ถ้ามีของตัวเองแล้ว -> ซ่อนปุ่มสร้าง
+  const hasMyReview = useMemo(
+    () => role === "student" && !!myId && reviews.some((r) => isOwner(r)),
+    [role, myId, reviews]
+  );
 
   const columns: ColumnsType<any> = [
     { title: "รหัส", dataIndex: "ID" },
@@ -40,29 +46,28 @@ export default function ReviewPage() {
       },
     },
     {
-  title: "การจัดการ",
-  render: (_: any, record: any) => {
-    if (role === "admin") {
-      return <Button danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>;
-    }
-    if (role === "student" && isOwner(record)) {
-      return (
-        <>
-          <Link to={`/Review/Edit/${record.ID}`}>
-            <Button icon={<EditOutlined />} style={{ marginRight: 8 }}>แก้ไข</Button>
-          </Link>
-          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>
-        </>
-      );
-    }
-    return null;
-  },
-
-  },
+      title: "การจัดการ",
+      render: (_: any, record: any) => {
+        if (role === "admin") {
+          return <Button danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>;
+        }
+        if (role === "student" && isOwner(record)) {
+          return (
+            <>
+              <Link to={`/Review/Edit/${record.ID}`}>
+                <Button icon={<EditOutlined />} style={{ marginRight: 8 }}>แก้ไข</Button>
+              </Link>
+              <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.ID!)}>ลบ</Button>
+            </>
+          );
+        }
+        return null;
+      },
+    },
   ];
 
   const fetchAll = async () => {
-    const res = await GetReviews();
+    const res = await GetReviews(); // ดึงรีวิวทั้งหมดให้นศ.เห็นได้ครบ
     if (res?.status === 200) setReviews(res.data);
     else messageApi.error(res?.data?.error || "โหลดข้อมูลรีวิวล้มเหลว");
   };
@@ -71,7 +76,7 @@ export default function ReviewPage() {
     const res = await DeleteReview(id.toString());
     if (res?.status === 200) {
       messageApi.success("ลบรีวิวสำเร็จ");
-      fetchAll();
+      fetchAll(); // อัปเดตรายการ และจะทำให้ hasMyReview เป็น false หากลบของตัวเอง
     } else {
       messageApi.error(res?.data?.error || "ลบไม่สำเร็จ");
     }
@@ -79,7 +84,6 @@ export default function ReviewPage() {
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
   return (
@@ -87,13 +91,19 @@ export default function ReviewPage() {
       {contextHolder}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
         <h2>รีวิวและประเมินหอพัก</h2>
-        {role === "student" && (
+        {/* แสดงปุ่มเฉพาะนักศึกษาที่ 'ยังไม่มีรีวิวของตัวเอง' */}
+        {role === "student" && !hasMyReview && (
           <Link to="/Review/Create">
             <Button type="primary" icon={<PlusOutlined />}>เขียนรีวิวใหม่</Button>
           </Link>
         )}
       </div>
-      <Table rowKey="ID" columns={columns} dataSource={reviews} pagination={{ pageSize: 10 }} />
+      <Table
+        columns={columns}
+        dataSource={reviews}
+        rowKey="ID"
+        pagination={{ pageSize: 10 }}
+      />
     </div>
   );
 }
