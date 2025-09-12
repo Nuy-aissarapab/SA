@@ -187,7 +187,7 @@ func main() {
 		router.GET("/meter/last", meter.GetLastMeterRecord)
 
 		router.GET("/metertype", metertype.GetMeterType)
-		//kuy
+		//kuy2
 		router.GET("/room/bill", room.GetRoomByBill) 
 		router.GET("/bill/room/:room_id", bill.GetBillByRoom)
 		router.DELETE("/bill/:id", bill.DeleteBill)
