@@ -283,7 +283,7 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           { path: "/Maintenance", element: <Maintenance /> },
           { path: "/Maintenance/Create", element: <MaintenanceCreate /> },
           { path: "/Maintenance/Edit/:id", element: <MaintenanceEdit /> }, // ✅ มี :id
-          { path: "/Maintenance/Status/:id", element: <MaintenanceStatus /> },
+          // { path: "/Maintenance/Status/:id", element: <MaintenanceStatus /> },
         ],
       },
 

@@ -44,14 +44,14 @@ func SetupDatabase() {
 		&entity.Maintenance{},
 		&entity.AnnouncementTarget{},
 		&entity.AnnouncementType{},
-		&entity.Announcement{},&entity.RoomType{},
+		&entity.Announcement{},
+	&entity.RoomType{},
 		&entity.AssetType{},
 		&entity.RoomAsset{},
 	); err != nil {
 		panic(err)
 	}
 		
-
 	// ใช้ Transaction เพื่อความถูกต้องครบชุด
 	tx := db.Begin()
 	defer func() {
@@ -85,18 +85,6 @@ func SetupDatabase() {
 		}
 	}
 
-	// ===== Room (ระบุเอกลักษณ์ด้วย RoomNumber) =====
-	roomNumbers := []string{"101", "102", "103", "104", "105", "201", "202", "203", "204", "205"}
-	for _, rn := range roomNumbers {
-		var r entity.Room
-		if err := tx.
-			Where(&entity.Room{RoomNumber: rn}).
-			Attrs(entity.Room{RoomNumber: rn}).
-			FirstOrCreate(&r).Error; err != nil {
-			tx.Rollback()
-			panic(err)
-		}
-	}
 
 	// ===== Student (เอกลักษณ์ด้วย Email) =====
 	r1, r2, r3 := uint(1), uint(2), uint(3)
@@ -181,131 +169,6 @@ func SetupDatabase() {
 			panic(err)
 		}
 	}
-	db.Model(&entity.Student{}).Create(&entity.Student{
-		Username:     "SA1",
-		Password:     string(password),
-		Email:        "sa1@gmail.com",
-		First_Name:   "วิชญ์",
-		Last_Name:    "อินทรโชติ",
-		Birthday:     time.Date(2003, 4, 21, 0, 0, 0, 0, time.UTC),
-		Phone:        "0823456789",
-		Parent_Phone: "0812349876",
-		Parent_Name:  "สมหมาย อินทรโชติ",
-		Major:        "เทคโนโลยีสารสนเทศ",
-		Address:      "88/9 ถ.สุรนารายณ์ ต.ในเมือง อ.เมือง จ.นครราชสีมา",
-		Room_ID:      &r2,
-	})
-	db.Model(&entity.Student{}).Create(&entity.Student{
-		Username:     "SA2",
-		Password:     string(password),
-		Email:        "sa2@gmail.com",
-		First_Name:   "พิมพ์ชนก",
-		Last_Name:    "บุญมาก",
-		Birthday:     time.Date(2004, 1, 17, 0, 0, 0, 0, time.UTC),
-		Phone:        "0865432198",
-		Parent_Phone: "0856789123",
-		Parent_Name:  "อำไพ บุญมาก",
-		Major:        "วิทยาการข้อมูล",
-		Address:      "129 หมู่ 7 ต.โคกกรวด อ.เมือง จ.นครราชสีมา",
-		Room_ID:      &r3,
-	})
-	db.Model(&entity.Student{}).Create(&entity.Student{
-		Username:     "SA3",
-		Password:     string(password),
-		Email:        "sa3@gmail.com",
-		First_Name:   "ศรัณย์",
-		Last_Name:    "อุดมสุข",
-		Birthday:     time.Date(2002, 9, 9, 0, 0, 0, 0, time.UTC),
-		Phone:        "0832224455",
-		Parent_Phone: "0891234560",
-		Parent_Name:  "มยุรี อุดมสุข",
-		Major:        "วิศวกรรมซอฟต์แวร์",
-		Address:      "12/3 ต.หนองบัวศาลา อ.เมือง จ.นครราชสีมา",
-	})
-	db.Model(&entity.Student{}).Create(&entity.Student{
-		Username:     "SA4",
-		Password:     string(password),
-		Email:        "sa4@gmail.com",
-		First_Name:   "กฤษณะ",
-		Last_Name:    "สีทอง",
-		Birthday:     time.Date(2003, 6, 28, 0, 0, 0, 0, time.UTC),
-		Phone:        "0845556677",
-		Parent_Phone: "0823331122",
-		Parent_Name:  "บุญส่ง สีทอง",
-		Major:        "ระบบสารสนเทศทางธุรกิจ",
-		Address:      "56/78 ถ.มิตรภาพ ต.บ้านเกาะ อ.เมือง จ.นครราชสีมา",
-	})
-		//RoomType
-	db.Create(&entity.RoomType{
-		RoomTypeName:    "Air Room",
-		RentalPrice: 2900.00,
-	})
-	db.Create(&entity.RoomType{
-		RoomTypeName:    "Fan Room",
-		RentalPrice: 2500.00,
-	})
-	//Room
-// ✅ Seed Room (เพิ่ม RoomTypeID ให้ทุกห้อง)
-rooms := []entity.Room{
-    {RoomNumber: "100", Status: "ว่าง", Image: "room1.jpg", RoomTypeID: 1, AdminID: 1},
-    {RoomNumber: "101", Status: "ไม่ว่าง", Image: "room2.jpg", RoomTypeID: 1, StudentID: &r1, AdminID: 1},
-    {RoomNumber: "102", Status: "ไม่ว่าง", Image: "room3.jpg", RoomTypeID: 1, StudentID: &r2, AdminID: 1},
-    {RoomNumber: "103", Status: "ว่าง", Image: "room4.jpg", RoomTypeID: 2, AdminID: 1},
-    {RoomNumber: "104", Status: "ว่าง", Image: "room5.jpg", RoomTypeID: 2, AdminID: 1},
-    {RoomNumber: "105", Status: "ว่าง", Image: "room6.jpg", RoomTypeID: 2, AdminID: 1},
-    {RoomNumber: "201", Status: "ว่าง", Image: "room7.jpg", RoomTypeID: 1, AdminID: 1},
-    {RoomNumber: "202", Status: "ว่าง", Image: "room8.jpg", RoomTypeID: 1, AdminID: 1},
-    {RoomNumber: "203", Status: "ว่าง", Image: "room9.jpg", RoomTypeID: 2, AdminID: 1},
-    {RoomNumber: "204", Status: "ว่าง", Image: "room10.jpg", RoomTypeID: 2, AdminID: 1},
-    {RoomNumber: "205", Status: "ว่าง", Image: "room11.jpg", RoomTypeID: 1, AdminID: 1},
-}
-
-for _, r := range rooms {
-    db.FirstOrCreate(&entity.Room{}, r)
-}
-
-		//AssetType
-	db.Create(&entity.AssetType{
-		Name: "เตียง",
-		Type: "เฟอร์นิเจอร์",
-		PenaltyFee: 500.00,
-		Date: time.Now(),
-	})
-	db.Create(&entity.AssetType{
-		Name: "Wi-Fi",
-		Type: "สิ่งอำนวยความสะดวก",
-		PenaltyFee: 1000.00,
-		Date: time.Now(),
-	})
-	//RoomAsset
-	now := time.Now()
-	db.Create(&entity.RoomAsset{
-		Quantity:    1,
-
-
-		
-		CheckDate:   &now,
-		RoomNumber:  "101",
-		AssetTypeID: 1,
-	})
-	db.Create(&entity.RoomAsset{
-		Quantity:    1,
-
-		
-		CheckDate:   &now,
-		RoomNumber:  "102",
-		AssetTypeID: 1,
-	})
-	db.Create(&entity.RoomAsset{
-		Quantity:    1,
-
-		
-		CheckDate:   &now,
-		RoomNumber:  "103",
-		AssetTypeID: 2,
-	})
-	
-
 
 	// ===== Contract (เอกลักษณ์: StudentID + Start_Date + End_Date) =====
 	startDate, _ := time.Parse("2006-01-02", "2025-01-01")
@@ -351,6 +214,125 @@ for _, r := range rooms {
 			panic(err)
 		}
 	}
+
+	
+
+// ===== RoomType (idempotent) =====
+rtSeeds := []struct {
+    Name  string
+    Price float64
+}{
+    {"Air Room", 2900.00},
+    {"Fan Room", 2500.00},
+}
+for _, s := range rtSeeds {
+    var rt entity.RoomType
+    if err := tx.Where(&entity.RoomType{RoomTypeName: s.Name}).
+        Attrs(entity.RoomType{RentalPrice: s.Price}).
+        FirstOrCreate(&rt).Error; err != nil {
+        tx.Rollback(); panic(err)
+    }
+}
+
+// ดึง RoomType IDs
+var rtAir, rtFan entity.RoomType
+if err := tx.First(&rtAir, "room_type_name = ?", "Air Room").Error; err != nil { tx.Rollback(); panic(err) }
+if err := tx.First(&rtFan, "room_type_name = ?", "Fan Room").Error; err != nil { tx.Rollback(); panic(err) }
+
+// ===== Room (อย่าเดา ID ให้ผูกด้วย RoomNumber และเซ็ต RoomTypeID ที่ดึงมาจริง) =====
+roomSeeds := []struct {
+    Number string
+    Status string
+    Image  string
+    RTID   uint
+    StudID *uint // ใส่ให้อยู่ทีหลังเมื่อมี Students แล้วก็ได้ (ตอนนี้ค่าว่างไว้ก่อนจะปลอดภัยกว่า)
+}{
+    {"100", "ว่าง",   "room1.jpg",  rtAir.ID, nil},
+    {"101", "ไม่ว่าง","room2.jpg",  rtAir.ID, nil},
+    {"102", "ไม่ว่าง","room3.jpg",  rtAir.ID, nil},
+    {"103", "ว่าง",   "room4.jpg",  rtFan.ID, nil},
+    {"104", "ว่าง",   "room5.jpg",  rtFan.ID, nil},
+    {"105", "ว่าง",   "room6.jpg",  rtFan.ID, nil},
+    {"201", "ว่าง",   "room7.jpg",  rtAir.ID, nil},
+    {"202", "ว่าง",   "room8.jpg",  rtAir.ID, nil},
+    {"203", "ว่าง",   "room9.jpg",  rtFan.ID, nil},
+    {"204", "ว่าง",   "room10.jpg", rtFan.ID, nil},
+    {"205", "ว่าง",   "room11.jpg", rtAir.ID, nil},
+}
+for _, r := range roomSeeds {
+    var rm entity.Room
+    if err := tx.Where(&entity.Room{RoomNumber: r.Number}).
+        Attrs(entity.Room{
+            Status:     r.Status,
+            Image:      r.Image,
+            RoomTypeID: r.RTID,
+            AdminID:    1, // ใช้ admin seed ตัวแรก
+        }).
+        FirstOrCreate(&rm).Error; err != nil {
+        tx.Rollback(); panic(err)
+    }
+}
+
+// สร้าง map: roomNumber -> roomID (เอาไว้ใช้ต่อ)
+var roomList []entity.Room
+if err := tx.Find(&roomList).Error; err != nil { tx.Rollback(); panic(err) }
+roomIDByNumber := map[string]uint{}
+for _, r := range roomList { roomIDByNumber[r.RoomNumber] = r.ID }
+
+// ===== AssetType =====
+atSeeds := []struct {
+    Name       string
+    Type       string
+    PenaltyFee float64
+}{
+    {"เตียง", "เฟอร์นิเจอร์", 500.00},
+    {"Wi-Fi", "สิ่งอำนวยความสะดวก", 1000.00},
+}
+now := time.Now()
+for _, s := range atSeeds {
+    var at entity.AssetType
+    if err := tx.Where(&entity.AssetType{Name: s.Name}).
+        Attrs(entity.AssetType{Type: s.Type, PenaltyFee: s.PenaltyFee, Date: now}).
+        FirstOrCreate(&at).Error; err != nil {
+        tx.Rollback(); panic(err)
+    }
+}
+
+// ดึง AssetType เป็น map ชื่อ -> ID
+var atList []entity.AssetType
+if err := tx.Find(&atList).Error; err != nil { tx.Rollback(); panic(err) }
+atID := map[string]uint{}
+for _, a := range atList { atID[a.Name] = a.ID }
+
+// ===== RoomAsset (ใช้ FirstOrCreate กันซ้ำ และอ้างด้วย RoomNumber + AssetTypeID) =====
+raSeeds := []struct {
+    RoomNumber  string
+    AssetName   string
+    Qty         int
+}{
+    {"101", "เตียง", 1},
+    {"102", "เตียง", 1},
+    {"103", "Wi-Fi", 1},
+}
+for _, s := range raSeeds {
+    var ra entity.RoomAsset
+    if err := tx.Where(&entity.RoomAsset{
+        RoomNumber:  s.RoomNumber,
+        AssetTypeID: atID[s.AssetName],
+    }).Attrs(entity.RoomAsset{
+        Quantity:  s.Qty,
+        CheckDate: &now,
+    }).FirstOrCreate(&ra).Error; err != nil {
+        tx.Rollback(); panic(err)
+    }
+}
+
+
+
+
+
+
+
 
 	// ===== ComboBox Seeds =====
 	// ProblemType
@@ -483,3 +465,4 @@ for _, r := range rooms {
 		panic(err)
 	}
 }
+
