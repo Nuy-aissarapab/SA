@@ -9,4 +9,4 @@ type RoomType struct {
 
     // Relations
     Rooms []Room `json:"Rooms" gorm:"foreignKey:RoomTypeID"`
-}//kuy
+}//kuy2
