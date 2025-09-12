@@ -20,6 +20,36 @@ func GetAll(c *gin.Context) {
 
 }
 
+func GetRoomByMeter(c *gin.Context) {
+	db := config.DB()
+
+	var rooms []entity.Room
+	// Preload ต้องตรงกับ struct field
+	results := db.Preload("Student").Preload("MeterRecords").Find(&rooms)
+                
+	if results.Error != nil {
+       c.JSON(http.StatusNotFound, gin.H{"error": results.Error.Error()})
+       return
+    }
+
+    c.JSON(http.StatusOK, rooms)
+}
+
+func GetRoomByBill(c *gin.Context) {
+	db := config.DB()
+
+	var rooms []entity.Room
+	// Preload ต้องตรงกับ struct field "Billing"
+	results := db.Preload("Student").Preload("Billing").Find(&rooms)
+                
+	if results.Error != nil {
+       c.JSON(http.StatusNotFound, gin.H{"error": results.Error.Error()})
+       return
+    }
+
+    c.JSON(http.StatusOK, rooms)
+}
+
 // ดึงห้องทั้งหมด
 func GetAllRooms(c *gin.Context) {
 	var rooms []entity.Room

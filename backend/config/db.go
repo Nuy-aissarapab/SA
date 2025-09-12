@@ -34,6 +34,7 @@ func SetupDatabase() {
 	db.AutoMigrate(
 		&entity.Admin{},
 		&entity.Billing{},
+		&entity.BillItem{},
 		&entity.Payment{},
 		&entity.Contract{},
 		&entity.Room{},
@@ -50,6 +51,9 @@ func SetupDatabase() {
 		&entity.RoomType{},
 		&entity.AssetType{},
 		&entity.RoomAsset{},
+		&entity.MeterRecord{},
+		&entity.MeterType{},
+		&entity.RatePerUnit{},
 	)
 
 	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
@@ -211,9 +215,21 @@ for _, r := range rooms {
 		RoomNumber:  "103",
 		AssetTypeID: 2,
 	})
+
+	//Payment try
+	db.Create(&entity.Payment{
+		StudentID:    1,
+		BillingID:    1,
+		ContractID:   1,
+		EvidenceID:   1,
+		ReceiverID:   UPtr(1),
+		Amount:       2900,
+		Payment_Date: time.Now(),
+		Method:       "-",
+		PayerName:    "ผู้ปกครอง A",
+	})
+
 	
-
-
 	db.Create(&entity.Payment{
 		StudentID:    2,
 		BillingID:    2,
@@ -341,6 +357,142 @@ for _, r := range rooms {
 			}).
 			FirstOrCreate(&a)
 	}
+
+	// --- MeterTypes ---
+    meterElectric := entity.MeterType{MeterName: "ค่าไฟ"}
+    db.FirstOrCreate(&meterElectric, entity.MeterType{MeterName: "ค่าไฟ"})
+
+    meterWater := entity.MeterType{MeterName: "ค่าน้ำ"}
+    db.FirstOrCreate(&meterWater, entity.MeterType{MeterName: "ค่าน้ำ"})
+
+    // --- Rate (สมมุติว่ามีค่าเริ่มต้น) ---
+    electricRate := entity.RatePerUnit{
+    PricePerUnit: 5,
+    MeterTypeID:  &meterElectric.ID,
+}
+    db.FirstOrCreate(&electricRate, entity.RatePerUnit{MeterTypeID: &meterElectric.ID})
+
+    waterRate := entity.RatePerUnit{
+    PricePerUnit: 3,
+    MeterTypeID:  &meterWater.ID,
+}
+    db.FirstOrCreate(&waterRate, entity.RatePerUnit{MeterTypeID: &meterWater.ID})
+
+   
+    
+
+    // --- MeterRecords ---
+   // --- MeterRecords ---
+room1ID := uint(1)
+room2ID := uint(2)
+student1ID := uint(1)
+student2ID := uint(2)
+
+db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
+    RoomID:      &room1ID,
+    MeterTypeID: &meterElectric.ID,
+    StudentID:   &student1ID,
+}, entity.MeterRecord{
+    RecordDate:  time.Now(),
+    OldValue:    100,
+    NewValue:    150,
+    UnitUsed:    50,
+    TotalAmount: 50 * electricRate.PricePerUnit,
+    RateID:      &electricRate.ID,
+})
+
+db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
+    RoomID:      &room1ID,
+    MeterTypeID: &meterWater.ID,
+    StudentID:   &student1ID,
+}, entity.MeterRecord{
+    RecordDate:  time.Now(),
+    OldValue:    120,
+    NewValue:    150,
+    UnitUsed:    30,
+    TotalAmount: 30 * waterRate.PricePerUnit,
+    RateID:      &waterRate.ID,
+})
+
+db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
+    RoomID:      &room2ID,
+    MeterTypeID: &meterElectric.ID,
+    StudentID:   &student2ID,
+}, entity.MeterRecord{
+    RecordDate:  time.Now(),
+    OldValue:    100,
+    NewValue:    150,
+    UnitUsed:    50,
+    TotalAmount: 50 * electricRate.PricePerUnit,
+    RateID:      &electricRate.ID,
+})
+
+db.FirstOrCreate(&entity.MeterRecord{}, entity.MeterRecord{
+    RoomID:      &room2ID,
+    MeterTypeID: &meterWater.ID,
+    StudentID:   &student2ID,
+}, entity.MeterRecord{
+    RecordDate:  time.Now(),
+    OldValue:    120,
+    NewValue:    150,
+    UnitUsed:    30,
+    TotalAmount: 30 * waterRate.PricePerUnit,
+    RateID:      &waterRate.ID,
+})
+
+
+	// =======================
+	// 2️⃣ ดึง Room ที่มีอยู่
+	// =======================
+	var room1, room2 entity.Room
+	db.First(&room1, 1)
+	db.First(&room2, 2)
+
+	statusPaid := "จ่ายแล้ว"
+	statusUnpaid := "ไม่มี ไม่หนี ไม่จ่าย"
+
+	bill1 := entity.Billing{
+		RoomID:      room1.ID,
+		BillingDate: time.Now(),
+		AmountDue:   4700,
+		DueDate:     time.Now().AddDate(0, 0, 30),
+		Status:      &statusUnpaid,
+	}
+	db.FirstOrCreate(&bill1, entity.Billing{RoomID: room1.ID})
+
+	bill2 := entity.Billing{
+		RoomID:      room2.ID,
+		BillingDate: time.Now(),
+		AmountDue:   5200,
+		DueDate:     time.Now().AddDate(0, 0, 30),
+		Status:      &statusPaid,
+	}
+	db.FirstOrCreate(&bill2, entity.Billing{RoomID: room2.ID})
+
+	// =======================
+	// 5️⃣ สร้าง BillItems
+	// =======================
+	billItemsRoom1 := []entity.BillItem{
+		{BillingID: bill1.ID, ItemType: "ค่าหอ", Amount: 4000},
+		{BillingID: bill1.ID, ItemType: "ค่าไฟ", Amount: 250},
+		{BillingID: bill1.ID, ItemType: "ค่าน้ำ", Amount: 90},
+	}
+
+	billItemsRoom2 := []entity.BillItem{
+		{BillingID: bill2.ID, ItemType: "ค่าหอ", Amount: 4500},
+		{BillingID: bill2.ID, ItemType: "ค่าไฟ", Amount: 300},
+		{BillingID: bill2.ID, ItemType: "ค่าน้ำ", Amount: 100},
+	}
+
+	for _, item := range billItemsRoom1 {
+		db.FirstOrCreate(&item, entity.BillItem{BillingID: bill1.ID, ItemType: item.ItemType})
+	}
+	for _, item := range billItemsRoom2 {
+		db.FirstOrCreate(&item, entity.BillItem{BillingID: bill2.ID, ItemType: item.ItemType})
+	}
+
+
+
 
 	// ตัวอย่างประกาศพื้นฐาน
 	seedAnnouncement(

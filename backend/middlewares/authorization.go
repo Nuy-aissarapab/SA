@@ -39,25 +39,24 @@ func Authorizes() gin.HandlerFunc {
 
         email := claims.Email
 
-        // ลองเป็น Student ก่อน
-        var st entity.Student
-        if err := config.DB().Where("email = ?", email).First(&st).Error; err == nil {
-            c.Set("role", "student")
-            c.Set("id", st.ID)      // ← สำหรับ controller รุ่นเก่า
-            c.Set("userID", st.ID)  // ← สำหรับ controller รุ่นใหม่
-            c.Next()
-            return
-        }
-
-        // ไม่ใช่ Student → ลองเป็น Admin
         var ad entity.Admin
-        if err := config.DB().Where("email = ?", email).First(&ad).Error; err == nil {
-            c.Set("role", "admin")
-            c.Set("id", ad.ID)
-            c.Set("userID", ad.ID)
-            c.Next()
-            return
-        }
+if err := config.DB().Where("email = ?", email).First(&ad).Error; err == nil {
+    c.Set("role", "admin")
+    c.Set("id", ad.ID)
+    c.Set("userID", ad.ID)
+    c.Next()
+    return
+}
+
+// ไม่ใช่ Admin → ลองเป็น Student
+var st entity.Student
+if err := config.DB().Where("email = ?", email).First(&st).Error; err == nil {
+    c.Set("role", "student")
+    c.Set("id", st.ID)
+    c.Set("userID", st.ID)
+    c.Next()
+    return
+}
 
         c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "user not found"})
     }

@@ -1,302 +1,139 @@
 import { useState, useEffect } from "react";
-
-import { Space, Table, Button, Col, Row, Divider, message } from "antd";
-
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-
+import { Table, Button, Space, Row, Col, Divider, message, Card, Tag } from "antd";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-
-import { GetUsers, DeleteUsersById } from "../../Service/https/index";
-
-import type { UsersInterface } from "../../interfaces/IUser";
-
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
+import type { RoomMeterInterface } from "../../interfaces/Room";
+import type { BillInterface } from "../../interfaces/Bill";
+import { GetRoomByBill } from "../../Service/https/index";
 import dayjs from "dayjs";
 
-
-function Billing() {
-
+function BillList() {
   const navigate = useNavigate();
-
-  const [users, setUsers] = useState<UsersInterface[]>([]);
-
   const [messageApi, contextHolder] = message.useMessage();
-
-  const myId = localStorage.getItem("id");
-
-
-  const columns: ColumnsType<UsersInterface> = [
-
-    {
-
-      title: "",
-
-      render: (record) => (
-
-        <>
-
-          {myId == record?.ID ? (
-
-            <></>
-
-          ) : (
-
-            <Button
-
-              type="dashed"
-
-              danger
-
-              icon={<DeleteOutlined />}
-
-              onClick={() => deleteUserById(record.ID)}
-
-            ></Button>
-
-          )}
-
-        </>
-
-      ),
-
-    },
-
-    {
-
-      title: "ลำดับ",
-
-      dataIndex: "ID",
-
-      key: "id",
-
-    },
-
-    {
-
-      title: "ชื่อ",
-
-      dataIndex: "first_name",
-
-      key: "first_name",
-
-    },
-
-    {
-
-      title: "นามสกุุล",
-
-      dataIndex: "last_name",
-
-      key: "last_name",
-
-    },
-
-    {
-
-      title: "อีเมล",
-
-      dataIndex: "email",
-
-      key: "email",
-
-    },
-
-    {
-
-      title: "วัน/เดือน/ปี เกิด",
-
-      key: "birthday",
-
-      render: (record) => <>{dayjs(record.birthday).format("DD/MM/YYYY")}</>,
-
-    },
-
-    {
-
-      title: "อายุ",
-
-      dataIndex: "age",
-
-      key: "age",
-
-    },
-
-    {
-      title: "ที่อยู่",
-
-      dataIndex: "address",
-    
-      key: "address",
-    },
-
-    {
-
-      title: "เพศ",
-
-      key: "gender",
-
-      render: (record) => <>{record?.gender?.gender}</>,
-
-    },
-
-    {
-
-      title: "",
-
-      render: (record) => (
-
-        <>
-
-          <Button
-
-            type="primary"
-
-            icon={<DeleteOutlined />}
-
-            onClick={() => navigate(`/customer/edit/${record.ID}`)}
-
-          >
-
-            แก้ไขข้อมูล
-
-          </Button>
-
-        </>
-
-      ),
-
-    },
-
-  ];
-
-
-  const deleteUserById = async (id: string) => {
-
-    const res = await DeleteUsersById(id);
-
-
-    if (res.status == 200) {
-
-      messageApi.open({
-
-        type: "success",
-
-        content: res.data.message,
-
-      });
-
-      await getUsers();
-
-    } else {
-
-      messageApi.open({
-
-        type: "error",
-
-        content: res.data.error,
-
-      });
-
+  const [rooms, setRooms] = useState<RoomMeterInterface[]>([]);
+
+  const getRooms = async () => {
+    try {
+      const res = await GetRoomByBill();
+      if (res.status === 200) {
+        setRooms(res.data);
+      } else {
+        setRooms([]);
+        messageApi.open({ type: "error", content: res.data?.error || "เกิดข้อผิดพลาด" });
+      }
+    } catch (err: any) {
+      setRooms([]);
+      messageApi.open({ type: "error", content: err.message || "เกิดข้อผิดพลาด" });
     }
-
   };
-
-
-  const getUsers = async () => {
-
-    const res = await GetUsers();
-
-   
-
-    if (res.status == 200) {
-
-      setUsers(res.data);
-
-    } else {
-
-      setUsers([]);
-
-      messageApi.open({
-
-        type: "error",
-
-        content: res.data.error,
-
-      });
-
-    }
-
-  };
-
 
   useEffect(() => {
-
-    getUsers();
-
+    getRooms();
   }, []);
 
+  // ฟังก์ชันหา bill ล่าสุด
+  const getLatestBill = (bills?: BillInterface[]) => {
+    if (!bills || bills.length === 0) return null;
+    return bills.reduce((prev, curr) =>
+      new Date(prev.Billing_date!).getTime() > new Date(curr.Billing_date!).getTime()
+        ? prev
+        : curr
+    );
+  };
+
+  const columns: ColumnsType<RoomMeterInterface> = [
+    { title: "เลขห้อง", dataIndex: "RoomNumber", key: "RoomNumber" },
+    {
+    title: "ชื่อ-นามสกุล",
+    key: "full_name",
+    render: (_, record) => {
+    const student = record.Student;
+    if (!student) return "-";
+    return `${student.first_name || "-"} ${student.last_name || ""}`;
+  },
+},
+    {
+      title: "เดือน",
+      key: "Billing_date",
+      render: (_, record) => {
+        const latestBill = getLatestBill(record.Bills);
+        return latestBill?.Billing_date ? dayjs(latestBill.Billing_date).format("MM/YYYY") : "-";
+      },
+    },
+    {
+      title: "รวม",
+      key: "amount_due",
+      render: (_, record) => {
+        const latestBill = getLatestBill(record.Bills);
+        return latestBill?.amount_due ? `${latestBill.amount_due.toLocaleString()} บาท` : "-";
+      },
+    },
+    {
+      title: "วันครบกำหนด",
+      key: "due_date",
+      render: (_, record) => {
+        const latestBill = getLatestBill(record.Bills);
+        return latestBill?.due_date ? dayjs(latestBill.due_date).format("DD/MM/YYYY") : "-";
+      },
+    },
+    {
+      title: "สถานะ",
+      key: "status",
+      render: (_, record) => {
+        const latestBill = getLatestBill(record.Bills);
+        const status = latestBill?.status;
+        if (!status) return "-";
+        return (
+          <Tag color={status === "paid" ? "green" : status === "pending" ? "orange" : "red"}>
+            {status.toUpperCase()}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "จัดการ",
+      key: "actions",
+      render: (_, record) => (
+        <Button
+          type="link"
+          icon={<EditOutlined />}
+          onClick={() => navigate(`/Billing/BillHistory/${record.ID}`)}
+        >
+          แก้ไข
+        </Button>
+      ),
+    },
+  ];
 
   return (
-
     <>
-
       {contextHolder}
-
-      <Row>
-
-        <Col span={12}>
-
-          <h2>ตรวจสอบสัญญาเช่า</h2>
-
+      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+        <Col>
+          <h2 style={{ margin: 0 }}>บิลและใบแจ้งหนี้</h2>
         </Col>
-
-
-        <Col span={12} style={{ textAlign: "end", alignSelf: "center" }}>
-
+        <Col>
           <Space>
-
             <Link to="/Billing/Payment">
-
               <Button type="primary" icon={<PlusOutlined />}>
-
                 การชำระเงิน
-
               </Button>
-
             </Link>
-
           </Space>
-
         </Col>
-
       </Row>
 
-
-      <Divider />
-
-
-      <div style={{ marginTop: 20 }}>
-
+      <Card bordered={false} style={{ borderRadius: 12, boxShadow: "0 2px 8px #f0f1f2" }}>
         <Table
-
-          rowKey="ID"
-
+          rowKey="id"
           columns={columns}
-
-          dataSource={users}
-
-          style={{ width: "100%", overflow: "scroll" }}
-
+          dataSource={rooms}
+          pagination={{ pageSize: 5 }}
         />
-
-      </div>
-
+      </Card>
     </>
-
   );
-
 }
 
-
-export default Billing;
+export default BillList;

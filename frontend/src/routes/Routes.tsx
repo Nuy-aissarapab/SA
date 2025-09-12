@@ -5,7 +5,10 @@ import type { RouteObject } from "react-router-dom";
 import Loadable from "../components/third-patry/Loadable";
 
 import FullLayout from "../layout/FullLayout";
-import EditAssetType from "../pages/Assets/EditAssetType";
+
+import AdminGuard from "../components/guards/AdminGuard";
+
+import StudentGuard from "../components/guards/StudentGuard";
 
 const MainPages = Loadable(lazy(() => import("../pages/authentication/Login")));
 
@@ -29,8 +32,6 @@ const Asset = Loadable(lazy(() => import("../pages/Assets")));
 const CreateRoomAssetsForm = Loadable(lazy(() => import("../pages/Assets/CreateAssets")));
 const AssetRoom = Loadable(lazy(() => import("../pages/Assets/assetroom")));
 const RoomAssetEdit = Loadable(lazy(() => import("../pages/Assets/RoomAssetEdit")));
-const CreateAssetsTypeForm = Loadable(lazy(() => import("../pages/Assets/CreateAssetsType")));
-const EditAssetTypes = Loadable(lazy(() => import("../pages/Assets/EditAssetType")));
 
 
 const RoomPage = Loadable(lazy(() => import("../pages/Room")));
@@ -74,6 +75,22 @@ const ExtendSuccess = Loadable(lazy(() => import("../pages/Contract/Extendcontra
 const EvidenceGallery = Loadable(lazy(() => import("../pages/Contract/Extendcontract/EvidenceGallery")));
 
 const Announcement = Loadable(lazy(() => import("../pages/Announcement")));
+
+const MeterList = Loadable(lazy(() => import("../pages/Meter")));
+
+const MeterDetail = Loadable(lazy(() => import("../pages/Meter/MeterDetail")));
+
+const MeterCreate = Loadable(lazy(() => import("../pages/Meter/MeterDetail/Create")));
+
+const MeterEdit = Loadable(lazy(() => import("../pages/Meter/MeterDetail/Edit")));
+
+const BillList = Loadable(lazy(() => import("../pages/Billing")));
+
+const BillHistory = Loadable(lazy(() => import("../pages/Billing/BillHistory")));
+
+const BillingDetail = Loadable(lazy(() => import("../pages/Billing/BillHistory/BillingDetail")));
+
+const BillingCreate = Loadable(lazy(() => import("../pages/Billing/BillHistory/BillingCreate")));
 
 const UpdateInfo = Loadable(
   lazy(() => import("../pages/Student/UpdateInfo/UpdateInfo"))
@@ -256,8 +273,6 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           { path: "room/:roomNumber", element: <Asset /> },
           { path: "create", element: <CreateRoomAssetsForm /> },
           { path: "edit/:id", element: <RoomAssetEdit /> }, // ✅ ต้องมี :id
-          { path: "create-asset-type", element: <CreateAssetsTypeForm /> },
-          { path: "edit-asset-type", element: <EditAssetTypes /> },
            // เพิ่มเส้นทางสำหรับ CreateAssets โดยมีพารามิเตอร์ roomNumber
         ],
       },
@@ -287,6 +302,58 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
           }
         ],
       },
+
+       {
+    path: "Meter",
+    children: [
+      {
+        path: "", // -> /Meter
+        element: <AdminGuard><MeterList /></AdminGuard>,
+      },
+      {
+        path: "MeterDetail/:id", // -> /Meter/MeterDetail/:id
+        element: <AdminGuard><MeterDetail /></AdminGuard>,
+      },
+      {
+        path: "MeterDetail/:id/Create", // -> /Meter/MeterDetail/:id/create
+        element: <AdminGuard><MeterCreate /></AdminGuard>,
+      },
+      {
+        path: "MeterDetail/:id/Edit/:meterId", // -> /Meter/MeterDetail/:id/create
+        element: <AdminGuard><MeterEdit /></AdminGuard>,
+      },
+      
+        ],
+      },
+
+      {
+    path: "Billing",
+    children: [
+      // ✅ Admin เห็นทั้งหมด
+      {
+        path: "",
+        element: <AdminGuard><BillList /></AdminGuard>,
+      },
+      {
+        path: "BillHistory/:room_id/BillingCreate",
+        element: <AdminGuard><BillingCreate /></AdminGuard>,
+      },
+      {
+        path: "Payment",
+        element: <AdminGuard><Payment /></AdminGuard>,
+      },
+
+      // ✅ Student เห็นเฉพาะประวัติ & รายละเอียดบิล
+      {
+        path: "BillHistory/:room_id",
+        element: <StudentGuard><BillHistory /></StudentGuard>,
+      },
+      {
+        path: "BillHistory/:room_id/BillingDetail/:billId",
+        element: <StudentGuard><BillingDetail /></StudentGuard>,
+      },
+    ],
+  },
 
       {
         path: "/Maintenance",

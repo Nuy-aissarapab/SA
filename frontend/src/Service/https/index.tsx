@@ -16,6 +16,10 @@ import type { ReviewInterface } from "../../interfaces/Review";
 import type { MaintenanceInterface } from "../../interfaces/Maintenance";
 import type { CreateAnnouncementRequest } from "../../interfaces/CreateAnnouncementRequest";
 import type { RoomInterface } from "../../interfaces/Room";
+import type { CreateMeterPayload } from "../../interfaces/Meter";
+
+import type { UpdateMeterPayload } from "../../interfaces/Meter";
+
 import axios, { AxiosError } from "axios";
 
 import type { AxiosResponse } from "axios";
@@ -795,8 +799,6 @@ export async function GetRoomAssetById(id: number) {
     .catch((e) => e.response);
 }
 
-
-  //Asset Type
 export async function GetAllAssetTypes() {
   try {
     const res = await axios.get(`${API_URL}/asset-types`, getAuthHeader());
@@ -805,22 +807,149 @@ export async function GetAllAssetTypes() {
     return e?.response ?? { status: 500, data: [] };
   }
 }
-export async function CreateAssetType(payload: any) {
+
+// =============================
+// Meter
+// =============================
+
+export async function GetRoomByMeter() {
+  return await axios
+    .get(`${API_URL}/room/meter`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function Getmeter() {
+  return await axios
+    .get(`${API_URL}/meter`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+
+export async function CreateMeter(payload: CreateMeterPayload) {
+  return await axios
+    .post(`${API_URL}/meter`, payload, getConfig()) // เปลี่ยนจาก /reviews -> /meter
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetMeterByRoom(room_id: string | undefined) {
+  if (!room_id) return { status: 400, data: { error: "room_id is required" } };
+
+  return await axios
+    .get(`${API_URL}/meter/${room_id}`, getConfig())
+  .then(res => res)
+  .catch(e => e.response);
+}
+
+export async function GetMeterType() {
+  return await axios
+    .get(`${API_URL}/metertype`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function DeleteMeter(id: string) {
   try {
-    return await axios.post(`${API_URL}/asset-types`, payload, getConfig());
-  } catch (err: any) {
-    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+    const res = await axios.delete(`${API_URL}/meter/${id}`, getConfig());
+    return res; // res.status, res.data
+  } catch (error: any) {
+    // ถ้า axios error, คืน response หรือ object default
+    return error.response ?? { status: 500, data: { error: "เกิดข้อผิดพลาด" } };
   }
 }
 
-export async function UpdateAssetType(id: number, payload: any) {
+
+
+export async function UpdateMeter(id: string, payload: UpdateMeterPayload) {
   try {
-    return await axios.put(`${API_URL}/asset-types`, payload, getConfig());
-  } catch (err: any) {
-    return err?.response ?? { status: 500, data: { error: "Unexpected error" } };
+    const res = await axios.put(`${API_URL}/meter/${id}`, payload, getConfig());
+    return res;
+  } catch (error: any) {
+    return error.response ?? { status: 500, data: { error: "เกิดข้อผิดพลาด" } };
   }
 }
 
+export async function GetMeterById(id: string) {
+  try {
+    const res = await axios.get(`${API_URL}/meter/${id}`, getConfig());
+    return res; // res.status, res.data (object มิเตอร์เดี่ยว)
+  } catch (error: any) {
+    return error.response ?? { status: 500, data: { error: "เกิดข้อผิดพลาด" } };
+  }
+}
+
+export async function GetRoomByBill() {
+  return await axios
+    .get(`${API_URL}/room/bill`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+// Service/https/index.ts
+export async function GetBillByRoom(room_id: string) {
+  return await axios
+    .get(`${API_URL}/bill/room/${room_id}`, getConfig()) // <-- เพิ่ม "room/" ให้ตรงกับ backend
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function DeleteBill(billId: string) {
+  return await axios
+    .delete(`${API_URL}/bill/${billId}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+export async function GetBillItemsByBillId(billId: string) {
+  return await axios
+    .get(`${API_URL}/billitem/${billId}`, getConfig())
+    .then((res) => res)
+    .catch((e) => e.response);
+}
+
+interface CreateBillPayload {
+  room_id: number;
+  due_date: string;
+}
+
+export async function CreateBill(payload: CreateBillPayload) {
+  return await axios.post(`${API_URL}/bill`, payload, getConfig())
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+
+interface PreviewBillItemsRequest {
+  room_id: number;
+  dueDate: string;
+}
+
+export async function PreviewBillItems(params: PreviewBillItemsRequest) {
+  return await axios
+    .get(`${API_URL}/bill/${params.room_id}/preview-items`, {
+      ...getConfig(),
+      params: { dueDate: params.dueDate } // ส่งเป็น query string
+    })
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+
+
+export async function PreviewBill(room_id: string) {
+  return await axios
+    .get(`${API_URL}/bill/${room_id}/preview`, getConfig())
+    .then(res => res)
+    .catch(e => e.response);
+}
+
+export const GetLastMeterRecord = async (roomId: number, meterTypeId: number) => {
+  return axios.get(`/meter/last`, {
+    params: { room_id: roomId, meter_type_id: meterTypeId },
+  });
+};
 
 // ---------------------- Student ----------------------
 

@@ -37,13 +37,13 @@ const Asset = () => {
       const formatted: RoomAssetData[] = roomAssets.map(
         (item: RoomAsset, index: number) => ({
           ...item,
-          key: (item.Room?.RoomNumber ?? "unknown") + "-" + index,
+          key: (item.Room?.room_number ?? "unknown") + "-" + index,
         })
       );
 
       const filteredAssets = formatted.filter(
         (item: RoomAssetData) =>
-          item.Room?.RoomNumber === roomNumber ||
+          item.Room?.room_number === roomNumber ||
           item.Room?.RoomNumber === roomNumber
       );
 

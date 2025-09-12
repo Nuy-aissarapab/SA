@@ -24,6 +24,11 @@ function SignInPages() {
         localStorage.setItem("isLogin", "true");
         localStorage.setItem("role", role);
         localStorage.setItem("id", res.data.id);
+        if (res.data.room_id && res.data.room_id > 0) {
+      localStorage.setItem("room_id", res.data.room_id.toString());
+        } else {
+      localStorage.removeItem("room_id"); // กันไม่ให้เป็น "undefined"
+      }
         localStorage.setItem("email", res.data.email);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("token_type", res.data.token_type ?? "Bearer");
