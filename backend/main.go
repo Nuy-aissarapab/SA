@@ -19,7 +19,7 @@ import (
 	"github.com/SA/controller/problemtype"
 	"github.com/SA/controller/review"
 	"github.com/SA/controller/reviewTopic"
-	"github.com/SA/controller/Room"
+	"github.com/SA/controller/room"
 
 	"github.com/SA/controller/student"
 	"github.com/SA/entity"
