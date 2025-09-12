@@ -55,8 +55,6 @@ import AssetRoom from "../../pages/Assets/assetroom";
 import CreateRoomAssetsForm from "../../pages/Assets/CreateAssets";
 import RoomAssetEdit from "../../pages/Assets/RoomAssetEdit";
 
-import CreateAssetsTypeForm from "../../pages/Assets/CreateAssetsType";
-import EditAssetTypes from "../../pages/Assets/EditAssetType";
 import RoomPage from "../../pages/Room";
 import CreateRoomForm from "../../pages/Room/CreateRoom";
 import RoomDetails from "../../pages/Room/RoomDetails";
